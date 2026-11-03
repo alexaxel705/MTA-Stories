@@ -1,0 +1,22 @@
+<meta>
+	<info author="Dark_ALEX" type="script" name="Vehicle Node" version="1.0.4" description="Vehicle Node" />
+	<min_mta_version client="1.3.0-9.04431" />
+	<script src="VehicleNodeSA.lua" type="shared"/>
+	<script src="VehicleNodeVC.lua" type="shared"/>
+	<script src="VehicleNodeLC.lua" type="shared"/>
+	<script src="RailNode.lua" type="client"/>
+	<script src="PedNode.lua" type="shared"/>
+	<script src="VehicleNode.lua" type="server"/>
+	<script src="client.lua" type="client"/>
+	<export function='GetPedNodes' type="server" />
+	<export function='GetRailnodes' type="client" />
+	<export function='GetVehicleNodesClient' type="client" />
+	<export function='GetVehicleNodes' type="server" />
+	<export function='GetVehiclePathGrid' type="server" />
+	<export function='GetPedPathGrid' type="shared" />
+	<export function='LoadZone' type="client" />
+	<export function='GetGroundMaterial' type="client" />
+	<export function='GetCoordsByGPS' type="server" />
+	<export function='NEWGPSFound' type="server" />
+	<export function='FindBusStop' type="server" />
+</meta>

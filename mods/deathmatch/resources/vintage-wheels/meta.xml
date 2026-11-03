@@ -1,0 +1,19 @@
+<meta>
+	<info name="Vintage Wheels" version="1.0.1" type="script" author="alexaxel705" description="Vintage Wheels"/>
+	<script src="client.lua" type="client"/>
+	
+	<file src="shader.fx" download="true" />
+	
+	<file src="wheels/wheel_old.png" type="client" />
+	<file src="wheels/wheel_truck64.png" type="client" />
+	<file src="wheels/wheel_sport64.png" type="client" />
+	<file src="wheels/wheel_smallcar64.png" type="client" />
+	<file src="wheels/wheel_saloon64.png" type="client" />
+	<file src="wheels/wheel_offroad64.png" type="client" />
+	<file src="wheels/wheel_lightvan64.png" type="client" />
+	<file src="wheels/wheel_lighttruck64.png" type="client" />
+	<file src="wheels/wheel_classic64.png" type="client" />
+	<file src="wheels/wheel_alloy64.png" type="client" />
+	<file src="wheels/whee_rim64.png" type="client" />
+	<file src="wheels/tyre64a.png" type="client" />
+</meta>

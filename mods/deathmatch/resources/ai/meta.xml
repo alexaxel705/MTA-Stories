@@ -1,0 +1,8 @@
+<meta>
+	<info name="ai" version="1.0.0" type="script" author="alexaxel705" description="ai"/>
+	
+	<script src="server.lua" type="server"/>
+	<script src="client.lua" type="client"/>
+	
+	<export function="bandits" type="server"/>
+</meta>

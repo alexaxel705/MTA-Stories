@@ -1,0 +1,6 @@
+<meta>
+	<info name="radio" version="1.0.0" type="script" author="alexaxel705" description="radio"/>
+	
+	<script src="client.lua" type="client"/>
+	<script src="server.lua" type="server"/>
+</meta>

@@ -1,0 +1,4440 @@
+﻿local screenWidth, screenHeight = guiGetScreenSize()
+local scale = (screenWidth/1920)+(screenHeight/1080)
+local scalex = (screenWidth/1920)
+local scaley = (screenHeight/1080)
+local NewsPaper = {false, false, false, false}
+local Pricedown = {} -- font
+local WebLink = false
+local GroundMaterial = {}
+toggleControl("radar", false)
+local PData = {
+	["ExpText"] = {}, 
+	["ExpText3D"] = {}
+}
+local VideoMemory = {["HUD"] = {}}
+local PText = {["Inventory"] = {}, ["HUD"] = {}}
+
+local fps = 100
+local MouseX, MouseY = 0, 0
+local ParkMessage = false
+local FPSMessage = 0
+
+local VehicleTrack = false
+local VehicleTrack2 = false
+
+
+
+
+local RenderQuality = 1
+-- RenderTarget, x,y,alpha, Handler для перерисовки
+local RenderTargets = {
+	["Location"] = {false, 1200, 150, true, "DrawLocationHandler"},
+	["Player"] = {false, 230*scale, 230*scale, true}, 
+	["Arrow"] = {false, dxGetTextWidth("↑", scale*1.5, "default-bold", false), dxGetFontHeight(scale*1.5, "default-bold"), true, "DrawArrowHandler"}, 
+	["ToolTip"] = {false, 800, 600, true, "DrawToolTipHandler"}, 
+	["TabPanel"] = {false, screenWidth, screenHeight, true}, 
+	["MissionCompleted"] = {false, screenWidth, screenHeight, true, "DrawMissionCompletedHandler"},
+	["DrawSpeedo"] = {false, 160*scale, 160*scale, true},
+	
+}
+
+function UpdateTargets()
+	for name, dat in pairs(RenderTargets) do
+		if(dat[1]) then
+			destroyElement(dat[1])			
+		end
+		dat[1] = dxCreateRenderTarget(dat[2]*RenderQuality, dat[3]*RenderQuality, dat[4])
+		if(dat[5]) then
+			triggerEvent(dat[5], resourceRoot)
+		end
+	end
+end
+
+
+function RenderQualityChecker(theKey, oldValue, newValue)
+    if theKey == "RenderQuality" and source == localPlayer then
+		if(newValue) then
+			RenderQuality = tonumber(getElementData(localPlayer, "RenderQuality"))
+		else
+			RenderQuality = 1
+		end
+		UpdateTargets()
+    end
+end
+addEventHandler("onClientElementDataChange", root, RenderQualityChecker)
+
+
+
+local VehTypeSkill = {
+	["Automobile"] = 160,
+	["Monster Truck"] = 160,
+	["Unknown"] = 160,
+	["Trailer"] = 160,
+	["Train"] = 160,
+	["Boat"] = 160,
+	["Bike"] = 229,
+	["Quad"] = 229,
+	["BMX"] = 230,
+	["Helicopter"] = 169,
+	["Plane"] = 169
+}
+
+local VehicleType = {
+	[441] = "RC", 
+	[464] = "RC", 
+	[594] = "RC", 
+	[501] = "RC", 
+	[465] = "RC", 
+	[564] = "RC", 
+}
+function GetVehicleType(theVehicle)
+	if(isElement(theVehicle)) then theVehicle = getElementModel(theVehicle) end
+	return VehicleType[theVehicle] or getVehicleType(theVehicle)
+end
+
+
+--[Необходимое уважение = {Звание, id скина}
+local BandRangs = {
+	["Военные"] = {
+		[1] = {0, "Призывник", 312},
+		[2] = {30, "Контрактник", 287},
+	},
+	["Гроув-стрит"] = {
+		[1] = {0, "Укурыш", 293},
+		[2] = {30, "Красавчик Флиззи", 105},
+		[3] = {60, "Гангстерлительный", 106},
+		[4] = {120, "Джин Рамми", 107},
+		[5] = {180, "Big Smoke", 269},
+		[6] = {310, "Консильери", 270}
+	},
+	["Баллас"] = {
+		[1] = {0, "Жаба", 102},
+		[2] = {30, "Гусь", 103},
+		[3] = {60, "Бык", 104}
+	},
+	["Колумбийский картель"] = {
+		[1] = {0, "La Mugre", 222},
+		[2] = {50, "Sombras", 95},
+		[3] = {75, "Sureno", 30},
+		[4] = {120, "Cacos", 242},
+		[5] = {180, "Guerrero", 179},
+		[6] = {250, "Лейтенант колумбийского картеля", 43}
+	},
+	["Вагос"] = {
+		[1] = {0, "Отмычка", 108},
+		[2] = {30, "Браток", 109},
+		[3] = {60, "Комендант", 110}
+	},
+	["Байкеры"] = {
+		[1] = {0, "Тусовщик", 181},
+		[2] = {30, "Вольный ездок", 247},
+		[3] = {75, "Шустрила", 248},
+		[4] = {130, "Дорожный капитан", 100}
+	},
+	["Русская мафия"] = {
+		[1] = {0, "Клоп", 111},
+		[2] = {30, "Вор", 112},
+		[3] = {75, "Пахан", 113},
+	},
+	["Ацтекас"] = {
+		[1] = {0, "Сопляк", 114},
+		[2] = {30, "Кирпич", 115},
+		[3] = {75, "Башка", 116},
+		[4] = {130, "Громоотвод", 292}
+	},
+	["Триады"] = {
+		[1] = {0, "Моль", 117},
+		[2] = {30, "Баклан", 118},
+		[3] = {75, "Зам. Лидера", 120},
+		[4] = {130, "Желтый дракон (Лидер)", 294}
+	},
+	["Da Nang Boys"] = {
+		[1] = {0, "Куми-ин", 121},
+		[2] = {30, "Сансита", 122},
+		[3] = {75, "Дэката", 123},
+		[4] = {130, "Кумитё (Лидер)", 169}
+	},
+	["Деревенщины"] = {
+		[1] = {0, "Опущенный", 162},
+		[2] = {50, "Чёрт", 160},
+		[3] = {75, "Шнырь", 159},
+		[4] = {120, "Блатной", 161},
+		[5] = {180, "Папаша", 158}
+	},
+	["Рифа"] = {
+		[1] = {0, "Упырь", 173},
+		[2] = {30, "Баклан", 174},
+		[3] = {75, "Капореджиме", 175},
+	},
+	["Уголовники"] = {
+		[1] = {0, "Потраченный", 252}, 
+		[2] = {25, "Черт", 213}, 
+		[3] = {50, "Шпана", 268}, 
+		[4] = {100, "Блатной", 62}, 
+	}, 
+	["Мирные жители"] = {
+		[1] = {0, "Житель", 252}
+	}, 
+	["МЧС"] = {
+		[1] = {0, "Санитар", 252}
+	}
+}
+
+
+	
+local SkillName = {
+	[165] = "Пьяница", 
+	[160] = "Вождение",
+	[229] = "Мотоциклист",
+	[230] = "Велосипедист",
+	[169] = "Летчик",
+	[161] = "Грузоперевозки",
+	[157] = "Рыболов",
+	[177] = "Рукопашный бой",
+	[69] = "Пистолет",
+	[70] = "Пистолет с глуш.",
+	[71] = "Дигл",
+	[72] = "Дробовик",
+	[73] = "Sawn-Off",
+	[74] = "SPAZ-12",
+	[75] = "УЗИ",
+	[76] = "MP5",
+	[77] = "АК-47",
+	[78] = "M4",
+	[79] = "Винтовка",
+	[24] = "Здоровье",
+	[22] = "Выносливость"
+}
+
+
+local SkillLevel = {
+	[165] = {
+		[0] = "Ты понизил свой навык пьяницы\nТеперь ты пьяница застенчивый", 
+		[500] = "Ты повысил свой навык пьяницы\nТеперь ты пьяница выносливый", 
+		[999] = "Ты повысил свой навык пьяницы\nТеперь ты пьяница вездесущий", 
+	}, 
+	[229] = {
+		[0] = "Ты понизил свой навык мотоциклиста", 
+		[500] = "Ты повысил свой навык мотоциклиста\nУ тебя меньше шансов упасть с мотоцикла", 
+		[999] = "Ты повысил свой навык мотоциклиста\nУ тебя меньше шансов упасть с мотоцикла", 
+	}
+	
+}
+
+ 
+
+
+-- ИД обьекта, Навык
+local WeaponModel = {
+	[0] = {nil, 177},
+	[1] = {331, 177},
+	[2] = {333, 177},
+	[3] = {334, 177},
+	[4] = {335, 177},
+	[5] = {336, 177},
+	[6] = {337, 177},
+	[7] = {338, 177},
+	[8] = {339, 177},
+	[9] = {341, 177},
+	[10] = {321, 177},
+	[11] = {322, 177},
+	[12] = {323, 177},
+	[14] = {325, 177},
+	[15] = {326, 177},
+	[22] = {346, 69},
+	[23] = {347, 70},
+	[24] = {348, 71},
+	[25] = {349, 72},
+	[26] = {350, 73},
+	[27] = {351, 74},
+	[28] = {352, 75},
+	[29] = {353, 76},
+	[32] = {372, 75},
+	[30] = {355, 77},
+	[31] = {356, 78},
+	[33] = {357, 79},
+	[34] = {358, 79},
+	[35] = {359, nil},
+	[36] = {360, nil},
+	[37] = {361, nil},
+	[38] = {362, nil},
+	[16] = {342, nil},
+	[17] = {343, nil},
+	[18] = {344, nil},
+	[39] = {363, nil},
+	[40] = {364, nil},
+	[41] = {365, nil},
+	[42] = {366, nil},
+	[43] = {367, nil},
+	[44] = {368, nil},
+	[45] = {369, nil},
+	[46] = {371, nil},
+	[3026] = {3026, nil},
+	[1210] = {1210, nil},
+	[1650] = {1650, nil},
+	[2663] = {2663, nil},
+	[1025] = {1025, nil},
+	[3632] = {3632, nil}, 
+	[1370] = {1370, nil}, 
+	[1218] = {1218, nil}, 
+	[1222] = {1222, nil}, 
+	[1225] = {1225, nil}, 
+	[1453] = {1453, nil},
+	[330] = {330, nil}, 
+	[2900] = {2900, nil}, 
+}
+
+
+local Day = {
+	[1] = "ВС",
+	[2] = "ПН",
+	[3] = "ВТ",
+	[4] = "СР",
+	[5] = "ЧТ",
+	[6] = "ПТ",
+	[7] = "СБ"
+}
+			
+local Month = {
+	[1] = "Января",
+	[2] = "Февраля",
+	[3] = "Марта",
+	[4] = "Апреля",
+	[5] = "Мая",
+	[6] = "Июня",
+	[7] = "Июля",
+	[8] = "Августа",
+	[9] = "Сентября",
+	[10] = "Октября",
+	[11] = "Ноября",
+	[12] = "Декабря"
+}
+
+
+
+
+
+
+
+--Путь к картинке, Описание, Стаки, Используемый или нет, вес, цена, {связанные предметы}, Выпадаемый, Объединяемый, размер ячейки
+local items = {
+	["hp"] = {1240, "", 100, false, 0, 0, false, false, false, {1,1}}, 
+	["Бронежилет"] = {1242, "Военый бронежилет", 1, "usearmor", 4650, 2520, false, false, true, {2,3}}, 
+	["Канистра"] = {1650, "Десяти литровая канистра с бензином", 1, "usekanistra", 10350, 1000, false, false, false, {1,2}}, 
+	["Запчасти"] = {1221, "Автомобильные запчасти", 1, "usezapt", 5000, 7500, false, false, false, {2,2}}, 
+	["Реликвия"] = {1276, "Древняя статуэтка неизвестного происхождения", 1, false, 760, 10000, false, false, false, {1,2}}, 
+	["Подкова"] = {954, "Старая подкова, антиквариат", 1, false, 350, 5000, false, false, false, {1,1}}, 
+	["Ракушка"] = {953, "Просто ракушка", 1, false, 10, 50, false, false, false, {1,1}}, 
+	["Телефон"] = {330, "Телефон", 1, "usecellphone", 350, 1500, false, false, false, {1,2}}, 
+	["Рюкзак"] = {3026, "Обычный рюкзак", 1, false, 2500, 5000, false, true, false, {1,1}}, 
+	["Чемодан"] = {1210, "Обычный чемодан", 1, false, 1000, 1000, false, true, false, {1,1}}, 
+	["Пакет"] = {2663, "Обычный пакет", 1, false, 10, 1, false, true, false, {1,2}}, 
+	["АК-47"] = {355, "Автомат Калашникова\nСтрана: СССР", 1, "useinvweapon", 4300, 4500, false, false, true, {3,2}}, 
+	["Базука"] = {359, "Просто базука", 1, "useinvweapon", 10000, 24500, false, false, true, {4,2}}, 
+	["Ракетная установка"] = {360, "Ракетная установка HS", 1, "useinvweapon", 13000, 34500, false, false, true, {4,2}}, 
+	["Граната"] = {342, "Обычная граната", 25, "useinvweapon", 600, 1700, false, false, true, {1,1}}, 
+	["Газовая граната"] = {343, "Обычная газовая граната", 25, "useinvweapon", 400, 1200, false, false, true, {1,1}}, 
+	["Взрывчатка"] = {363, "Обычная взрывчатка", 25, "useinvweapon", 800, 1900, false, false, true, {1,1}}, 
+	["Молотов"] = {344, "Коктейль молотова", 25, "useinvweapon", 800, 2200, false, false, true, {1,2}}, 
+	["М16"] = {356, "Автомат М16\nСтрана: США", 1, "useinvweapon", 2880, 6000, false, false, true, {3,2}}, 
+	["Кольт 45"] = {346, "Кольт 45 9-мм", 1, "useinvweapon", 1120, 1000, false, false, true, {2,2}}, 
+	["USP-S"] = {347, "Пистолет USP-S", 1, "useinvweapon", 1043, 1500, false, false, true, {2,2}}, 
+	["Deagle"] = {348, "Пистолет Deagle", 1, "useinvweapon", 1950, 5500, false, false, true, {2,2}}, 
+	["Кровь"] = {1580, "Используется для лечения больных", 5, false, 450, 800, false, false, true, {1,1}}, 
+	["Pissh"] = {1543, "Шотландское пиво Pissh темное", 1, "usedrink", 450, 140, false, false, false, {1,2}}, 
+	["Pissh Gold"] = {1544, "Шотландское пиво Pissh светлое", 1, "usedrink", 430, 120, false, false, false, {1,2}}, 
+	["KBeer"] = {1950, "3 Литра светлого немецкого пива KBeer", 1, "usedrink", 3084, 615, false, false, false, {1,2}}, 
+	["KBeer Dark"] = {1951, "3 Литра темного немецкого пива KBeer", 1, "usedrink", 3084, 735, false, false, false, {1,2}}, 
+	["isabella"] = {1669, "Вино", 1, "usedrink", 1043, 515, false, false, false, {1,2}}, 
+	["Фекалии"] = {16444, "Для одних - обычное говно\nДля других - сладкий хлебушек", 10, "eatcrap", 150, 0, false, false, true, {1,1}}, 
+	["CoK"] = {2670, "Пачка сигарет CoK", 1, "usesmoke", 5, 20, false, false, false, {1,1}}, 
+	["Сигарета"] = {3027, "Просто сигарета", 20, "usesmoke", 0.2, 1, {["сигареты"] = {"CoK"}}, false, false, {1,1}}, 
+	["Mossberg"] = {349, "Дробовик Mossberg 500", 1, "useinvweapon", 3300, 4700, false, false, true, {3,2}}, 
+	["Sawed-Off"] = {350, "Дробовик Sawed-Off", 1, "useinvweapon", 2500, 5500, false, false, true, {3,2}}, 
+	["SPAS-12"] = {351, "Дробовик SPAS-12", 1, "useinvweapon", 4400, 6500, false, false, true, {3,2}}, 
+	["Узи"] = {352, "Микро Узи", 1, "useinvweapon", 2650, 1750, false, false, true, {2,2}}, 
+	["MP5"] = {353, "Просто MP5", 1, "useinvweapon", 2660, 2000, false, false, true, {3,2}}, 
+	["Tec-9"] = {372, "Просто Tec-9", 1, "useinvweapon", 1400, 1500, false, false, true, {2,2}}, 
+	["ИЖ-12"] = {357, "Просто ИЖ-12", 1, "useinvweapon", 3100, 6500, false, false, true, {3,2}}, 
+	["M40"] = {358, "Просто M40", 1, "useinvweapon", 6570, 10000, false, false, true, {4,2}}, 
+	["Dildo XXL"] = {321, "Просто Dildo XXL", 1, "useinvweapon", 760, 4350, false, false, true, {1,2}}, 
+	["Dildo"] = {322, "Просто Dildo", 1, "useinvweapon", 540, 1600, false, false, true, {1,2}}, 
+	["Вибратор"] = {323, "Просто Vibrator", 1, "useinvweapon", 1100, 3000, false, false, true, {1,2}}, 
+	["Клюшка"] = {333, "Клюшка для гольфа", 1, "useinvweapon", 2500, 4000, false, false, true, {1,4}}, 
+	["Лопата"] = {337, "Обычная лопата", 1, "useinvweapon", 1500, 800, false, false, true, {1,4}}, 
+	["Кастет"] = {331, "Обычный кастет", 1, "useinvweapon", 400, 250, false, false, true, {1,1}}, 
+	["Миниган"] = {362, "Миниган", 1, "useinvweapon", 15000, 8000, false, false, true, {3,3}}, 
+	["Цветы"] = {325, "Цветы", 1, "useinvweapon", 1000, 500, false, false, true, {1,2}}, 
+	["Трость"] = {326, "Бабушкина трость", 1, "useinvweapon", 500, 1000, false, false, true, {1,3}}, 
+	["Бита"] = {336, "Бейсбольная бита", 1, "useinvweapon", 3000, 2000, false, false, true, {1,4}}, 
+	["Дубинка"] = {334, "Полицейская дубинка", 1, "useinvweapon", 2400, 3000, false, false, true, {1,3}}, 
+	["Нож"] = {335, "Охотничий нож", 1, "useinvweapon", 160, 450, false, false, true, {2,1}}, 
+	["Катана"] = {339, "Катана настоящего якудзы", 1, "useinvweapon", 750, 1350, false, false, true, {1,4}}, 
+	["Камера"] = {367, "Обычная любительская фотокамера", 1, "useinvweapon", 570, 12000, false, false, true, {2,2}}, 
+	["Огнетушитель"] = {366, "Обычный огнетушитель", 1, "useinvweapon", 5000, 150, false, false, true, {1,2}}, 
+	["Спрей"] = {365, "Обычный спрей", 1, "useinvweapon", 340, 250, false, false, true, {1,2}}, 
+	["Огнемет"] = {361, "Обычный огнемет", 1, "useinvweapon", 3340, 9250, false, false, true, {3,3}}, 
+	["Бензопила"] = {341, "Просто бензопила", 1, "useinvweapon", 12500, 7700, false, false, true, {3,3}}, 
+	["Лазерный прицел"] = {367, "Лазерный прицел", 1, false, 420, 6800, {"M40", "АК-47", "М16", "ИЖ-12", "SPAS-12", "Sawed-Off", "Mossberg", "Tec-9", "MP5", "Узи", "Кольт 45", "USP-S", "Deagle"}, false, false, {1,1}}, 
+	["9-мм"] = {18044, "В настоящий момент используются во: \nВсех пистолетах, узи", 250, false, 6, 5, {"Tec-9", "MP5", "Узи", "Кольт 45", "USP-S", "Deagle"}, false, false, {2,1}}, 
+	["5.56-мм"] = {18044, "В настоящий момент используются в М16", 250, false, 3, 7, {"М16"}, false, false, {2,1}}, 
+	["7.62-мм"] = {18044, "В настоящий момент используются для снайперской винтовки, АК-47", 250, false, 7, 10, {"M40", "АК-47", "Миниган"}, false, false, {2,1}}, 
+	["18.5-мм"] = {18044, "В настоящий момент используются во всех дробовиках и винтовке ИЖ-12", 250, false, 13, 25, {"ИЖ-12", "SPAS-12", "Sawed-Off", "Mossberg"}, false, false, {2,1}}, 
+	["Ракета"] = {345, "Используется для обычной базуки", 250, false, 1200, 500, {"Базука"}, false, false, {1,1}}, 
+	["Кулак"] = {1666, nil, 1, "useinvweapon", 0, 0, false, false, false, {1,1}}, 
+	["Конопля"] = {823, "Сырые листья конопли, могут быть посажены на землю или траву.\nТак же используются для получения шмали.", 100, "CreateCanabis", 260, 250, false, true, false, {1,1}}, 
+	["Роза"] = {870, "Розы", 100, "CreateRose", 260, 500, false, true, false, {2,2}}, 
+	["Кока"] = {782, "Кока приобрела широкую известность как сырьё для изготовления кокаина — наркотика из класса стимуляторов", 25, "CreateCoka", 625, 2000, false, true, false, {1,1}}, 
+	["Косяк"] = {3027, "Косяк, вызывает зависимость, восстанавливает жизни", 20, "usedrugs", 1, 750, false, true, true, {1,1}}, 
+	["Спанк"] = {1279, "Спанк, вызывает зависимость", 10, "usespunk", 100, 3500, false, true, true, {2,1}}, 
+	["Удочка"] = {338, "Рыболовная удочка", 1, "useinvweapon", 400, 700, false, false, true, {1,4}}, 
+	["Рыба"] = {1600, "Рыба", 1, false, 0, 0, false, false, false, {1,1}}, 
+	["Черепаха"] = {1609, "Морская черепаха", 1, false, 0, 15700, false, false, false, {3,3}}, 
+	["Акула"] = {1608, "Морская акула", 1, false, 0, 9800, false, false, false, {3,2}}, 
+	["Дельфин"] = {1607, "Морской дельфин", 1, false, 0, 5300, false, false, false, {3,2}}, 
+	["Парашют"] = {371, "Парашют", 1, "useinvweapon", 400, 700, false, true, true, {2,3}}, 
+	["Запаска"] = {1025, "Запасное автомобильное колесо", 1, "usezapaska", 16300, 5, false, true, true, {2,2}}, 
+	["Алкоголь"] = {2900, "Алкоголь", 1, false, 40000, 600, false, true, false, {2,2}}, 
+	["Скот"] = {11470, "Скот", 1, false, 90000, 700, false, true, false, {1,1}}, 
+	["Мясо"] = {2805, "Мясо", 1, false, 36000, 330, false, true, false, {1,1}}, 
+	["Нефть"] = {3632, "Нефть", 1, false, 136000, 1500, false, true, false, {2,3}}, 
+	["Пропан"] = {1370, "Пропан", 1, false, 55000, 175, false, true, false, {2,3}}, 
+	["Химикаты"] = {1218, "Химикаты", 1, false, 92000, 350, false, true, false, {2,3}}, 
+	["Удобрения"] = {1222, "Удобрения", 1, false, 41000, 150, false, true, false, {2,3}}, 
+	["Бензин"] = {1225, "Бензин", 1, false, 56000, 250, false, true, false, {2,3}}, 
+	["Зерно"] = {1453, "Зерно", 1, false, 2500, 50, false, true, false, {1,1}}, 
+	["Газета"] = {2674, "Обычная газета", 1, "usenewspaper", 45, 20, false, false, false, {1,1}}, 
+	["Деньги"] = {1212, "Деньги", 10000000, false, 0.01, 1, false, false, false, {1,1}}, 
+	["Кредитка"] = {1581, "Банковская кредитная карта", 1, false, 100, 1, false, false, false, {1,1}}, 
+}
+
+local AddITimer = false
+local AddITimerText = false
+local COLOR = {
+	["DOLLAR"] = {
+		["RGB"] = {69, 124, 59},
+		["HEX"] = "#457C3B"
+	},
+	["REDDOLLAR"] = {
+		["RGB"] = {180, 25, 10},
+		["HEX"] = "#B4191D"
+	},
+	["TEXT"] = {
+		["RGB"] = {220, 220, 220},
+		["HEX"] = "#DCDCDC"
+	},
+	["KEY"] = {
+		["RGB"] = {160, 160, 160},
+		["HEX"] = "#A0A0A0"
+	}
+}
+
+
+
+
+
+local MyTextures = {
+	["Кулак"] = {1666, 0,0,0, 0,0,0, 0,70, 255}, 
+	["Фекалии"] = {16444, -2,-6,1, 0,0,0, 0,70, 255}, 
+	["АК-47"] = {355, 0.3,1,0, 0.3,0,0, 0,70, 110}, 
+	["Кольт 45"] = {346, 0.2,0.4,0.05, 0.1,-0.2,0.05, 0,70, 110}, 
+	["Узи"] = {352, 0.3,0.4,0, 0,-0.3,0, 0,70, 110}, 
+	["Pissh Gold"] = {1544, 0.3,0.6,0.2, 0,0,0.2, 0,70, 170}, 
+	["Pissh"] = {1543, 0.2,0.6,0.2, 0,0,0.2, 0,70, 170}, 
+	["USP-S"] = {347, 0.2,0.55,0.05, 0.2,-0.2,0.05, 0,70, 170}, 
+	["Deagle"] = {348, 0.2,0.5,0.05, 0.2,-0.5,0.05, 0,70, 170}, 
+	["MP5"] = {353, 0.2,0.6,0.08, 0.2,-0.1,0.08, 0,70, 170}, 
+	["Кока"] = {782, 0,15,5, 0,0,5, 0,70, 160}, 
+	["Конопля"] = {823, 0,14,0, 0,0,0, 0,70, 160}, 
+	["Роза"] = {870, 0,3,3, 0,0,0, 0,70, 160}, 
+	["Tec-9"] = {372, 0.4,0.55,-0.03, 0.2,-0.2,-0.03, 0,70, 110}, 
+	["Чемодан"] = {1210, 0,0.5,0.03, 0,0,0.03, 0,70, 140}, 
+	["Рюкзак"] = {3026, 0.2,-0.7,0, 0.2,0,0, 270,70, 140}, 
+	["М16"] = {356, 0.22,-0.85,0.05, 0.22,0,0.05, 0,70, 110}, 
+	["Mossberg"] = {349, 0.3,0.9,0, 0.3,0,0, 8,70, 110}, 
+	["ИЖ-12"] = {357, 0.2,0.8,0.05, 0.2,0,0.05, 352,70, 110}, 
+	["SPAS-12"] = {351, 0.4,0.6,0.05, 0.4,0,0.05, 8,70, 110}, 
+	["M40"] = {358, 0.22,-0.85,0.1, 0.22,0,0.1, 0,70, 110}, 
+	["Sawed-Off"] = {350, 0.3,0.5,0.05, 0.3,0,0.05, 8,70, 110}, 
+	["Парашют"] = {371, 0,-0.7,0.02, 0,0,0.02, 0,70, 110}, 
+	["Бензопила"] = {341, 0.45,0.9,0.12, 0.45,0,0.12, 8,70, 110}, 
+	["Dildo XXL"] = {321, 0,0.8,0.2, 0,0,0.2, 330,70, 110}, 
+	["Dildo"] = {322, 0.06,0.4,0.03, 0.06,0,0.03, 340,70, 110}, 
+	["Вибратор"] = {323, 0.05,0.65,0.12, 0.05,0,0.12, 330,70, 110}, 
+	["Пакет"] = {2663, 0,-0.7,0.02, 0,0,0.02, 0,70, 150}, 
+	["Нож"] = {335, 0.1,-0.3,0.1, 0.1,0,0.1, 290,70, 110}, 
+	["Удочка"] = {338, -0.5,2,0.35, -0.5,0,0.35, 0,70, 110}, 
+	["Клюшка"] = {333, -0.33,1.5,0.34, -0.33,0,0.34, 0,70, 140},  
+	["Лопата"] = {337, -0.5,2,0.25, -0.5,0,0.25, 0,70, 110},  
+	["Кастет"] = {331, 0.1,0.4,0, 0.1,0,0, 0,70, 255}, 
+	["Миниган"] = {362, 0.65,1.25,0.05, 0.65,0,0.05, 0,70, 110},  
+	["Цветы"] = {325, 0,1,0.25, 0,0,0.25, 0,70, 110},  
+	["Трость"] = {326, 0,0.95,0.16, 0,0,0.16, 2,70, 140}, 
+	["Бита"] = {336, -0.3,1.4,0.25, -0.3,0,0.25, 0,70, 110}, 
+	["Дубинка"] = {334, -0.1,1.1,0.15, -0.1,0,0.15, 0,70, 110}, 
+	["Катана"] = {339, -0.5,2,0.4, -0.5,0,0.4, 0,70, 110}, 
+	["Камера"] = {367, 0.45,0.4,0.02, 0.05,0,0.02, 0,70, 110}, 
+	["Лазерный прицел"] = {367, 0.15,0.4,0.05, 0.15,0,0.05, 0,100, 110}, 
+	["KBeer"] = {1950, 0.3,0.6,0, 0,0,0, 0,70, 250}, 
+	["KBeer Dark"] = {1951, 0.3,0.6,0, 0,0,0, 0,70, 250}, 
+	["isabella"] = {1669, 0.3,0.5,0, 0,0,0, 0,70, 250}, 
+	["Бронежилет"] = {1242, 0,0.6,0.007, 0,0,0.007, 0,70, 140}, 
+	["Спанк"] = {1279, 0,0,-1.1, 0,0,0, 0,70, 255}, 
+	["Кровь"] = {1580, 0,0.8,0.1, 0,0,0.1, 0,70, 255}, 
+	["Граната"] = {342, 0.05,0.4,0, 0.05,0,0, 0,70, 255}, 
+	["Газовая граната"] = {343, 0.05,0.4,0, 0.05,0,0, 0,70, 255}, 
+	["Взрывчатка"] = {363, 0.2,-0.7,0, 0.2,0,0, 0,70, 255}, 
+	["Молотов"] = {344, 0.2,-0.5,0, 0.1,0,0, 0,70, 255}, 
+	["Канистра"] = {1650, 0,-0.8,-0.12, 0,0,-0.12, 0,70, 250}, 
+	["Запчасти"] = {1221, 1.4,1.4,0.7, -1.4,-1.4,-1, 0,70, 140}, 
+	["Телефон"] = {330, 0.04,0.6,0.05, 0.04,0,0.05, 0,70, 250}, 
+	["Подкова"] = {954, 0,0.95,0.04, 0,0,0.04, 0,70, 250}, 
+	["Реликвия"] = {1276, 0,-1.2,0.03, 0,0,0.03, 0,70, 250}, 
+	["Запаска"] = {1025, 1.5,0,0, 0,0,0, 0,70, 150}, 
+	["CoK"] = {2670, 0.14,0.18,0.28, 0.14,0.18,-0.28, 100,70, 250}, 
+	["Сигарета"] = {3027, 0.31,0.01,0.08, 0,0.01,0.08, 290,70, 130}, 
+	["Черепаха"] = {1609, 0,0,5, 0,0,0, 0,70, 250}, 
+	["Акула"] = {1608, -10,0,0, 0,0,0, 0,70, 250}, 
+	["Дельфин"] = {1607, -10,0,0, 0,0,0, 0,70, 250}, 
+	["Рыба"] = {1600, 1,0,0.1, 0,0,0.1, 0,70, 255}, 	
+	["Косяк"] = {3027, 0.31,0.01,0.08, 0,0.01,0.08, 290,70, 130}, 
+	["7.62-мм"] = {18044, -3.3,-3.3,-0.6, 4.5,9,-2.5, 0,70, 110}, 
+	["5.56-мм"] = {18044, -1.2,-3.3,-0.57, 4.5,9,-2.5, 0,70, 110}, 
+	["9-мм"] = {18044, -4.5,1.2,-0.5, 4.5,4,-2.5, 0,70, 110}, 
+	["18.5-мм"] = {18044, -4.5,1.2,-0.5, 4.5,4,-2.5, 0,70, 110}, 
+	["Скот"] = {11470, 10,0,1.2, 0,0,1.2, 0,70, 255}, 
+	["Мясо"] = {2805, 0,1.5,0, 0,0,0, 0,70, 255}, 
+	["Нефть"] = {3632, 2,0,0, 0,0,0, 0,70, 255}, 
+	["Пропан"] = {1370, 2,0,0, 0,0,0, 0,70, 255}, 
+	["Химикаты"] = {1218, 2,0,0.1, 0,0,0.1, 0,70, 255}, 
+	["Удобрения"] = {1222, 2,0,0.1, 0,0,0.1, 0,70, 255}, 
+	["Бензин"] = {1225, 2,0,0.2, 0,0,0.2, 0,70, 255}, 
+	["Зерно"] = {1453, 2,0,0, 0,0,0, 0,70, 200},
+	["Газета"] = {2674, 0.8,0.2,0.75, 0.8,0.2,0, 0,70, 200},
+	["Деньги"] = {1212, 0.2,0.2,0.35, -0.05,-0.05,0, 0,70, 200},
+	["Кредитка"] = {1581, -0.3,0.7,0.6, 0,0,0, 0,70, 200},
+	["Огнетушитель"] = {366, 0.35,1.2,-0.06, 0.35,0,-0.06, -40,70, 110}, 
+	["Базука"] = {359, -0.1,1.2,0.05, -0.1,0,0.05, 0,70, 110}, 
+	["Ракетная установка"] = {360, -0.1,1.2,0.05, -0.1,0,0.05, 0,70, 110}, 
+	["Спрей"] = {365, 0.05,-0.35,-0.05, 0.05,-0.05,-0.05, 0,70, 250}, 
+	["Огнемет"] = {361, 0.5,1.1,0.12, 0.5,0,0.12, 8,70, 110}, 
+	["Ракушка"] = {953, 0,2,0, 0,0,0, 0,70, 250}, 
+	["Ракета"] = {345, 0.8,0,0, 0.4,0,0, 0,70, 250}, 
+	["Алкоголь"] = {2900, 2.5,0,0.6, 0,0,0.6, 0,70, 255}, 
+}
+
+
+-- x*32px, y*32px
+local FontPos = {
+	["$"] = {13, 6}, 
+	["0"] = {0, 11}, 
+	["1"] = {1, 11}, 
+	["2"] = {2, 11}, 
+	["3"] = {3, 11}, 
+	["4"] = {4, 11}, 
+	["5"] = {5, 11}, 
+	["6"] = {6, 11}, 
+	["7"] = {7, 11}, 
+	["8"] = {8, 11}, 
+	["9"] = {9, 11}, 
+	[":"] = {10, 11}, 
+	--["A"] = {11, 11}, 
+	--["B"] = {12, 11}, 
+	--["C"] = {13, 11}, 
+	--["D"] = {14, 11}, 
+	--["F"] = {15, 11}, 
+}
+
+function LoadedRes()
+	triggerEvent("GenerateTexture", root, MyTextures)
+	
+	UpdateTargets() -- Начальная отрисовка
+	
+	if(getPedOccupiedVehicle(localPlayer)) then
+		ClientVehicleEnter(localPlayer, 0)
+	end
+	
+	local losca = 2
+	for font, dat in pairs(FontPos) do
+		Pricedown[font] = dxCreateRenderTarget(32+(losca*2),32+(losca*2), true)
+		dxSetRenderTarget(Pricedown[font], true)
+		dxSetBlendMode("modulate_add")
+	
+		for oX = -losca, losca do 
+			for oY = -losca, losca do 
+				dxDrawImageSection((losca*1.5)+oX,(losca*1.5)+oY, 32, 32, 32*dat[1],14+(32*dat[2]), 32, 32,"icons/font.png", 0, 0, 0, tocolor(0,0,0,255))
+			end
+		end
+		
+		dxDrawImageSection((losca*1.5),(losca*1.5), 32, 32, 32*dat[1],14+(32*dat[2]), 32, 32,"icons/font.png", 0, 0, 0, tocolor(255,255,255,255))
+		
+		dxSetBlendMode("blend")
+		dxSetRenderTarget()
+	end
+end
+addEventHandler("onClientResourceStart", getResourceRootElement(), LoadedRes)
+
+
+
+
+
+function GenerateTextureCompleted(textures) -- Третий этап загрузки
+	for name, texture in pairs(textures) do
+		items[name][1] = texture
+	end
+	
+	triggerServerEvent("SyncTime", localPlayer, localPlayer)
+end
+addEvent("GenerateTextureCompleted", true)
+addEventHandler("GenerateTextureCompleted", localPlayer, GenerateTextureCompleted)
+
+
+
+
+
+function math.round(number, decimals, method)
+    decimals = decimals or 0
+    local factor = 10 ^ decimals
+    if (method == "ceil" or method == "floor") then return math[method](number * factor) / factor
+    else return tonumber(("%."..decimals.."f"):format(number)) end
+end
+
+
+
+function CreateInventory(h,w)
+	local out = {}
+	for x = 1, h do
+		out[x] = {}
+		for y = 1, w do
+			out[x][y] = {}
+		end
+	end
+	return out
+end
+
+
+local PlayerInventory = fromJSON(getElementData(localPlayer, "inv")) or false
+
+
+function AuthInterface(arr)
+	PlayerInventory = fromJSON(arr)
+end
+addEvent("AuthInterface", true)
+addEventHandler("AuthInterface", localPlayer, AuthInterface)
+
+
+
+
+function GetItemCount(item)
+	return item["count"] or 1
+end
+
+function GetItemQuality(item)
+	return item["quality"] or 550
+end
+
+
+
+function GetUsableSlot()
+	local dat = getElementData(localPlayer, "WeaponSlot")
+	if(dat) then
+		return fromJSON(dat)
+	else
+		return false
+	end
+end
+
+
+function GetItemMass(item)
+	local gr = false
+	if(item["mass"]) then gr = item["mass"] end
+	if(not gr) then gr = items[item["txd"]][5] end
+	
+	if(gr >= 1000) then
+		return (gr/1000).."кг"
+	else
+		return gr.."г"
+	end
+end
+
+function GetItemCost(it)
+	if(it["cost"]) then
+		return it["cost"] 
+	end
+	cost = items[it["txd"]][6]
+	
+	local Economics = fromJSON(getElementData(root, "Economics"))
+	
+	if(Economics[it["txd"]]) then cost = cost*Economics[it["txd"]] end
+	
+	
+	if(cost <= 0) then cost = 1 end
+	return math.round(cost*(GetItemQuality(it)/450), 0)
+end
+
+
+
+function GetQualityColor(quality)
+	if(not quality or quality <= 99) then
+		return "#CC0000"
+	elseif(quality <= 199 and quality > 99) then
+		return "#CC3300"
+	elseif(quality <= 299 and quality > 199) then
+		return "#CC6600"
+	elseif(quality <= 399 and quality > 299) then
+		return "#CC9900"
+	elseif(quality <= 499 and quality > 399) then
+		return "#CCCC00"
+	elseif(quality <= 599 and quality > 499) then
+		return "#CCFF00"
+	elseif(quality <= 699 and quality > 599) then
+		return "#99CC00"
+	elseif(quality <= 799 and quality > 699) then
+		return "#99FF00"
+	elseif(quality <= 899 and quality > 799) then
+		return "#9966FF"
+	elseif(quality <= 999 and quality > 899) then
+		return "#9933FF"
+	elseif(quality >= 1000) then
+		return "#9900FF"
+	end
+end
+
+function GetQuality(quality)
+	local out = ""
+	if(not quality or quality <= 99) then
+		out = "отвратительное"
+	elseif(quality <= 199 and quality > 99) then
+		out = "мерзкое"
+	elseif(quality <= 299 and quality > 199) then
+		out = "гадкое"
+	elseif(quality <= 399 and quality > 299) then
+		out = "плохое"
+	elseif(quality <= 499 and quality > 399) then
+		out = "обычное"
+	elseif(quality <= 599 and quality > 499) then
+		out = "хорошее"
+	elseif(quality <= 699 and quality > 599) then
+		out = "очень хорошее"
+	elseif(quality <= 799 and quality > 699) then
+		out = "отличное"
+	elseif(quality <= 899 and quality > 799) then
+		out = "высокое"
+	elseif(quality <= 999 and quality > 899) then
+		out =  "великолепное"
+	elseif(quality >= 1000) then
+		out = "превосходное"
+	end
+	return GetQualityColor(quality)..out
+end
+
+
+
+
+
+
+local InitHud = {}
+local InitHudIndex = {} -- Записывает очередность окон
+local HudPosition = { -- Позиция x,y. Размер x,y
+	["Инвентарь"] = {300*scale, 175*scale},
+	["Магазин"] = {100*scale, 175*scale},
+	["Багажник"] = {100*scale, 175*scale},
+}
+local DragElement = false
+local DragInventory = false
+local ActiveEgg = {}
+local DragStart = {}
+local DragX = false
+local DragY = false
+local EggSize = 25*scale
+
+
+
+function dxDrawBorderedText(text, left, top, right, bottom, color, scale, font, alignX, alignY, clip, wordBreak, postGUI, colorCoded, subPixelPositioning)
+	if(text) then
+		local r,g,b = bitExtract(color, 0, 8), bitExtract(color, 8, 8), bitExtract(color, 16, 8)
+		if(r+g+b >= 100) then r = 0 g = 0 b = 0 else r = 255 g = 255 b = 255 end
+		local textb = string.gsub(text, "#%x%x%x%x%x%x", "")
+		local locsca = math.round(scale, 0)
+		if (locsca == 0) then locsca = 1 end
+		for oX = -locsca, locsca do 
+			for oY = -locsca, locsca do 
+				dxDrawText(textb, left + oX, top + oY, right + oX, bottom + oY, tocolor(r, g, b, bitExtract(color, 24, 8)), scale, font, alignX, alignY, clip, wordBreak,postGUI,false, subPixelPositioning)
+			end
+		end
+
+		dxDrawText(text, left, top, right, bottom, color, scale, font, alignX, alignY, clip, wordBreak, postGUI, colorCoded, subPixelPositioning)
+	end
+end
+
+
+
+function dxDrawTextMoney(text, left, top, right, bottom, color, scale, font, alignX, alignY, clip, wordBreak, postGUI, colorCoded, subPixelPositioning)
+	if(text) then
+		local r,g,b = bitExtract(color, 0, 8), bitExtract(color, 8, 8), bitExtract(color, 16, 8)
+		if(r+g+b >= 100) then r = 0 g = 0 b = 0 else r = 255 g = 255 b = 255 end
+		local textb = string.gsub(text, "#%x%x%x%x%x%x", "")
+		local locsca = math.round(scale*2, 0)
+		if (locsca == 0) then locsca = 2 end
+		for oX = -locsca, locsca do 
+			for oY = -locsca, locsca do 
+				dxDrawText(textb, left + oX, top + oY, right + oX, bottom + oY, tocolor(r, g, b, bitExtract(color, 24, 8)), scale, font, alignX, alignY, clip, wordBreak,postGUI,false, subPixelPositioning)
+			end
+		end
+
+		dxDrawText(text, left, top, right, bottom, color, scale, font, alignX, alignY, clip, wordBreak, postGUI, colorCoded, subPixelPositioning)
+	end
+end
+
+
+
+function table.copy(t)
+	local t2 = {};
+	for k,v in pairs(t) do
+		if type(v) == "table" then
+			t2[k] = table.copy(v);
+		else
+			t2[k] = v;
+		end
+	end
+	return t2;
+end
+
+
+
+
+
+function table.empty(self)
+    for _, _ in pairs(self) do
+        return false
+    end
+    return true
+end
+
+
+
+
+
+function InformTitle(text, types)
+	if(types) then
+		if(types == "wardrobe") then
+			AddITimerText = "В #4682B4гардероб#FFFFFF добавлен костюм "..text
+		end
+	else
+		AddITimerText = text
+	end
+	
+		
+	if(isTimer(AddITimer)) then
+		resetTimer(AddITimer)
+	else
+		addEventHandler("onClientHUDRender", root, DrawInformTitle)
+		
+		AddITimer = setTimer(function() removeEventHandler("onClientHUDRender", root, DrawInformTitle) end, 3500, 1)
+	end
+end
+addEvent("InformTitle", true)
+addEventHandler("InformTitle", localPlayer, InformTitle)
+
+
+
+function DrawInformTitle()
+	dxDrawBorderedText(AddITimerText, 22*scale, screenHeight-(30*scale), screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "sans", "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+end
+
+
+
+
+function DrawExpText()
+	for i, arr in pairs(PData['ExpText']) do
+		if(not arr[4]) then 
+			arr[4] = 0
+			arr[5] = 255
+		end
+		
+		font = "sans"
+		tw = dxGetTextWidth(arr[1], scale, font, true)
+		th = dxGetFontHeight(scale, font)
+
+		dxDrawBorderedText(arr[1], (arr[2]-tw/2), (arr[3]-th/2)+arr[4], screenWidth, screenHeight, tocolor(0, 255, 153, 180), scale, font, "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+		
+		arr[4] = arr[4]-0.3
+		arr[5] = arr[5]-1
+		if(arr[5] <= 0) then
+			table.remove(PData['ExpText'], i)
+		end
+	end
+end
+addEventHandler("onClientRender", root, DrawExpText)
+
+
+
+
+
+
+--[[
+	scale3D - Необходимо для того чтобы уменьшать текст в 3D пространстве, без перерисовки
+--]]
+function MemText(text, left, top, color, scale, font, border, incline, centerX, centerY, scale3D)
+	if(text) then
+		local w,h = dxGetTextWidth(text, scale, font, true)+(border*2), dxGetFontHeight(scale, font)+(border*2)
+		local index = text..color
+		
+		if(not VideoMemory["HUD"][index]) then
+			VideoMemory["HUD"][index] = dxCreateRenderTarget(w+((w*incline)/4),h, true)
+			dxSetRenderTarget(VideoMemory["HUD"][index], true)
+			dxSetBlendMode("modulate_add")
+			
+			local posx, posy = ((w*incline)/4),0
+			if(border) then
+				posx = posx+border
+				posy = posy+border
+			end
+			
+			
+			local textb = string.gsub(text, "#%x%x%x%x%x%x", "")
+			for oX = -border, border do 
+				for oY = -border, border do 
+					dxDrawText(textb, posx+oX, posy+oY, 0+oX, 0+oY, tocolor(0, 0, 0, 255), scale, font, "left", "top", false, false,false,false,true)
+				end
+			end
+
+			dxDrawText(text, posx, posy, 0, 0, color, scale, font, "left", "top", false,false,false,true,true)
+
+			dxSetBlendMode("blend")
+			dxSetRenderTarget()
+			
+			if(incline > 0) then 
+				local pixels = dxGetTexturePixels(VideoMemory["HUD"][index])
+				local x, y = dxGetPixelsSize(pixels)
+				local texture = dxCreateTexture(x,y, "argb")
+				local pixels2 = dxGetTexturePixels(texture)
+				local pady = 0
+				for y2 = 0, y-1 do
+					for x2 = 0, x-1 do
+						local colors = {dxGetPixelColor(pixels, x2,y2)}
+						if(colors[4] > 0) then
+							dxSetPixelColor(pixels2, x2-pady, y2, colors[1],colors[2],colors[3],colors[4])
+						end
+					end
+					pady = pady+incline
+				end
+				
+				dxSetTexturePixels(texture, pixels2)
+				VideoMemory["HUD"][index] = texture
+			end
+		end
+		
+		if(scale3D) then 
+			w = w/scale3D 
+			h = h/scale3D
+		end
+		if(centerX) then 
+			if(centerX == "right") then 
+				left = left-(w) 
+			else
+				left = left-(w/2) 
+			end
+		end
+		
+		if(centerY) then 
+			if(centerY == "bottom") then 
+				top = top-(h) 
+			else
+				top = top-(h/2)
+			end
+		end
+		
+		return dxDrawImage(left,top, w,h, VideoMemory["HUD"][index], 0, 0, 0, color) 
+	end
+end
+
+
+local score = 0
+local tick
+local idleTime
+local multTime
+local mult = 1
+
+
+local VehicleSpeed = 0
+local SlowTahometer = 0
+local ClearDriving = false
+setElementData(localPlayer, "Rage", 0)
+local RageTimer = false
+local Driver = false
+
+addEvent("driftCarCrashed", true)
+addEventHandler("driftCarCrashed", root, function()
+	resetTimer(ClearDriving)
+	if score ~= 0 then
+		score = 0
+		mult = 1
+	end
+end)
+
+--Для работы дальнобойщиком без прицепа
+
+
+
+
+
+function ClientVehicleEnter(thePlayer, seat)
+	if(thePlayer == localPlayer) then
+		for i = 1, 44 do -- Для пассажиров
+			setWorldSoundEnabled(i, true)
+		end
+		
+		if(seat == 0) then
+			local theVehicle = getPedOccupiedVehicle(thePlayer)
+			
+			if(isElement(VehicleTrack)) then
+				destroyElement(VehicleTrack)
+				destroyElement(VehicleTrack2)
+			end
+			
+			if(getElementType(theVehicle) == "vehicle" or getElementType(theVehicle) == "bike") then
+				local x,y,z = getElementPosition(theVehicle)
+				VehicleTrack = playSFX3D("genrl", VehicleSound[getElementModel(theVehicle)], 0, x,y,z, true)
+				VehicleTrack2 = playSFX3D("genrl", VehicleSound[getElementModel(theVehicle)], 1, x,y,z, true)
+				
+				setSoundVolume(VehicleTrack, 0)
+				setSoundVolume(VehicleTrack2, 0)
+				setSoundMaxDistance(VehicleTrack, 50)
+				setSoundMaxDistance(VehicleTrack2, 50)
+				
+				for i = 7, 16 do
+					setWorldSoundEnabled(i, false)
+				end
+				setWorldSoundEnabled(40, false)
+			end
+			
+			setVehicleNitroCount(theVehicle, 0)
+			Driver = {
+				["Handling"] = getVehicleHandling(theVehicle),
+				["Distance"] = 0
+			}
+			Driver["drx"], Driver["dry"], Driver["drz"] = getElementPosition(theVehicle)
+			local name = getElementData(theVehicle, "name") or getVehicleName(theVehicle)
+			if(getElementData(theVehicle, "name")) then
+				name = getElementData(theVehicle, "name")
+			end
+			if(getElementData(theVehicle, "year")) then
+				name = name.." "..getElementData(theVehicle, "year")
+			end
+			if(getElementData(localPlayer, "City")) then
+				triggerEvent("SetZoneDisplay", localPlayer, "#9b7c52"..name)
+			else
+				triggerEvent("SetZoneDisplay", localPlayer, "#66935C"..name)
+			end
+		
+			ClearDriving = setTimer(function() 
+				AddRage(150)
+				--triggerEvent("helpmessageEvent", localPlayer, "#ffe800Чистое вождение +150")
+			end, 25000, 0)
+
+			if(getElementModel(theVehicle) == 532 or getElementModel(theVehicle) == 531) then
+				onAttach(theVehicle)
+			end
+			if(getElementData(theVehicle, "type")) then
+				if(getElementData(theVehicle, "type") == "jobtruck") then
+					triggerEvent("onClientTrailerAttach", theVehicle)
+				end
+			end
+			
+			addEventHandler("onClientHUDRender", root, DrawSpeedoRender)
+		end
+	end
+end
+addEventHandler("onClientVehicleEnter", root, ClientVehicleEnter)
+
+
+
+function ClientVehicleExit(thePlayer, seat)
+	if(thePlayer == localPlayer) then
+		if(seat == 0) then
+			Driver = false
+			killTimer(ClearDriving)
+			if(getElementModel(source) == 532 or getElementModel(source) == 531) then
+				deAttach(source)
+			end
+			if(getElementData(source, "type")) then
+				if(getElementData(source, "type") == "jobtruck") then
+					triggerEvent("onClientTrailerDetach", source, source)
+				end
+			end
+			
+		end
+	end
+end
+addEventHandler("onClientVehicleExit", root, ClientVehicleExit)
+
+
+function ClientVehicleStartExit(thePlayer, seat)
+	if(thePlayer == localPlayer) then
+		if(seat == 0) then
+			removeEventHandler("onClientHUDRender", root, DrawSpeedoRender)
+			destroyElement(VehicleTrack2)
+			destroyElement(VehicleTrack)
+		end
+	end
+end
+addEventHandler("onClientVehicleStartExit", root, ClientVehicleStartExit)
+
+
+
+
+
+function checkKey()
+	local theVehicle = getPedOccupiedVehicle(localPlayer)
+	if(theVehicle and ClearDriving) then
+		if(VehicleSpeed < 1) then
+			if(isTimer(ClearDriving)) then resetTimer(ClearDriving) end
+			if(getElementData(theVehicle, "owner") == getPlayerName(localPlayer)) then
+				if(not ParkMessage) then
+					ToolTip("Нажми P чтобы припарковать машину")
+					ParkMessage = true
+				end
+			end
+		end
+	end
+end
+setTimer(checkKey,700,0)
+
+
+
+function updateFPS(msSinceLastFrame)
+    fps = (1/msSinceLastFrame) * 1000
+	
+	if(getDevelopmentMode()) then
+		local roundedFPS = math.floor(fps)
+		dxDrawBorderedText(roundedFPS, dxGetTextWidth(roundedFPS), 0, 0, 0, tocolor(200, 200, 200, 255), scale*2, "default-bold", "left", "top")
+	end
+	if(FPSMessage) then
+		if(fps < 30) then
+			FPSMessage = FPSMessage+1
+		else
+			FPSMessage = 0
+		end
+		
+		if(FPSMessage > 30) then
+			ToolTip("Используй клавишу F9 чтобы\r\nВключить режим для слабых ПК")
+			FPSMessage = false
+		end
+	end
+
+	if(getElementModel(localPlayer) == 299) then
+		if(isPedDoingTask(localPlayer, "TASK_COMPLEX_IN_WATER")) then
+			setElementHealth(localPlayer, getElementHealth(localPlayer)-0.5)
+		end
+	end
+end
+addEventHandler("onClientPreRender", root, updateFPS)
+
+
+
+
+
+
+
+function getVehicleOneGear(engineAcceleration, dragCoeff, numberOfGears) -- engineAcceleration, dragCoeff, numberOfGears
+	return (math.sqrt(3300*engineAcceleration/dragCoeff)*1.18)/numberOfGears
+end
+
+
+function getVehicleGear(theVehicle, engineAcceleration, dragCoeff, numberOfGears)
+	local onegear = getVehicleOneGear(engineAcceleration, dragCoeff, numberOfGears)
+	local result = 0
+	for Gear = 0, numberOfGears, 1 do
+		if(getVehicleCurrentGear(theVehicle) > 0) then
+			if(onegear*Gear <= VehicleSpeed) then
+				if((Gear+1) <= numberOfGears) then
+					result = (Gear+1)
+				end
+			end
+		else
+			result = 0
+		end
+	end
+    return result
+end
+
+
+
+
+function TuningExits()
+	local theVehicle = getPedOccupiedVehicle(localPlayer)
+	Driver["Handling"] = getVehicleHandling(theVehicle)
+end
+addEvent("TuningExits", true)
+addEventHandler("TuningExits", localPlayer, TuningExits)
+
+
+
+
+local WheelStates = {
+	["rwd"] = {1, 3}, 
+	["awd"] = {0,1,2,3}, 
+	["fwd"] = {0,2}
+}
+
+function getVehicleRPM(theVehicle, engineAcceleration, dragCoeff, numberOfGears)
+	local onegear = getVehicleOneGear(engineAcceleration, dragCoeff, numberOfGears)
+	local MaxRPM = GetVehicleMaxRPM(engineAcceleration)
+	local Gear = getElementData(localPlayer, "ManualGear") or getVehicleGear(theVehicle, engineAcceleration, dragCoeff, numberOfGears)
+	local crpm = 0
+	local GroundGrip = true
+	if(getVehicleType(theVehicle) == "Automobile") then
+		local HT = getVehicleHandling(theVehicle) 
+		for _, wheel in pairs(WheelStates[HT["driveType"]]) do
+			if(not isVehicleWheelOnGround(theVehicle, wheel)) then
+				GroundGrip = false
+			end
+		end
+	end
+	if(getPedControlState(localPlayer, "accelerate") and getPedControlState(localPlayer, "brake_reverse") or 
+	getPedControlState(localPlayer, "accelerate") and getPedControlState(localPlayer, "handbrake") or
+	not GroundGrip and getPedControlState(localPlayer, "accelerate") or getPedControlState(localPlayer, "brake_reverse")) then
+		crpm = MaxRPM
+	else
+		if(Gear > 0) then
+			crpm = MaxRPM/onegear*(onegear-((onegear*Gear)-VehicleSpeed))
+		else
+			crpm = MaxRPM/onegear*((VehicleSpeed-onegear*Gear))
+		end
+	end
+	if getVehicleEngineState(theVehicle) == true then
+		if(crpm < 800) then 
+			crpm = 800
+		else
+			if(crpm > MaxRPM) then crpm = MaxRPM end -- Костыль
+		end
+	end
+    return crpm
+end
+
+
+function GetVehicleMaxRPM(engineAcceleration)
+	return (((10*(engineAcceleration))*1.5))*40
+end
+
+
+
+
+
+function DrawSpeedo(theVehicle)
+	dxSetRenderTarget(RenderTargets["DrawSpeedo"][1], true)
+	dxSetBlendMode("modulate_add")
+	
+	local scale = scale*RenderQuality
+	local x = RenderTargets["DrawSpeedo"][2]*RenderQuality
+	local y = RenderTargets["DrawSpeedo"][3]*RenderQuality
+	local scalex = scalex*RenderQuality
+	local scaley = scaley*RenderQuality
+	
+
+	local vx, vy, vz = getElementVelocity(theVehicle)
+	VehicleSpeed = (vx^2 + vy^2 + vz^2)^(0.5)*156
+
+
+	
+	tick = getTickCount()
+	local angulo,velocidad = angle(theVehicle)
+	
+	local tempBool = tick - (idleTime or 0) < 750
+	if not tempBool and score ~= 0 then
+		score = 0
+	end
+	
+	if angulo ~= 0 then
+		if tempBool then
+			score = score + math.floor(angulo*velocidad)*mult
+		else
+			score = math.floor(angulo*velocidad)*mult
+		end
+
+		idleTime = tick
+	end
+	
+
+	if tick - (idleTime or 0) < 50 then
+		if(score > 500) then
+			AddRage(1)
+			--triggerEvent("helpmessageEvent", localPlayer, "#ffe800Дрифт +"..math.round(score/100, 0))
+		end
+	end
+
+
+	local MaxRPM = GetVehicleMaxRPM(Driver["Handling"]["engineAcceleration"])
+	local RPMMeter = false
+	local RPMDate = false 
+	
+	
+	
+	if(MaxRPM <= 4000) then
+		RPMMeter = 45
+		RPMDate = 4000
+	elseif(MaxRPM > 4000 and MaxRPM <= 6000) then
+		RPMMeter = 37.5
+		RPMDate = 6000
+	elseif(MaxRPM > 6000 and MaxRPM <= 7000) then
+		RPMMeter = 32.1
+		RPMDate = 7000
+	elseif(MaxRPM > 7000 and MaxRPM <= 8000) then
+		RPMMeter = 28
+		RPMDate = 8000
+	elseif(MaxRPM > 8000 and MaxRPM <= 10000) then
+		RPMMeter = 22.5
+		RPMDate = 10000
+	elseif(MaxRPM > 10000 and MaxRPM <= 12000) then
+		RPMMeter = 18.7
+		RPMDate = 12000
+	elseif(MaxRPM > 12000 and MaxRPM <= 14000) then
+		RPMMeter = 16
+		RPMDate = 14000
+	elseif(MaxRPM > 14000 and MaxRPM <= 16000) then
+		RPMMeter = 14
+		RPMDate = 16000
+	elseif(MaxRPM > 16000 and MaxRPM <= 18000) then
+		RPMMeter = 12.5
+		RPMDate = 18000
+	elseif(MaxRPM > 18000 and MaxRPM <= 20000) then
+		RPMMeter = 11.2
+		RPMDate = 20000
+	end
+	
+	
+	
+	--if(RPMDate) then
+	--	local RPM = (225*(getVehicleRPM(theVehicle, Driver["Handling"]["engineAcceleration"], Driver["Handling"]["dragCoeff"], Driver["Handling"]["numberOfGears"])/RPMDate))
+	--	local RedRPMZone = 225*((MaxRPM/RPMDate))
+	--	if(SlowTahometer < RPM) then
+	--		SlowTahometer = SlowTahometer+(RPM-SlowTahometer)/20
+	--	elseif(SlowTahometer > RPM) then
+	--		SlowTahometer = SlowTahometer-(SlowTahometer-RPM)/20
+	--	end
+	--	sx = (150*scalex)
+	--	sy = (210*scaley)
+	--
+	--	dxDrawCircle(sx,sy, 54*scale, 0, 360, tocolor(0,0,0,50))
+	--	dxDrawCircleCustom(sx,sy, 50*scale, 2.5*scale, 4, 120, 120+RedRPMZone, tocolor(0,0,0,200))
+	--	dxDrawCircleCustom(sx,sy, 50*scale, 2.5*scale, 4, 120+RedRPMZone, 345, tocolor(255,51,51,200))
+	--	dxDrawCircleCustom(sx,sy, 50*scale, 2.5*scale, 4, 120, 120+math.floor(SlowTahometer), tocolor(255,255,255,255))
+	--	if(getVehicleNitroCount(theVehicle)) then
+	--		dxDrawCircleCustom(sx,sy, 60*scale, 4*scale, 1, 59, 158, tocolor(0,0,0,20))
+	--		dxDrawCircleCustom(sx,sy, 60*scale, 2*scale, 4, 60, 157, tocolor(100,100,100,200))
+	--		dxDrawCircleCustom(sx,sy, 60*scale, 2*scale, 4, 60, 120+(3.7*getVehicleNitroCount(theVehicle)), tocolor(40,200,255,160))
+	--	end
+	--
+	--	dxDrawCircleCustom(sx,sy, 60*scale, 4*scale, 1, 158, 345, tocolor(0,0,0,20))
+	--	dxDrawCircleCustom(sx,sy, 60*scale, 2*scale, 4, 160, 344, tocolor(100,100,100,200))
+	--	dxDrawCircleCustom(sx,sy, 60*scale, 2*scale, 4, 160, 160+(184*(getElementData(localPlayer, "Rage")/1000)), tocolor(255,200,40,160))
+	--
+	--	dxDrawCircleCustom(sx,sy, 44*scale, 1*scale, RPMMeter, 120, 345, tocolor(255,255,255,255), nil, true)
+	--	dxDrawCircleCustom(sx,sy, 43*scale, 0.5*scale, 0.8, 120, 345, tocolor(255,255,255,255))
+	--
+	--	dxDrawCircle(sx,sy, 35*scale, 0, 360, tocolor(0,0,0,150))
+	--	dxDrawText(getVehicleGear(theVehicle, Driver["Handling"]["engineAcceleration"], Driver["Handling"]["dragCoeff"], Driver["Handling"]["numberOfGears"]), sx,sy-(30*scaley),sx,sy-(30*scaley), tocolor(255,255,255,255), scale*2.5, "default-bold", "center", "center")
+	--
+	--	if(getElementData(theVehicle, "Fuel")) then
+	--		local handlingTable = getOriginalHandling(getElementModel(theVehicle))
+	--		dxDrawCircleCustom(sx,sy, 45*scale, 2*scale, 1, 10, 90, tocolor(0,0,0,60))
+	--		local maxfuel = math.floor(handlingTable["mass"]/30)
+	--		dxDrawCircleCustom(sx,sy, 45*scale, 2*scale, 1, 10+math.floor(80-(80*(getElementData(theVehicle, "Fuel")/maxfuel))), 90, tocolor(255,255,255,60))
+	--	end
+	--
+	--	dxDrawText(string.format("%03.f", VehicleSpeed), sx,sy+(15*scaley),sx,sy+(15*scaley), tocolor(120,120,120,255), scale*1.25, "default-bold", "center", "center")
+	--	dxDrawText("КМ/Ч", sx,sy+(45*scaley),sx,sy+(45*scaley), tocolor(120,120,120,255), scale/1.5, "default-bold", "center", "center")
+		
+		
+		if(RPMDate) then
+			local MyRPM = getVehicleRPM(theVehicle, Driver["Handling"]["engineAcceleration"], Driver["Handling"]["dragCoeff"], Driver["Handling"]["numberOfGears"])
+			
+			if(SlowTahometer < MyRPM) then
+				SlowTahometer = math.floor(SlowTahometer+((MyRPM-SlowTahometer)/20))
+			elseif(SlowTahometer > MyRPM) then
+				SlowTahometer = math.floor(SlowTahometer-((SlowTahometer-MyRPM)/20))
+			end
+		
+			local posy = 35*scaley
+			local padding = math.floor(4*scale)
+			for i = 1, 25 do
+				if(i > 14) then
+					if(i <= math.round(((MaxRPM/RPMDate)*100)/4)) then
+						posy = posy+(3*scaley)
+					end
+				end
+				dxDrawLine((50*scalex)+(i*padding), y-(5*scaley), (50*scalex)+(i*padding), y-(5*scaley)-posy, tocolor(0,0,0,50), math.floor(3*scale))
+			end
+		
+			local posy = 35*scaley
+			for i = 1, math.ceil(((SlowTahometer/RPMDate)*100)/4) do
+				if(i > 14) then
+					if(i <= math.round(((MaxRPM/RPMDate)*100)/4)) then
+						posy = posy+(3*scaley)
+					end
+				end
+				dxDrawLine((50*scalex)+(i*padding), y-(5*scaley), (50*scalex)+(i*padding), y-(5*scaley)-posy, tocolor(30,30,30,255), math.floor(3*scale))
+			end
+			
+			
+			local posy = 35*scaley
+			for i = 1, 25 do
+				if(i > 14) then
+					if(i <= math.round(((MaxRPM/RPMDate)*100)/4)) then
+						posy = posy+(3*scaley)
+					else
+						dxDrawLine((50*scalex)+(i*padding), y-(5*scaley), (50*scalex)+(i*padding), y-(5*scaley)-posy, tocolor(150,30,30,255), math.floor(3*scale))
+					end
+				end
+			end
+			
+	
+			
+			dxDrawBorderedText("RPM", 0, y-(70*scaley),162*scalex,0, tocolor(140,140,140,255), scale/2, "default-bold", "right")
+			dxDrawBorderedText((math.round(((SlowTahometer)/100))*100), 0, y-(75*scaley),127*scalex,0, tocolor(140,140,140,255), scale/1.9, "pricedown", "right")
+			
+			local DrawSpeed = string.format("%03.f",VehicleSpeed)
+			
+			local speedsize = 35*scale
+			local speedoff = 19.5*scale
+			dxDrawImage(x-(270*scalex),y-(135*scaley), speedsize, speedsize, Pricedown[string.sub(DrawSpeed, 1, 1)], 0,0,0,tocolor(210,210,210,255))
+			dxDrawImage(x-(270*scalex)+speedoff,y-(135*scaley), speedsize, speedsize, Pricedown[string.sub(DrawSpeed, 2, 2)], 0,0,0,tocolor(210,210,210,255))
+			dxDrawImage(x-(270*scalex)+(speedoff*2),y-(135*scaley), speedsize, speedsize, Pricedown[string.sub(DrawSpeed, 3, 3)], 0,0,0,tocolor(210,210,210,255))
+			
+			dxDrawBorderedText("КМ/Ч", 0,y-(128*scaley),x-(100*scalex),0, tocolor(150,150,150,255), scale/1.5, "default-bold", "right")
+			local Gear = getElementData(localPlayer, "ManualGear") or getVehicleGear(theVehicle, Driver["Handling"]["engineAcceleration"], Driver["Handling"]["dragCoeff"], Driver["Handling"]["numberOfGears"])
+			
+			dxDrawBorderedText(Gear.." ", 0,y-(100*scaley),x-(100*scalex),0, tocolor(150,150,150,255), scale, "default-bold", "right")
+		--end
+		
+		if(isElement(VehicleTrack)) then
+			if(not getPedControlState(localPlayer, "accelerate")) then
+				setSoundSpeed(VehicleTrack, 0)
+				setSoundVolume(VehicleTrack, 0)
+			else
+				setSoundSpeed(VehicleTrack, 0.7+((SlowTahometer/15000)))
+				setSoundVolume(VehicleTrack, (0.15+(SlowTahometer/RPMDate)/2))
+			end
+			
+			setSoundSpeed(VehicleTrack2, 1+((SlowTahometer/RPMDate)/2))
+			
+			if(getVehicleEngineState(theVehicle)) then
+				setSoundVolume(VehicleTrack2, 0.15)
+			else
+				setSoundVolume(VehicleTrack2, 0)
+			end
+			
+			local x, y, z = getElementPosition(theVehicle)
+			local i, d = getElementInterior(theVehicle), getElementDimension(theVehicle)
+			setElementPosition(VehicleTrack, x, y, z)
+			setElementInterior(VehicleTrack, i)
+			setElementDimension(VehicleTrack, d)
+			setElementPosition(VehicleTrack2, x, y, z)
+			setElementInterior(VehicleTrack2, i)
+			setElementDimension(VehicleTrack2, d)
+		end
+	end
+	
+	
+	dxSetBlendMode("blend")
+	dxSetRenderTarget()
+	return RenderTargets["DrawSpeedo"][1]
+end
+
+
+
+
+function dxDrawCircleCustom( posX, posY, radius, width, angleAmount, startAngle, stopAngle, color, postGUI, text)
+	if(startAngle == stopAngle) then
+		return false
+	end
+
+	local function clamp( val, lower, upper )
+		if ( lower > upper ) then lower, upper = upper, lower end
+		return math.max( lower, math.min( upper, val ) )
+	end
+
+	radius = type( radius ) == "number" and radius or 50
+	width = type( width ) == "number" and width or 5
+	angleAmount = type( angleAmount ) == "number" and angleAmount or 1
+	startAngle = clamp( type( startAngle ) == "number" and startAngle or 0, 0, 360 )
+	stopAngle = clamp( type( stopAngle ) == "number" and stopAngle or 360, 0, 360 )
+	color = color or tocolor( 255, 255, 255, 200 )
+	postGUI = type( postGUI ) == "boolean" and postGUI or false
+
+	if ( stopAngle < startAngle ) then
+		local tempAngle = stopAngle
+		stopAngle = startAngle
+		startAngle = tempAngle
+	end
+
+	local n = 0
+	for i = startAngle, stopAngle, angleAmount do
+		local startX = math.cos( math.rad( i ) ) * ( radius - width )
+		local startY = math.sin( math.rad( i ) ) * ( radius - width )
+		local endX = math.cos( math.rad( i ) ) * ( radius + width )
+		local endY = math.sin( math.rad( i ) ) * ( radius + width )
+		dxDrawLine(startX + posX, startY + posY, endX + posX, endY + posY, color, width, postGUI)
+		if(text) then
+			dxDrawText(n, (startX/1.17)+posX,(startY/1.17)+posY, (startX/1.17)+posX,(startY/1.17)+posY, tocolor(160,160,160,255), scale/2, "default-bold", "center", "center")
+			n=n+1
+		end
+	end
+	return true
+end
+
+
+
+
+
+
+
+
+
+function getPositionFromElementOffset(element,offX,offY,offZ) 
+    local m = getElementMatrix(element)
+    local x = offX * m[1][1] + offY * m[2][1] + offZ * m[3][1] + m[4][1]
+    local y = offX * m[1][2] + offY * m[2][2] + offZ * m[3][2] + m[4][2] 
+    local z = offX * m[1][3] + offY * m[2][3] + offZ * m[3][3] + m[4][3] 
+    return x, y, z
+end 
+
+
+
+
+function DrawSpeedoRender()
+	if(not getElementData(localPlayer, "HUD")) then return false end
+	
+	local theVehicle = getPedOccupiedVehicle(localPlayer)
+	if(theVehicle) then
+		if(getPedOccupiedVehicleSeat(localPlayer) == 0) then
+			dxDrawImage(screenWidth-RenderTargets["DrawSpeedo"][2], screenHeight-RenderTargets["DrawSpeedo"][3]-(155*scaley), RenderTargets["DrawSpeedo"][2], RenderTargets["DrawSpeedo"][3], DrawSpeedo(theVehicle), 0,0,0,tocolor(255,255,255,180))
+
+			if(getDevelopmentMode()) then
+				AddRage(15)
+			end
+		end
+	end
+end
+
+
+
+function DrawExpText3D()
+	for i, arr in pairs(PData['ExpText3D']) do
+		if(not arr[5]) then 
+			arr[5] = 0
+			arr[6] = 255
+		end
+		local px,py,pz = getCameraMatrix()
+		local dist = 50
+		local distance = getDistanceBetweenPoints3D(arr[2],arr[3],arr[4],px,py,pz)
+
+		if distance <= dist then
+			sx,sy = getScreenFromWorldPosition(arr[2],arr[3],arr[4])
+			if sx and sy then 
+				MemText(arr[1], sx, sy, tocolor(255, 255, 255, arr[6]), scale, "pricedown", 1, 0, true, true, dist/(dist-distance))
+			end
+		end
+		
+		
+		arr[4] = arr[4]+0.01
+		arr[6] = arr[6]-1
+		if(arr[6] <= 0) then
+			table.remove(PData['ExpText3D'], i)
+		end
+	end
+end
+addEventHandler("onClientRender", root, DrawExpText3D)
+
+
+
+
+
+
+
+
+
+
+function angle(theVehicle)
+	local vx,vy,vz = getElementVelocity(theVehicle)
+	local modV = math.sqrt(vx*vx + vy*vy)
+	
+	if not isVehicleOnGround(theVehicle) then return 0,modV end
+	
+	local rx,ry,rz = getElementRotation(theVehicle)
+	local sn,cs = -math.sin(math.rad(rz)), math.cos(math.rad(rz))
+	
+	local deltaT = tick - (multTime or 0)
+	if mult~= 1 and modV <= 0.3 and deltaT > 750 then
+		mult = mult-1
+		multTime = tick
+	elseif deltaT > 1500 then
+		local temp = 1
+		if score >= 1000 then
+			temp = 5
+		elseif score >= 500 then
+			temp = 4
+		elseif score >= 250 then
+			temp = 3
+		elseif score >= 100 then
+			temp = 2
+		end
+		if temp>mult then
+			mult = temp
+			multTime = tick
+		end
+	end
+	
+
+	local cosX = (sn*vx + cs*vy)/modV
+	if cosX > 0.966 or cosX < 0 then return 0,modV end
+	return math.deg(math.acos(cosX))*0.5, modV
+end
+
+
+
+
+function AddRage(count)
+	if(count < 0) then
+		count = count+(count*((1000-getPedStat(localPlayer, 160))/200))
+	end
+	local Rage = getElementData(localPlayer, "Rage")
+	if(Rage+count < 0) then
+		if(isTimer(RageTimer)) then killTimer(RageTimer) end
+		triggerServerEvent("AccelerationDown", root, localPlayer)
+		Rage = 0
+		
+	elseif(Rage + count > 1000) then
+		Rage = 1000
+	else
+		Rage = Rage + count
+	end
+	setElementData(localPlayer, "Rage", Rage)
+end
+
+
+
+
+
+
+
+
+
+function AddInventoryItemNew(invname, item, posx, posy)
+	local inv = false
+	if(InitHud[invname]) then
+		inv = InitHud[invname]
+	else
+		inv = PlayerInventory
+	end
+	local ItemSize = items[item["txd"]][10]
+	
+	if(not posx or not posy) then
+		for sloty = 1, #inv[1] do
+			local out = false
+			for slotx = 1, #inv do
+				if(table.empty(inv[slotx][sloty])) then
+					local status = true
+					local sizex, sizey = ItemSize[1]-1, ItemSize[2]-1
+					for slot2x = slotx, slotx+sizex do
+						for slot2y = sloty, sloty+sizey do
+							if(inv[slot2x]) then
+								if(inv[slot2x][slot2y]) then
+									if(not table.empty(inv[slot2x][slot2y])) then
+										status = false
+									end
+								else
+									status = false
+								end
+							else
+								status = false
+							end
+						end
+					end
+					
+					if(status) then
+						out = {slotx, sloty}
+						break
+					end
+				end
+			end
+			if(out) then
+				posx, posy = out[1], out[2]
+				break
+			end
+		end
+	else
+		if(table.empty(inv[posx][posy])) then
+			local sizex, sizey = ItemSize[1]-1, ItemSize[2]-1
+			for slot2x = posx, posx+sizex do
+				for slot2y = posy, posy+sizey do
+				
+					if(not inv[slot2x]) then
+						return false
+					end
+					
+					if(not inv[slot2x][slot2y]) then
+						return false
+					end
+					
+					if(not table.empty(inv[slot2x][slot2y])) then
+						return false
+					end
+				end
+			end
+		else
+			return false
+		end
+	end
+	
+	if(posx and posy) then
+		inv[posx][posy] = item
+		
+		local sizex, sizey = ItemSize[1]-1, ItemSize[2]-1
+		for slot2x = posx, posx+sizex do
+			for slot2y = posy, posy+sizey do
+				if(table.empty(inv[slot2x][slot2y])) then
+					inv[slot2x][slot2y]["link"] = {posx, posy}
+				end
+			end
+		end
+		
+		if(invname == "Инвентарь") then
+			triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(PlayerInventory))
+		end
+		return true
+	else
+		triggerServerEvent("ToolTip", localPlayer, localPlayer, "Кончилось место в инвентаре!")
+		return false
+	end
+	
+end
+addEvent("AddInventoryItemNew", true)
+addEventHandler("AddInventoryItemNew", localPlayer, AddInventoryItemNew)
+
+
+
+function Nitro(state)
+	local theVehicle = getPedOccupiedVehicle(localPlayer)
+	if(theVehicle) then
+		if(state) then
+			setVehicleNitroActivated(theVehicle, true)
+		else
+			setVehicleNitroActivated(theVehicle, false)
+		end
+	end
+end
+addEvent("Nitro", true)
+addEventHandler("Nitro", localPlayer, Nitro)
+
+
+
+
+
+function FoundStackedInventoryItem(item)
+	local id = false
+	for x, dat in pairs(PlayerInventory) do
+		for y, data in pairs(dat) do
+			if(data["name"]) then
+				if(data["name"] == item["name"]) then
+					if(GetItemQuality(data) == GetItemQuality(item)) then
+						if(items[item["name"]][3] > GetItemCount(data)) then
+							id={x,y}
+							break
+						end
+					end
+				end
+			end
+		end
+	end
+	return id
+end
+
+
+ 
+function FoundFullStackedInventoryItem(item)
+	local id = false
+	for x, dat in pairs(PlayerInventory) do
+		for y, data in pairs(dat) do
+			if(data["name"]) then
+				if(data["name"] == item["name"]) then
+					if(items[item["name"]][3] == GetItemCount(data)) then
+						if(GetItemQuality(data) == GetItemQuality(item)) then
+							id={x,y}
+							break
+						end
+					end
+				end
+			end
+		end
+	end
+	return id
+end
+ 
+
+
+
+
+
+function RemoveInventoryItem(invname, x,y)
+	local sizex, sizey
+	if(invname == "Инвентарь") then
+		sizex, sizey = items[PlayerInventory[x][y]["txd"]][10][1]-1, items[PlayerInventory[x][y]["txd"]][10][2]-1
+	else
+		sizex, sizey = items[InitHud[invname][x][y]["txd"]][10][1]-1, items[InitHud[invname][x][y]["txd"]][10][2]-1
+	end
+	for slot2x = x, x+sizex do
+		for slot2y = y, y+sizey do
+			if(invname == "Инвентарь") then
+				PlayerInventory[slot2x][slot2y] = {}
+			else
+				InitHud[invname][slot2x][slot2y] = {}
+			end
+		end
+	end
+	if(invname == "Инвентарь") then
+		triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(PlayerInventory))
+	end
+	return true
+end
+addEvent("RemoveInventoryItem", true)
+addEventHandler("RemoveInventoryItem", localPlayer, RemoveInventoryItem)
+
+
+function RemoveInventoryItemCount(x,y)
+	local arr = InitHud["Инвентарь"] or PlayerInventory
+	if(GetItemCount(arr[x][y])-1 == 0) then
+		RemoveInventoryItem("Инвентарь", x,y)
+	else
+		arr[x][y]["count"] = GetItemCount(arr[x][y])-1
+		triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(arr))
+	end
+	return true
+end
+addEvent("RemoveInventoryItemCount", true)
+addEventHandler("RemoveInventoryItemCount", localPlayer, RemoveInventoryItemCount)
+
+
+
+
+
+local BannedReasons = {
+	[19] = "Rocket",
+	[37] = "Burnt",
+	[50] = "Ranover/Helicopter Blades",
+	[51] = "Explosion",
+	[53] = "Drowned",
+	[54] = "Fall",
+	[55] = "Unknown",
+	[56] = "Melee",
+	[57] = "Weapon",
+	[59] = "Tank Grenade",
+	[63] = "Blown"
+}
+
+function RGBToHex(red, green, blue, alpha)
+	if((red < 0 or red > 255 or green < 0 or green > 255 or blue < 0 or blue > 255) or (alpha and (alpha < 0 or alpha > 255))) then return nil end
+	if(alpha) then return string.format("#%.2X%.2X%.2X%.2X", red,green,blue,alpha)
+	else return string.format("#%.2X%.2X%.2X", red,green,blue) end
+end
+
+
+function PedDamage(attacker, weapon, bodypart, loss)
+	if(BannedReasons[weapon]) then 
+		cancelEvent()
+	end
+	if(attacker) then
+		if(getElementType(attacker) == "vehicle") then
+			if(getElementModel(attacker) == 532) then
+				bodypart = 9
+				weapon = 160
+			end
+			attacker = getVehicleOccupant(attacker)
+		end
+		
+		if(attacker == localPlayer) then
+			local color = RGBToHex(255, 255, 0)
+			if(weapon) then
+				local usedslot = GetUsableSlot()
+				if(usedslot) then
+					local dam = GetDamageItem(PlayerInventory[usedslot[1]][usedslot[2]])
+					loss = math.random(dam[1], dam[2])
+				end
+			end
+			loss = math.round(loss, 0)
+			triggerServerEvent("PedDamage", attacker, source, weapon, bodypart, loss)
+
+			for _, thePed in pairs(getElementsByType("ped", root, true)) do
+				if(source ~= thePed) then
+					local team = getElementData(thePed, "team")
+					if(team) then
+						if(getTeamName(getTeamFromName(team)) ~= "Мирные жители") then
+							triggerServerEvent("PedDamage", attacker, thePed, weapon, 0, 0)
+						end
+					end
+				end
+			end
+			cancelEvent()	
+		elseif(getElementType(attacker) == "ped") then
+			if(isElementSyncer(source)) then
+				triggerServerEvent("PedDamage", attacker, source, weapon, bodypart, loss)
+			end
+		end
+	end
+end
+addEventHandler("onClientPedDamage", root, PedDamage)
+
+
+
+
+
+
+function AddInventoryItem(invname, item, posx,posy)
+	local inv = false
+	if(InitHud[invname]) then
+		inv = InitHud[invname]
+	else
+		inv = PlayerInventory
+	end
+
+
+	if(posx and posy) then
+		local status = true
+
+		local ItemSize = items[item["txd"]][10]	
+		local sizex, sizey = ItemSize[1]-1, ItemSize[2]-1
+		for slot2x = posx, posx+sizex do
+			for slot2y = posy, posy+sizey do
+				if(not table.empty(inv[slot2x][slot2y])) then
+					status = false
+				end
+			end
+		end
+		
+		
+		if(status) then
+			AddInventoryItemNew(invname, item, posx,posy)
+			return true
+		end
+	end
+
+
+	local stacked = false
+	local count = GetItemCount(item)
+	local quality = GetItemQuality(item)
+	if count > 0 then 
+		stacked = math.floor(count/items[item["txd"]][3])
+		if(item["txd"] ~= "Деньги") then
+			InformTitle("В #4682B4инвентарь#FFFFFF добавлен предмет "..COLOR["KEY"]["HEX"]..item["txd"].."#FFFFFF, нажми #C00000i#FFFFFF чтобы посмотреть")
+		end
+	else
+		stacked = math.ceil(count/items[item["txd"]][3])
+	end
+	
+	if(stacked >= 1) then
+		for v = 1, stacked do
+			local buff = table.copy(item) -- Костыль чтобы не было багов
+			buff["count"] = items[item["txd"]][3]
+			AddInventoryItemNew(invname, buff)
+			count = count - items[item["txd"]][3]
+		end
+	elseif(stacked <= -1) then
+		for v = 1, stacked-stacked-stacked do
+			local nc = FoundFullStackedInventoryItem(item)
+			if(nc) then
+				RemoveInventoryItem(invname, nc[1], nc[2])
+				count = count + items[item["txd"]][3]
+			end
+		end
+	end
+	
+	
+	if(count == 0) then
+		if(invname == "Инвентарь") then
+			triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(PlayerInventory))
+		end
+		return true
+	elseif(count > 0) then
+		local nc = FoundStackedInventoryItem(item)
+		if(nc) then
+			if(GetItemCount(PlayerInventory[nc[1]][nc[2]])+count <= items[item["txd"]][3]) then
+				PlayerInventory[nc[1]][nc[2]]["count"] = GetItemCount(PlayerInventory[nc[1]][nc[2]])+count
+				count = 0
+			else
+				count = count - (items[item["txd"]][3]-PlayerInventory[nc[1]][nc[2]]["count"])
+				PlayerInventory[nc[1]][nc[2]]["count"] = items[item["txd"]][3]
+			end	
+		end
+	
+		if(count > 0) then
+			item["count"] = count
+			AddInventoryItemNew(invname, item) --Докладываем остаток
+		end
+		
+		if(invname == "Инвентарь") then
+			triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(PlayerInventory))
+		end
+		return true
+	elseif(count < 0) then
+		local nc = FoundStackedInventoryItem(item)
+		if(not nc) then nc = FoundFullStackedInventoryItem(item) end
+		if(nc) then
+			if(GetItemCount(PlayerInventory[nc[1]][nc[2]])+count <= 0) then
+				RemoveInventoryItem(invname, nc[1], nc[2])
+			else
+				PlayerInventory[nc[1]][nc[2]]["count"] = GetItemCount(PlayerInventory[nc[1]][nc[2]])+count
+			end
+			if(invname == "Инвентарь") then
+				triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(PlayerInventory))
+			end
+			return true
+		end
+	end
+end
+addEvent("AddInventoryItem", true)
+addEventHandler("AddInventoryItem", localPlayer, AddInventoryItem)
+
+
+
+
+
+local WeaponNamesArr = {
+	["АК-47"] = 30,
+	["Граната"] = 16,
+	["Газовая граната"] = 17,
+	["Взрывчатка"] = 39,
+	["Молотов"] = 18,
+	["Кольт 45"] = 22,
+	["USP-S"] = 23,
+	["Deagle"] = 24,
+	["М16"] = 31,
+	["Mossberg"] = 25,
+	["Sawed-Off"] = 26,
+	["SPAS-12"] = 27,
+	["Узи"] = 28,
+	["MP5"] = 29,
+	["Tec-9"] = 32,
+	["ИЖ-12"] = 33,
+	["M40"] = 34,
+	["Dildo XXL"] = 10,
+	["Dildo"] = 11,
+	["Вибратор"] = 12,
+	["Клюшка"] = 2,
+	["Бита"] = 5,
+	["Дубинка"] = 3,
+	["Лопата"] = 6,
+	["Кастет"] = 1,
+	["Миниган"] = 38,
+	["Цветы"] = 14,
+	["Трость"] = 15,
+	["Камера"] = 43,
+	["Огнетушитель"] = 42,
+	["Спрей"] = 41,
+	["Базука"] = 35,
+	["Ракетная установка"] = 36,
+	["Огнемет"] = 37,
+	["Бензопила"] = 9,
+	["Нож"] = 4,
+	["Катана"] = 8, 
+	["Удочка"] = 7,
+	["Парашют"] = 46,
+	["Рюкзак"] = 3026,
+	["Чемодан"] = 1210,
+	["Канистра"] = 1650,
+	["Запчасти"] = 1221,
+	["Пакет"] = 2663,
+	["Запаска"] = 1025,
+	["Нефть"] = 3632, 
+	["Пропан"] = 1370, 
+	["Химикаты"] = 1218,
+	["Бензин"] = 1225, 
+	["Удобрения"] = 1222, 
+	["Алкоголь"] = 2900, 
+	["Мясо"] = 2805, 
+	["Зерно"] = 1453
+}
+
+
+
+local UsableWeapon = {
+	[16] = "Граната",
+	[18] = "Молотов",
+	[35] = "Ракета", 
+	[46] = "Парашют",
+}
+
+local WeaponAmmo = {
+	[30] = "7.62-мм",
+	[31] = "5.56-мм",
+	[22] = "9-мм",
+	[23] = "9-мм",
+	[24] = "9-мм",
+	[25] = "18.5-мм",
+	[26] = "18.5-мм",
+	[27] = "18.5-мм",
+	[28] = "9-мм",
+	[29] = "9-мм",
+	[32] = "9-мм",
+	[33] = "18.5-мм",
+	[34] = "7.62-мм",
+	[38] = "7.62-мм",
+}
+
+
+
+function handleVehicleDamage(attacker, weapon, loss, x, y, z, tyre)
+	if(attacker) then
+		if(getElementType(attacker) == "vehicle") then
+			local acc = getVehicleOccupant(attacker)
+			if(acc) then
+				if(getElementType(acc) == "player") then
+					attacker = acc
+				end
+			end
+		end
+		if(attacker == localPlayer) then
+			local occupants = getVehicleOccupants(source) or {}
+			for seat, occupant in pairs(occupants) do
+				if(getElementType(occupant) == "player") then
+					if(getTeamName(getPlayerTeam(occupant)) == "Полиция" 
+					or getTeamName(getPlayerTeam(occupant)) == "Военные"
+					or getTeamName(getPlayerTeam(occupant)) == "ФБР") then
+						triggerServerEvent("WantedLevel", localPlayer, localPlayer, 0.1)
+					end
+				elseif(getElementType(occupant) == "ped") then
+					triggerServerEvent("PedDamage", localPlayer, occupant, 228, 0, 0)
+				end
+			end
+			
+			
+			local color = RGBToHex(255, 255, 0)
+			if(weapon) then
+				local usedslot = GetUsableSlot()
+				if(usedslot) then
+					local dam = GetDamageItem(PlayerInventory[usedslot[1]][usedslot[2]])
+					loss = math.random(dam[1], dam[2])
+				end
+			end
+			loss = math.round(loss, 0)
+			triggerServerEvent("FireVehicle", localPlayer, source, weapon, loss, tyre)
+
+			cancelEvent()
+		end
+	end
+end
+addEventHandler("onClientVehicleDamage", root, handleVehicleDamage)
+
+
+
+
+
+function GetDamageItem(item)
+	local mini = math.round(getOriginalWeaponProperty(WeaponNamesArr[item["txd"]], "poor", "damage")*(GetItemQuality(item)/500), 0)-(2)
+	local maxi = math.round(getOriginalWeaponProperty(WeaponNamesArr[item["txd"]], "poor", "damage")*(GetItemQuality(item)/500), 0)+(2)
+	if(mini < 0) then mini = 0 end 
+	return {mini, maxi}
+end
+
+function DrawPlayerInterface()
+	for _, invname in pairs(InitHudIndex) do
+		local InvData = InitHud[invname]
+		local sx,sy = HudPosition[invname][1], HudPosition[invname][2]
+		local sizex, sizey = EggSize*(#InvData+1)+(150*scale), EggSize*(#InvData[1]+1)
+		dxDrawRectangle(sx-(EggSize/2),sy-(EggSize/2),sizex, sizey, tocolor(35,30,30,220))
+		HudPosition[invname][3], HudPosition[invname][4] = sizex, sizey
+		
+		dxDrawBorderedText(invname, sx,sy-(EggSize),sx,sy, tocolor(255, 255, 255, 255), scale*1.5, "default-bold", "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+		
+
+		for posx, xdata in pairs(InvData) do -- Решетка
+			sy = HudPosition[invname][2]
+			local color = tocolor(180,180,180, 20)
+			for posy, dat in pairs(xdata) do
+				if(DragElement) then
+					if(DragElement[1]["name"] and dat["name"]) then
+						if(DragElement[2] == invname) then -- Объединяемые предметы
+							if(dat["name"] == DragElement[1]["name"]) then
+								if(items[dat["name"]][9]) then 
+									if(DragElement[3] ~= posx or DragElement[4] ~= posy) then
+										if(GetQuality(GetItemQuality(dat)) == GetQuality(GetItemQuality(DragElement[1]))) then
+											local ItemSize = items[dat["txd"]][10]
+							
+											dxDrawRectangle(sx, sy, EggSize*ItemSize[1], EggSize*ItemSize[2],  tocolor(0,153,255,50))
+										end
+									end
+								end
+							end
+						end
+					end
+				end
+				dxDrawLine(sx, sy, sx+(EggSize), sy, color, 1)
+				dxDrawLine(sx, sy, sx, sy+(EggSize), color, 1)
+				dxDrawLine(sx, sy+(EggSize), sx+(EggSize), sy+(EggSize), color, 1)
+				
+				dxDrawLine(sx+(EggSize), sy, sx+(EggSize), sy+(EggSize), color, 1)
+				sy=sy+(EggSize)
+			end
+			sx=sx+(EggSize)
+		end
+		
+		
+		sx,sy = HudPosition[invname][1], HudPosition[invname][2]
+		for posx, xdata in pairs(InvData) do
+			sy = HudPosition[invname][2]
+			for posy, dat in pairs(xdata) do
+				if(dat["txd"]) then
+					local ItemSize = items[dat["txd"]][10]
+					
+					if(invname == "Инвентарь") then
+						if(DragElement) then
+							local txdname = DragElement[1]["txd"]
+							if(txdname) then
+								if(items[txdname][7]) then
+									for _, name in ipairs(items[txdname][7]) do
+										if(dat["name"] == name) then
+											dxDrawRectangle(sx,sy, EggSize*(ItemSize[1]), EggSize*ItemSize[2], tocolor(100,155,100,50))
+										end
+									end
+								end
+							end
+						end
+					end
+					
+					
+					if(ItemSize[2] > ItemSize[1]) then
+						dxDrawImage(sx-EggSize,sy, EggSize*(ItemSize[2]+1), EggSize*ItemSize[2], items[dat["txd"]][1])
+					elseif(ItemSize[2] < ItemSize[1]) then
+						dxDrawImage(sx,sy, EggSize*(ItemSize[1]), EggSize*(ItemSize[2]), items[dat["txd"]][1])
+					else
+						local d = dxDrawImage(sx-EggSize/2,sy, EggSize*(ItemSize[1]+1), EggSize*ItemSize[2], items[dat["txd"]][1])
+					end
+			
+					if(invname == "Инвентарь") then
+						local usedslot = GetUsableSlot()
+						if(usedslot) then
+							if(posx == usedslot[1] and posy == usedslot[2]) then
+								dxDrawBorderedText("Экипирован", sx+5,sy, EggSize, EggSize, tocolor(200, 220, 200, 200), (scale/4)*ItemSize[2], "default-bold", "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+							end
+						end
+					end
+				end
+
+				sy = sy+(EggSize)
+			end
+			sx = sx+(EggSize)
+		end
+		
+		
+		sx,sy = HudPosition[invname][1], HudPosition[invname][2]
+		if(ActiveEgg[invname]) then
+			local ItemData = InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]
+			if(not DragElement) then
+				local color = tocolor(180,180,180, 50)
+				sx,sy = sx+(EggSize*(ActiveEgg[invname][1]-1)), sy+(EggSize*(ActiveEgg[invname][2]-1))
+				if(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["txd"]) then
+					local ItemSize = items[InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["txd"]][10]
+					
+					dxDrawLine(sx, sy, sx+(EggSize*ItemSize[1]), sy, color, 1)
+					dxDrawLine(sx, sy, sx, sy+(EggSize*ItemSize[2]), color, 1)
+					dxDrawLine(sx, sy+(EggSize*ItemSize[2]), sx+(EggSize*ItemSize[1]), sy+(EggSize*ItemSize[2]), color, 1)
+					dxDrawLine(sx+(EggSize*ItemSize[1]), sy, sx+(EggSize*ItemSize[1]), sy+(EggSize*ItemSize[2]), color, 1)
+				else
+					dxDrawLine(sx, sy, sx+(EggSize), sy, color, 1)
+					dxDrawLine(sx, sy, sx, sy+(EggSize), color, 1)
+					dxDrawLine(sx, sy+(EggSize), sx+(EggSize), sy+(EggSize), color, 1)
+					dxDrawLine(sx+(EggSize), sy, sx+(EggSize), sy+(EggSize), color, 1)
+				end
+			else
+				if(DragElement[2] == invname) then
+					ItemData = DragElement[1]
+				end
+			end
+			
+			
+			sx,sy = HudPosition[invname][1], HudPosition[invname][2]
+			local InfoPosx, InfoPosy = (sx+sizex)-(150*scale)-EggSize/2, sy
+	
+			local text = "Пустой слот\n"
+			if(ItemData["name"]) then
+				text = ItemData["name"].."\n\n"
+				text = text.."Цена: "..COLOR["DOLLAR"]["HEX"].."$"..GetItemCost(ItemData)*GetItemCount(ItemData).."\n#FFFFFF"
+				text = text.."Вес: "..GetItemMass(ItemData).."\n"
+				text = text.."Количество: "..GetItemCount(ItemData).." шт".."\n"
+				if(items[ItemData["txd"]][4] == "useinvweapon") then	
+					if(getWeaponProperty(WeaponNamesArr[ItemData["txd"]], "poor", "damage")) then
+						local damage = GetDamageItem(ItemData)
+						text=text.."Урон"..": "..damage[1].." - "..damage[2].."\n"
+					end
+					if(getWeaponProperty(WeaponNamesArr[ItemData["txd"]], "poor", "weapon_range")) then
+						text=text.."Расстояние"..": "..math.round(getWeaponProperty(WeaponNamesArr[ItemData["txd"]], "poor", "weapon_range"), 0).." м\n"
+					end
+					if(getWeaponProperty(WeaponNamesArr[ItemData["txd"]], "poor", "maximum_clip_ammo")) then
+						text=text.."Магазин"..": "..getWeaponProperty(WeaponNamesArr[ItemData["txd"]], "poor", "maximum_clip_ammo").."\n"
+					end
+					if(WeaponAmmo[WeaponNamesArr[ItemData["txd"]]]) then
+						text=text.."Калибр"..": "..WeaponAmmo[WeaponNamesArr[ItemData["txd"]]].."\n"
+					end
+				elseif(items[ItemData["txd"]][4] == "usedrugs") then	
+					text=text.."Здоровье"..": "..math.floor((10+(GetItemQuality(ItemData)/10))).."\n"
+				elseif(items[ItemData["txd"]][4] == "usesmoke") then	
+					text=text.."Здоровье"..": 5\n"
+				end
+
+				text = text.."Качество: "..GetQuality(GetItemQuality(ItemData)).."\n"
+
+				if(items[ItemData["txd"]][8]) then text = text.."\n#FFFFFF".."*Выпадаемый предмет\n" end
+			end
+			dxDrawBorderedText(text, InfoPosx, InfoPosy ,sx,sy, tocolor(255, 255, 255, 255), scale*0.7, "default-bold", "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+		end
+	end
+	
+	if(DragElement) then
+		local ItemSize = items[DragElement[1]["txd"]][10]
+
+		local dist, i = 9999, {}
+		for invname, InvData in pairs(InitHud) do
+			local sx,sy = HudPosition[invname][1], HudPosition[invname][2]
+			for ix, xdata in pairs(InvData) do
+				for iy, dat in pairs(xdata) do
+					local x,y = sx+((EggSize)*(ix-1)), sy+((EggSize)*(iy-1))
+					if(getDistanceBetweenPoints2D(x,y, DragX, DragY) < dist) then
+						dist = getDistanceBetweenPoints2D(x,y, DragX, DragY)
+						i = {x,y}
+					end
+				end
+			end
+		end
+		
+		dxDrawRectangle(i[1],i[2], EggSize*ItemSize[1], EggSize*ItemSize[2], tocolor(70, 70, 70, 50))
+		
+		if(ItemSize[2] > ItemSize[1]) then
+			dxDrawImage(DragX-EggSize,DragY, EggSize*(ItemSize[2]+1), EggSize*ItemSize[2], items[DragElement[1]["txd"]][1])
+		elseif(ItemSize[2] < ItemSize[1]) then
+			dxDrawImage(DragX,DragY, EggSize*(ItemSize[1]), EggSize*(ItemSize[2]), items[DragElement[1]["txd"]][1])
+		else
+			dxDrawImage(DragX-EggSize/2,DragY, EggSize*(ItemSize[1]+1), EggSize*ItemSize[2], items[DragElement[1]["txd"]][1])
+		end
+	end
+	
+	
+	
+	
+	for name,arr in pairs(PText) do
+		for i,el in pairs(arr) do
+			color = el[6]
+			th = dxGetFontHeight(el[7], el[8])
+			tw = dxGetTextWidth(el[1], el[7], el[8], true)
+			
+			if(MouseX-el[2] <= tw and MouseX-el[2] >= 0) then
+				if(MouseY-el[3] <= th and MouseY-el[3] >= 0) then
+					if(el[20]) then
+						color = tocolor(255,0,0,255)
+					end
+				end
+			end
+			
+			if(el[19]["border"]) then
+				dxDrawBorderedText(el[1], el[2], el[3], el[4], el[5], color, el[7], el[8], el[9], el[10], el[11], el[12], el[13], el[14], el[15], el[16], el[17], el[18])
+			else
+				dxDrawText(el[1], el[2], el[3], el[4], el[5], color, el[7], el[8], el[9], el[10], el[11], el[12], el[13], el[14], el[15], el[16], el[17], el[18])
+			end
+			
+			if(el[19]["line"]) then
+				dxDrawLine(el[2], el[3]+th, el[2]+tw, el[3]+th, color, 1, el[13])
+			end
+		end
+	end
+end
+
+
+
+function GetItemLink(invname, x,y)
+	if(InitHud[invname][x][y]["link"]) then
+		return InitHud[invname][x][y]["link"][1], InitHud[invname][x][y]["link"][2]
+	else
+		return x,y
+	end
+end
+
+
+
+function StartDrag(invname, x,y, absoluteX, absoluteY)
+	x,y = GetItemLink(invname, x,y)
+	if(invname == "Инвентарь") then
+		local usable = GetUsableSlot()
+		if(usable) then
+			if(x == usable[1] and y == usable[2]) then
+				triggerServerEvent("ToolTip", localPlayer, localPlayer, "Нельзя перемещать используемое оружие!")
+				return false
+			end
+		end
+	end
+	local sx,sy = HudPosition[invname][1], HudPosition[invname][2]
+	
+	sx,sy = sx+((EggSize)*(x-1)), sy+((EggSize)*(y-1))
+	DragStart[1] = absoluteX-sx
+	DragStart[2] = absoluteY-sy
+	DragX = sx
+	DragY = sy
+
+	DragElement = {table.copy(InitHud[invname][x][y]), invname, x,y}
+	RemoveInventoryItem(invname, x,y)
+end
+
+
+
+function StopDrag(absoluteX, absoluteY)
+	if(DragElement) then
+		local dist = 9999
+		local i = false
+		local invname2 = ""
+		for invname, InvData in pairs(InitHud) do
+			local sx,sy = HudPosition[invname][1], HudPosition[invname][2]
+			for ix, xdata in pairs(InvData) do
+				for iy, dat in pairs(xdata) do
+					local x,y = sx+((EggSize)*(ix-1)), sy+((EggSize)*(iy-1))
+					if(getDistanceBetweenPoints2D(x,y, DragX, DragY) < dist) then
+						dist = getDistanceBetweenPoints2D(x,y, DragX, DragY)
+						if(dist < EggSize) then
+							i = {ix,iy}
+							invname2 = invname
+							
+							ActiveEgg[invname] = {GetItemLink(invname, ix,iy)}
+						end
+					end
+				end
+			end
+		end
+		
+		if(invname2 == "Инвентарь" and DragElement[2] == "Инвентарь") then
+			local added = AddInventoryItemNew(DragElement[2], DragElement[1], i[1], i[2])
+			if(not added) then
+				if(InitHud[invname2][i[1]][i[2]]["name"] == DragElement[1]["name"]) then -- Объединяемые предметы
+					if(items[DragElement[1]["name"]][9]) then 
+						if(DragElement[3] ~= i[1] or DragElement[4] ~= i[2]) then
+							if(GetQuality(GetItemQuality(InitHud[invname2][i[1]][i[2]])) == GetQuality(GetItemQuality(DragElement[1]))) then
+								if(InitHud[invname2][i[1]][i[2]]["count"] ~= DragElement[1]["count"]) then 
+									table.insert(PData['ExpText'], {"#ff0000разное количество", absoluteX, absoluteY})
+									AddInventoryItemNew(DragElement[2], DragElement[1], DragElement[3], DragElement[4]) -- Возвращаем где был
+									DragElement = false
+									return false 
+								end
+								InitHud[invname2][i[1]][i[2]]["quality"] = GetItemQuality(DragElement[1])+100
+								
+								table.insert(PData['ExpText'], {"#ffff99улучшено", absoluteX, absoluteY})
+								DragElement = false
+								
+								triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(PlayerInventory))
+								return true
+							end
+						end
+					end
+				else
+					local txdname = DragElement[1]["txd"]
+					if(txdname) then
+						if(items[txdname][7]) then
+							for _, name in ipairs(items[txdname][7]) do
+								if(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == name) then
+									if(not InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]][DragElement[1]["name"]]) then
+										InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]][DragElement[1]["name"]] = DragElement[1]
+										DragElement = false
+										table.insert(PData['ExpText'], {"#ffff99Установлено", absoluteX, absoluteY})
+										triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(PlayerInventory))
+										triggerServerEvent("useinvweapon", localPlayer, localPlayer)
+										return true
+									else
+										triggerServerEvent("ToolTip", localPlayer, localPlayer, DragElement[1]["name"].." уже установлен")
+									end
+								end
+							end
+						end
+					end
+				end
+				AddInventoryItemNew(DragElement[2], DragElement[1], DragElement[3], DragElement[4]) -- Возвращаем где был
+				playSFX("genrl", 53, 3, false)
+			else
+				if(i[1] ~= DragElement[3] or i[2] ~= DragElement[4]) then
+					playSFX("genrl", 53, 1, false)
+				end
+			end
+			DragElement = false
+		elseif(invname2 == "Магазин" and DragElement[2] == "Магазин") then
+			AddInventoryItemNew(DragElement[2], DragElement[1], DragElement[3], DragElement[4]) -- Возвращаем где был
+			DragElement = false
+		elseif(invname2 == "Инвентарь" and DragElement[2] == "Магазин") then -- Покупка
+			AddInventoryItemNew(DragElement[2], DragElement[1], DragElement[3], DragElement[4]) -- Возвращаем где был
+			triggerServerEvent("buyshopitem", localPlayer, localPlayer, 1, {DragElement[1], GetItemCost(DragElement[1]), i[1], i[2]})
+			DragElement = false
+		elseif(invname2 == "Магазин" and DragElement[2] == "Инвентарь") then -- Продажа
+			triggerServerEvent("SellShopItem", localPlayer, localPlayer, GetItemCost(DragElement[1])*GetItemCount(DragElement[1]))
+			table.insert(PData['ExpText'], {"+ $"..GetItemCost(DragElement[1])*GetItemCount(DragElement[1]), absoluteX, absoluteY})
+			DragElement = false
+		else
+			if(DragElement[2] == "Инвентарь") then -- Дроп
+				triggerServerEvent("NewDropItem", localPlayer, localPlayer, DragElement[1])
+			end
+			DragElement = false
+		end
+	end
+end
+
+
+
+
+function MoveMouse(x, y, absoluteX, absoluteY)
+	MouseX = absoluteX
+	MouseY = absoluteY
+	if(DragElement) then
+		DragX = absoluteX-DragStart[1]
+		DragY = absoluteY-DragStart[2]
+	elseif(DragInventory) then
+		HudPosition[DragInventory][1] = absoluteX-DragStart[1]
+		HudPosition[DragInventory][2] = absoluteY-DragStart[2]
+	end
+end
+
+
+
+
+
+function GetGroundMaterial(x,y,z,gz) -- Перенести потом все данные GroundMaterial
+	x, y = math.round(x, 0), math.round(y, 0)
+	local material = false
+	local zone = getZoneName(x,y,z,false)
+	if(GroundMaterial[zone]) then
+		if(GroundMaterial[zone][x]) then
+			if(GroundMaterial[zone][x][y]) then
+				material = GroundMaterial[zone][x][y]
+			end
+		end
+	end
+	if(not material) then _,_,_,_,_,_,_,_,material = processLineOfSight(x,y,z,x,y,gz-1, true,false,false,false,false,true,true,true,localPlayer, true) end
+	if(not material) then material = 1337 end
+	return material
+end
+
+
+
+function ValidateMaterialForThree(x,y,z,gz)
+	--Исключить: 26, 27
+	local materials = {9 ,10 ,11 ,12 ,13 ,14 ,15 ,16 ,17 ,20 ,80 ,81 ,82 ,115 ,116 ,117 ,118 ,119 ,120 ,121 ,122 ,125 ,146 ,147 ,148 ,149 ,150 ,151 ,152 ,153 ,160 ,19 ,21 ,22 ,24 ,25 ,40 ,83 ,84 ,87 ,88 ,100 ,110 ,123 ,124 ,126 ,128 ,129 ,130 ,132 ,133 ,141 ,142 ,145 ,155 ,156}
+    local material = GetGroundMaterial(x,y,z,gz)
+	for _,k in pairs(materials) do
+		if(k == material) then
+			return true
+		end
+	end
+	return false
+end 
+
+
+
+
+
+function onClientBrowserWhitelistChange()
+	ShowLink()
+end
+addEventHandler("onClientBrowserWhitelistChange", root, onClientBrowserWhitelistChange)
+
+
+
+function ShowLink()
+	if(WebLink) then
+		if(not isBrowserDomainBlocked(WebLink, true)) then
+			if(not NewsPaper[1]) then
+				NewsPaper[1] = createBrowser(screenWidth/1.5, screenHeight/1.5, false, false)
+				NewsPaper[3] = WebLink
+			else
+				CloseNewsPaper()
+			end
+		else
+			requestBrowserDomains({WebLink}, true)
+		end
+	end
+end
+addEvent("ShowLink", true)
+addEventHandler("ShowLink", localPlayer, ShowLink)
+bindKey("F5", "down", ShowLink)
+
+
+
+function DrawNewsPaper()
+	if(NewsPaper[1]) then
+		if(NewsPaper[2]) then
+			dxDrawImage(screenWidth/6, screenHeight/6, screenWidth/1.5, screenHeight/1.5, NewsPaper[1], 0, 0, 0, tocolor(255,255,255,255), true)
+		end
+	end
+end
+
+
+
+
+local webBrowser = {} 
+	
+
+
+
+addEventHandler("onClientBrowserCreated", resourceRoot,
+    function ()
+		loadBrowserURL(source, getElementData(source, "url"))
+		setTimer(function(webbr)
+			destroyElement(webbr)
+		end, 60000*5, 1, source)
+    end
+)
+
+local WBVehicle = {}
+
+addEventHandler("onClientBrowserDocumentReady", root, 
+	function(url) 
+		for i, v in pairs(webBrowser) do
+			if(v == source) then
+				if(getPedOccupiedVehicle(localPlayer)) then
+					if(getPedOccupiedVehicle(localPlayer) == i) then
+						triggerEvent("SetZoneDisplay", root, getBrowserTitle(source))
+					end
+				end
+			end
+		end
+	end 
+)
+
+
+
+function ReadNewsPaper(y,m)
+	WebLink = "http://"..getElementData(root, "IP").."/engine/include/MTA/newspaper.php?y="..y.."&m="..m
+	if(not isBrowserDomainBlocked(WebLink, true)) then
+		if(not NewsPaper[1]) then
+			NewsPaper[1] = createBrowser(screenWidth/1.5, screenHeight/1.5, false, false)
+			NewsPaper[3] = WebLink
+			
+			addEventHandler("onClientRender", root, DrawNewsPaper)
+		else
+			CloseNewsPaper()
+		end
+	else
+		requestBrowserDomains({WebLink, true})
+	end
+end
+addEventHandler("onClientBrowserWhitelistChange", root, ReadNewsPaper)
+
+
+function onClientBrowserCreated()
+	loadBrowserURL(source, NewsPaper[3])
+	NewsPaper[2] = true
+end
+addEventHandler("onClientBrowserCreated", root, onClientBrowserCreated)
+
+
+
+function CloseNewsPaper()
+	NewsPaper = {false,false,false,false}
+end
+
+
+
+
+function FocusInventory(invname)
+	local ind, name = false, false
+	for id, tname in pairs(InitHudIndex) do
+		if(tname == invname) then
+			ind, name = id, tname
+			break
+		end
+	end
+	if(ind) then
+		table.remove(InitHudIndex, ind)
+		table.insert(InitHudIndex, name)
+	end
+end
+
+
+function UseInventoryItem(x,y)
+	local action = items[PlayerInventory[x][y]["txd"]][4]
+	if(action) then
+		if(action == "useinvweapon") then
+			triggerServerEvent("useinvweapon", localPlayer, localPlayer, {x,y})
+		elseif(action == "CreateCanabis") then
+			local px, py, pz = getElementPosition(localPlayer)
+			local gz = getGroundPosition(px, py, pz)
+			if(ValidateMaterialForThree(px,py,pz, gz)) then
+				triggerServerEvent("CreateThreePlayer", localPlayer, localPlayer, x,y, px,py,gz)
+			else
+				triggerServerEvent("ToolTip", localPlayer, localPlayer, "Здесь нельзя садить #558833коноплю")
+			end
+		elseif(action == "CreateRose") then
+			local px, py, pz = getElementPosition(localPlayer)
+			local gz = getGroundPosition(px, py, pz)
+			if(ValidateMaterialForThree(px,py,pz, gz)) then
+				triggerServerEvent("CreateThreePlayer", localPlayer, localPlayer, x,y, px,py,gz)
+			else
+				triggerServerEvent("ToolTip", localPlayer, localPlayer, "Здесь нельзя садить #B90000розы")
+			end
+			
+		elseif(action == "CreateCoka") then
+			local px, py, pz = getElementPosition(localPlayer)
+			local gz = getGroundPosition(px, py, pz)
+			if(ValidateMaterialForThree(px,py,pz, gz)) then
+				triggerServerEvent("CreateThreePlayer", localPlayer, localPlayer, x,y, px,py,gz)
+			else
+				triggerServerEvent("ToolTip", localPlayer, localPlayer, "Здесь нельзя садить коку")
+			end
+		elseif(action == "usecellphone") then
+			triggerServerEvent(action, localPlayer, localPlayer)
+		elseif(action == "usedrugs" or action == "usesmoke" or action == "usespunk") then
+			RemoveInventoryItemCount(x,y)
+			triggerServerEvent(action, localPlayer, localPlayer)
+		elseif(action == "usenewspaper") then
+			ReadNewsPaper(PlayerInventory[x][y]["date"][2], PlayerInventory[x][y]["date"][1])
+		else 
+			RemoveInventoryItem("Инвентарь", x,y)
+			triggerServerEvent(action, localPlayer, localPlayer)
+		end
+	end
+end
+
+
+
+
+
+
+local OldClickObject = ""
+local OldClickTimer = false
+function addLabelOnClick(button, state, absoluteX, absoluteY, worldX, worldY, worldZ, clickedElement)
+	if(button == "right") then
+		if(state == "down") then	
+			for id = -#InitHudIndex, -1 do -- Перебираем в обратном порядке для окна в фокусе
+				id = id-id-id
+				invname = InitHudIndex[id]
+				local InvData = InitHud[invname]
+				local sx,sy = HudPosition[invname][1], HudPosition[invname][2]
+				for ix, xdata in pairs(InvData) do
+					for iy, dat in pairs(xdata) do
+						local x,y = sx+((EggSize)*(ix-1)), sy+((EggSize)*(iy-1))
+						local h,w = (EggSize), (EggSize)
+						if(absoluteX-x <= h and absoluteX-x >= 0) then
+							if(absoluteY-y <= w and absoluteY-y >= 0) then
+								FocusInventory(invname)
+								ActiveEgg[invname] = {GetItemLink(invname, ix,iy)}
+								PText["Inventory"] = {}
+							
+								if(not table.empty(dat)) then
+									PText["Inventory"] = {}
+									local FH = dxGetFontHeight(scale, "default-bold")
+									local line = 0
+									if(invname == "Магазин") then
+
+									elseif(invname == "Инвентарь") then
+										if(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "Pissh" or
+										InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "Pissh Gold" or
+										InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "isabella" or
+										InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "KBeer" or
+										InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "KBeer Dark") then
+											for key,thePlayers in pairs(getElementsByType("player", root, true)) do
+												PText["Inventory"][#PText["Inventory"]+1] = {"Посадить "..getPlayerName(thePlayers), absoluteX, absoluteY+line, screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true, false, 0, 0, 0, {["border"] = true}, {"butilka", localPlayer, localPlayer, thePlayers, ActiveEgg[invname][1],ActiveEgg[invname][2]}}
+											
+												line = line+FH
+											end
+										elseif(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "Кровь") then
+											for key,thePlayers in pairs(getElementsByType("player", root, true)) do
+												PText["Inventory"][#PText["Inventory"]+1] = {"Вылечить "..getPlayerName(thePlayers), absoluteX, absoluteY+line, screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true, false, 0, 0, 0, {["border"] = true}, {"MCHSEvent", localPlayer, localPlayer, thePlayers, ActiveEgg[invname][1],ActiveEgg[invname][2]}}
+											
+												line = line+FH
+											end
+										elseif(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "Кока") then
+											PText["Inventory"][#PText["Inventory"]+1] = {"Переработать", absoluteX, absoluteY+line, screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true, false, 0, 0, 0, {["border"] = true}, {"MakeSpunk", localPlayer, localPlayer, ActiveEgg[invname][1],ActiveEgg[invname][2]}}
+											
+											line = line+FH
+										elseif(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "Конопля") then
+											PText["Inventory"][#PText["Inventory"]+1] = {"Скрутить косяк", absoluteX, absoluteY+line, screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true, false, 0, 0, 0, {["border"] = true}, {"MakeKosya", localPlayer, localPlayer, ActiveEgg[invname][1],ActiveEgg[invname][2]}}
+											
+											line = line+FH
+										elseif(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "Фекалии") then
+											PText["Inventory"][#PText["Inventory"]+1] = {"Удобрить", absoluteX, absoluteY+line, screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true, false, 0, 0, 0, {["border"] = true}, {"Udobrenya", localPlayer, localPlayer, ActiveEgg[invname][1],ActiveEgg[invname][2]}}
+											
+											line = line+FH										
+										elseif(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["name"] == "Запчасти") then
+											PText["Inventory"][#PText["Inventory"]+1] = {"Открыть", absoluteX, absoluteY+line, screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true, false, 0, 0, 0, {["border"] = true}, {"usezapt", localPlayer, localPlayer, ActiveEgg[invname][1],ActiveEgg[invname][2]}}
+											
+											line = line+FH
+										end
+										
+										if(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["Лазерный прицел"]) then
+											PText["Inventory"][#PText["Inventory"]+1] = {"Извлечь лазерный прицел", absoluteX, absoluteY+line, screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true, false, 0, 0, 0, {["border"] = true}, {"UnEquip", localPlayer, localPlayer, invname, ActiveEgg[invname][1],ActiveEgg[invname][2], "Лазерный прицел"}}
+											
+											line = line+FH
+										end
+										local WN = WeaponNamesArr[InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["txd"]]
+										if(WN) then
+											if(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]][WeaponAmmo[WN]]) then
+												PText["Inventory"][#PText["Inventory"]+1] = {"Извлечь патроны", absoluteX, absoluteY+line, screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true, false, 0, 0, 0, {["border"] = true}, {"UnEquip", localPlayer, localPlayer, invname, ActiveEgg[invname][1],ActiveEgg[invname][2], "Патроны"}}
+											
+												line = line+FH
+											end
+										end
+										
+										PText["Inventory"][#PText["Inventory"]+1] = {"Выбросить", absoluteX, absoluteY+line, screenWidth, screenHeight, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true, false, 0, 0, 0, {["border"] = true}, {"DropInventoryItem", localPlayer, localPlayer, ActiveEgg[invname][1],ActiveEgg[invname][2]}}
+									end
+								else
+									PText["Inventory"] = {}
+								end
+							end
+						end
+					end
+				end	
+			end
+		end
+	elseif(button == "left") then
+		if(state == "down") then	
+			for name,arr in pairs(PText) do
+				for i,el in pairs(arr) do
+					local color = el[6]
+					local FH = dxGetFontHeight(el[7], el[8])
+					local FW = dxGetTextWidth(el[1], el[7], el[8], true)
+					if(MouseX-el[2] <= FW and MouseX-el[2] >= 0) then
+						if(MouseY-el[3] <= FH and MouseY-el[3] >= 0) then
+							triggerEvent(unpack(el[20]))
+							return true
+						end
+					end
+				end
+			end
+		
+			for id = -#InitHudIndex, -1 do -- Перебираем в обратном порядке для окна в фокусе
+				id = id-id-id
+				invname = InitHudIndex[id]
+				local InvData = InitHud[invname]
+				local sx,sy = HudPosition[invname][1], HudPosition[invname][2]
+				for ix, xdata in pairs(InvData) do
+					for iy, dat in pairs(xdata) do
+						local x,y = sx+((EggSize)*(ix-1)), sy+((EggSize)*(iy-1))
+						local h,w = (EggSize), (EggSize)
+						if(absoluteX-x <= h and absoluteX-x >= 0) then
+							if(absoluteY-y <= w and absoluteY-y >= 0) then
+								FocusInventory(invname)
+								ActiveEgg[invname] = {GetItemLink(invname, ix,iy)}
+								
+								if(not table.empty(dat)) then
+									if(not isTimer(OldClickTimer)) then
+										playSFX("genrl", 53, 6, false)
+										OldClickObject = invname..ix..iy
+									
+										OldClickTimer = setTimer(function()
+											OldClickObject = ""
+										end, 500, 1)
+									else
+										if(OldClickObject == invname..ix..iy) then
+											if(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["ForSale"]) then
+												if(items[InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]]["txd"]][3] == 1) then
+													triggerServerEvent("buyshopitem", localPlayer, localPlayer, 1, {InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]], GetItemCost(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]])})
+												else
+													triggerEvent("CreateButtonInputInt", localPlayer, "buyshopitem", "Введи количество", {InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]], GetItemCost(InitHud[invname][ActiveEgg[invname][1]][ActiveEgg[invname][2]])})
+												end
+												return
+											elseif(invname == "Инвентарь") then
+												UseInventoryItem(ActiveEgg[invname][1], ActiveEgg[invname][2])
+											else
+												playSFX("genrl", 53, 3, false)
+											end
+											killTimer(OldClickTimer)
+											OldClickObject = ""
+										else
+											resetTimer(OldClickTimer)
+											playSFX("genrl", 53, 6, false)
+											OldClickObject = invname..ix..iy
+										end
+									end
+									
+									StartDrag(invname, ix,iy, absoluteX, absoluteY)
+									return
+								else
+									playSFX("genrl", 53, 4, false)
+									return
+								end
+							end
+						end
+					end
+				end
+				if((absoluteX-HudPosition[invname][1])+EggSize/2 >= 0 and (absoluteX-HudPosition[invname][1])+EggSize/2 <= HudPosition[invname][3]) then
+					if((absoluteY-HudPosition[invname][2])+EggSize/2 >= 0 and (absoluteY-HudPosition[invname][2])+EggSize/2 <= HudPosition[invname][4]) then
+						FocusInventory(invname)
+						DragStart[1] = absoluteX-sx
+						DragStart[2] = absoluteY-sy
+						DragInventory = invname
+						break
+					end
+				end
+			end
+			
+			
+		elseif(state == "up") then
+			StopDrag(absoluteX, absoluteY)
+			if(DragInventory) then
+				DragInventory = false
+			end
+		end
+	end
+end
+
+
+
+
+
+function DropInventoryItem(thePlayer, x, y)
+	triggerServerEvent("NewDropItem", localPlayer, localPlayer, InitHud["Инвентарь"][x][y])
+	RemoveInventoryItem("Инвентарь", x,y)
+	
+	PText["Inventory"] = {}
+end
+addEvent("DropInventoryItem", true)
+addEventHandler("DropInventoryItem", localPlayer, DropInventoryItem)
+
+
+
+
+
+function UnEquip(thePlayer, invname, x, y, item)
+	if(item == "Патроны") then
+		local WNA = WeaponAmmo[WeaponNamesArr[InitHud[invname][x][y]["txd"]]]
+		local it = table.copy(InitHud[invname][x][y][WNA])
+		InitHud[invname][x][y][WNA] = nil
+		AddInventoryItem(invname, it)
+	else
+		local it = table.copy(InitHud[invname][x][y][item])
+		InitHud[invname][x][y][item] = nil
+		AddInventoryItem(invname, it)
+	end
+	triggerServerEvent("useinvweapon", localPlayer, localPlayer)
+	
+	PText["Inventory"] = {}
+end
+addEvent("UnEquip", true)
+addEventHandler("UnEquip", localPlayer, UnEquip)
+
+
+
+
+
+function Equip(x, y, x2, y2)
+	PlayerInventory[x][y][PlayerInventory[x2][y2]["name"]] = table.copy(PlayerInventory[x2][y2])
+	RemoveInventoryItem("Инвентарь", x2,y2)
+	triggerServerEvent("useinvweapon", localPlayer, localPlayer)
+	
+	PText["Inventory"] = {}
+end
+addEvent("Equip", true)
+addEventHandler("Equip", localPlayer, Equip)
+
+
+
+
+
+
+
+function butilka(thePlayer, thePed, x, y)
+	triggerServerEvent("butilka", localPlayer, thePlayer, thePed, MyTextures[PlayerInventory[x][y]["name"]][1])
+end
+addEvent("butilka", true)
+addEventHandler("butilka", localPlayer, butilka)
+
+
+function MCHSEvent(thePlayer, thePed, x, y)
+	triggerServerEvent("MCHSEvent", localPlayer, thePlayer, thePed, x, y)
+end
+addEvent("MCHSEvent", true)
+addEventHandler("MCHSEvent", localPlayer, MCHSEvent)
+
+
+
+
+
+function MakeSpunk(thePlayer, x, y)
+	if(getElementInterior(localPlayer) == 2) then
+		AddInventoryItem("Инвентарь", {["txd"] = "Спанк", ["name"] = "Спанк", ["quality"] = InitHud["Инвентарь"][x][y]["quality"]})
+		RemoveInventoryItemCount(x,y)
+	else
+		triggerServerEvent("ToolTip", localPlayer, localPlayer, "Тебе нужно находится в наркопритоне!")
+	end
+	PText["Inventory"] = {}
+end
+addEvent("MakeSpunk", true)
+addEventHandler("MakeSpunk", localPlayer, MakeSpunk)
+
+
+
+function Udobrenya(thePlayer, x, y)
+	triggerServerEvent("Udobrenya", localPlayer, localPlayer, x, y)
+	PText["Inventory"] = {}
+end
+addEvent("Udobrenya", true)
+addEventHandler("Udobrenya", localPlayer, Udobrenya)
+
+
+function usezapt(thePlayer, x, y)
+	triggerServerEvent("usezapt", localPlayer, localPlayer, x, y)
+	PText["Inventory"] = {}
+end
+addEvent("usezapt", true)
+addEventHandler("usezapt", localPlayer, usezapt)
+
+
+
+function MakeKosya(thePlayer, x, y)
+	if(getElementInterior(localPlayer) == 2) then
+		AddInventoryItem("Инвентарь", {["txd"] = "Косяк", ["name"] = "Косяк", ["quality"] = InitHud["Инвентарь"][x][y]["quality"]})
+		RemoveInventoryItemCount(x,y)
+	else
+		triggerServerEvent("ToolTip", localPlayer, localPlayer, "Тебе нужно находится в наркопритоне!")
+	end
+	PText["Inventory"] = {}
+end
+addEvent("MakeKosya", true)
+addEventHandler("MakeKosya", localPlayer, MakeKosya)
+
+
+
+
+
+
+function getArrSize(arr)
+	local i = 0
+	for _,_ in pairs(arr) do i=i+1 end
+	return i
+end
+
+
+function getPointInFrontOfPoint(x, y, z, rZ, dist)
+	local offsetRot = math.rad(rZ)
+	local vx = x + dist * math.cos(offsetRot)
+	local vy = y + dist * math.sin(offsetRot)  
+	return vx, vy, z
+end
+
+
+
+function getGroundPositionFish()
+	if(not getPedOccupiedVehicle(localPlayer)) then
+		if(not isCursorShowing()) then
+			local px,py,pz = getElementPosition(localPlayer)
+			local _,_,rz = getElementRotation(localPlayer)
+			local x,y,z = getPointInFrontOfPoint(px,py,pz, rz+90,10)
+			local lvl = getWaterLevel(x,y,z)
+			if(lvl) then
+				local result = lvl-getGroundPosition(x, y, z)
+				if(result > 0) then
+					local z = getGroundPosition(x, y, z)
+					triggerServerEvent("startfish", localPlayer, localPlayer, x,y,z)
+					return
+				end
+			end
+			local r,g,b,a = getWaterColor()
+			triggerServerEvent("ToolTip", localPlayer, localPlayer, "Подойди к "..RGBToHex(r,g,b).."воде")
+		end
+	end
+end
+addEvent("getGroundPositionFish", true)
+addEventHandler("getGroundPositionFish", localPlayer, getGroundPositionFish)
+
+
+
+
+
+ 
+
+
+function getArrSize(arr)
+	local i = 0
+	for _,_ in pairs(arr) do i=i+1 end
+	return i
+end
+
+
+ 
+
+
+
+
+function InitInterface(name, dat)
+	if(not InitHud[name]) then
+		if(getArrSize(InitHud) == 0) then
+			addEventHandler("onClientHUDRender", root, DrawPlayerInterface)
+			addEventHandler("onClientClick", root, addLabelOnClick)
+			addEventHandler("onClientCursorMove", root, MoveMouse)
+			showCursor(true)
+		end
+		ActiveEgg[name] = {1,1}
+		InitHud[name] = dat
+		table.insert(InitHudIndex, name)
+	else
+		ActiveEgg[name] = nil
+		InitHud[name] = nil
+		
+		for id, tname in pairs(InitHudIndex) do
+			if(tname == name) then
+				table.remove(InitHudIndex, id)
+			end
+		end
+		
+		if(getArrSize(InitHud) == 0) then
+			removeEventHandler("onClientHUDRender", root, DrawPlayerInterface)
+			removeEventHandler("onClientClick", root, addLabelOnClick)
+			removeEventHandler("onClientCursorMove", root, MoveMouse)
+			showCursor(false)
+		end
+	end
+end
+addEvent("InitInterface", true)
+addEventHandler("InitInterface", localPlayer, InitInterface)
+
+
+
+
+
+
+
+function TrunkWindow(theVehicle)
+	local dat = fromJSON(getElementData(theVehicle, "trunk"))
+
+	InitInterface("Багажник", dat)
+end
+addEvent("TrunkWindow", true)
+addEventHandler("TrunkWindow", localPlayer, TrunkWindow)
+
+
+
+
+function TradeWindow(dat, name)
+	local ShopItems = CreateInventory(15,7)
+	if(not InitHud["Магазин"]) then
+		InitInterface("Магазин", ShopItems)
+		for i,v in pairs(dat) do
+			AddInventoryItemNew("Магазин", v)
+		end
+	end
+end
+addEvent("TradeWindow", true)
+addEventHandler("TradeWindow", localPlayer, TradeWindow)
+
+
+
+
+
+function SetupBackpack()
+	InitInterface("Инвентарь", PlayerInventory)
+end
+bindKey("i", "down", SetupBackpack)
+
+
+
+function UseBind(num)
+	if(getElementData(localPlayer, "HUD")) then
+		local Elements = 1
+		local x = 1
+		local y = 1 
+		for i = 1, #PlayerInventory*#PlayerInventory[1] do
+			if(not PlayerInventory[x]) then
+				x = 1
+				y = y+1
+			end
+			
+			local item = PlayerInventory[x][y]
+			if(item) then
+				if(item["txd"]) then
+					local action = items[PlayerInventory[x][y]["txd"]][4]
+					if(action) then
+						if(Elements == tonumber(num)) then
+							UseInventoryItem(x,y)
+							return true
+						end
+						Elements = Elements+1
+					end
+				end
+				x = x+1
+			end
+		end
+	end
+end
+
+
+
+
+function onClientPlayerWeaponFireFunc(weapon, ammo, ammoInClip, hitX, hitY, hitZ, hitElement)
+	if source == localPlayer then
+		if(weapon == 41) then
+			if(GetObjectType(hitElement) == "Графити") then
+				triggerServerEvent("ToolTip", localPlayer, localPlayer, "Доделаю потом")
+			end
+		elseif(weapon == 42) then
+			if(getElementModel(hitElement) == 1362) then
+				triggerServerEvent("RemoveFire", localPlayer, localPlayer, getElementData(hitElement, "fireid"))
+			end
+		elseif(weapon == 43 and getElementModel(source) == 60) then
+			triggerServerEvent("doTakeScreenShot", localPlayer)
+		else
+			local usableslot = GetUsableSlot()
+			if(usableslot) then
+				if WeaponAmmo[weapon] and not getElementData(localPlayer, "FullClip") then
+					local WNA = WeaponAmmo[WeaponNamesArr[PlayerInventory[usableslot[1]][usableslot[2]]["txd"]]]
+					PlayerInventory[usableslot[1]][usableslot[2]][WNA]["count"] = PlayerInventory[usableslot[1]][usableslot[2]][WNA]["count"]-1
+					if(PlayerInventory[usableslot[1]][usableslot[2]][WNA]["count"] == 0) then
+						PlayerInventory[usableslot[1]][usableslot[2]][WNA] = nil
+					end
+					triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(PlayerInventory))
+				end
+				
+				
+				if(PlayerInventory[usableslot[1]][usableslot[2]]["txd"] == UsableWeapon[weapon]) then -- Для гранат
+					RemoveInventoryItemCount(usableslot[1], usableslot[2])
+					triggerServerEvent("SaveInventory", localPlayer, localPlayer, toJSON(PlayerInventory))
+				end
+				
+			end
+			
+			if(getPedTotalAmmo(localPlayer) == 0) then
+				triggerServerEvent("useinvweapon", localPlayer, localPlayer)
+			end
+		end
+	end
+end
+addEventHandler("onClientPlayerWeaponFire", localPlayer, onClientPlayerWeaponFireFunc)
+
+
+
+
+
+
+
+
+function DrawProgressBar(x,y,count,bool,size)
+	local scaley = scaley*RenderQuality
+	local scalex = scalex*RenderQuality
+	
+	local size2 = size-10
+	dxDrawRectangle(x, y, size*scalex, 24*scaley , tocolor(0, 0, 0, 255), false, true)
+	dxDrawRectangle(x+(5*scalex), y+(5*scaley), size2*scalex, 14*scaley , tocolor(100, 100, 100, 255), false, true)
+	dxDrawRectangle(x+(5*scalex), y+(5*scaley), ((count/1000)*size2)*scalex, 14*scaley, tocolor(255, 255, 255, 255), false, true)
+	
+	if(bool) then
+		if(bool == 0) then return true end
+		if(bool > 0) then
+			if(bool < 100) then
+				bool = 100
+			end
+			
+			if(count+bool > 1000) then
+				bool = 1000-count
+				if(bool == 0) then
+					count = 900
+					bool = 100
+				end
+			end
+			dxDrawRectangle((x+(5*scalex))+(((count/1000)*size2)*scalex), y+(5*scaley), (((bool)/1000)*size2)*scalex, 14*scaley, tocolor(69, 200, 59, 255), false, true)
+		else
+			if(bool > -100) then
+				bool = -100
+			end
+			
+			if(count+bool < 0) then
+				bool = -count
+				if(bool == 0) then
+					count = 100
+					bool = -100
+				end
+			end
+			dxDrawRectangle(x+(5*scalex)+(((count/1000)*size2)*scalex), y+(5*scaley), ((bool/1000)*size2)*scalex, 14*scaley, tocolor(255, 0, 0, 255), false, true)
+		end
+	end
+end
+
+
+
+
+local ToolTipText = ""
+local ToolTipTimers = false
+local RespectMsg = false
+
+function DrawToolTip()
+	dxSetRenderTarget(RenderTargets["ToolTip"][1], true)
+	dxSetBlendMode("modulate_add")
+	
+	local scale = scale*RenderQuality
+	local scaley = scaley*RenderQuality
+	local scalex = scalex*RenderQuality
+	
+	local linecount = 1
+	if(ToolTipText ~= "") then 
+		for i in string.gfind(ToolTipText, "\n") do
+			linecount = linecount+1
+		end
+	else
+		linecount = 0
+	end
+	
+	local FH = dxGetFontHeight(scale, "default-bold")
+	
+	local maxtw = 0
+	local th = (FH*(linecount))+(20*scaley)
+	if(RespectMsg) then
+		for v, key in pairs (RespectMsg) do
+			tw = dxGetTextWidth(v, scale, "default-bold", true)+(26*scalex)+(150*scalex)+dxGetTextWidth(" +", scale, "default-bold", true) -- 150 размер прогресс бара
+			if(tw > maxtw) then
+				maxtw = tw
+			end
+		end
+		th = (FH*(linecount+getArrSize(RespectMsg)))+(20*scaley)
+	end
+	tw = dxGetTextWidth(ToolTipText, scale, "default-bold", true)+(26*scalex)
+	if(maxtw > tw) then tw = maxtw end
+	dxDrawRectangle(15*scalex, 15*scaley, tw, th, tocolor(0, 0, 0, 180))
+	dxDrawText(ToolTipText, 25*scalex, 25*scaley, 0, 0, tocolor(255,255,255,255), scale, "default-bold", "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+	
+	
+	
+	if(RespectMsg) then
+		for v, key in pairs (RespectMsg) do
+			local tw = dxGetTextWidth(v, scale, "default-bold", true)
+			dxDrawText(v, 25*scalex, 25*scaley+(FH*(linecount)), screenWidth-170*scalex, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+			DrawProgressBar((25*scalex)+tw+(4*scalex), 30*scaley+(FH*(linecount)), key[2], key[1], 150)
+			if(key[1] > 0) then
+				dxDrawText("+", 37*scalex+tw+(150*scalex), 25*scaley+(FH*(linecount)), screenWidth-170*scalex, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+			else
+				dxDrawText("-", 37*scalex+tw+(150*scalex), 25*scaley+(FH*(linecount)), screenWidth-170*scalex, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+			end
+			linecount = linecount+1
+		end
+	end
+	
+	dxSetBlendMode("blend")
+	dxSetRenderTarget()
+	return RenderTargets["ToolTip"][1]
+end
+addEvent("DrawToolTipHandler", true)
+addEventHandler("DrawToolTipHandler", resourceRoot, DrawToolTip)
+
+
+
+
+
+
+function ToolTip(message, skill)
+	if(message ~= ToolTipText) then
+		playSoundFrontEnd(11)
+		if(isTimer(ToolTipTimers)) then
+			killTimer(ToolTipTimers)
+			ToolTipText = message
+			ToolTipTimers = setTimer(function()
+				RespectMsg = false
+				ToolTipText = ""
+			end, 1000+(#message*50), 1)
+		else
+			ToolTipText = message
+			ToolTipTimers = setTimer(function()
+				RespectMsg = false
+				ToolTipText = ""
+			end, 1000+(#message*50), 1)
+		end
+		DrawToolTip()
+	end
+end
+addEvent("ToolTip", true)
+addEventHandler("ToolTip", root, ToolTip)
+
+
+
+
+
+
+function getTeamGroup(team)
+	if(team == "Мирные жители" or team == "МЧС") then
+		return "Мирные жители"
+	elseif(team == "Вагос" or team == "Da Nang Boys" or team == "Рифа") then
+		return "Синдикат Локо"
+	elseif(team == "Баллас" or team == "Колумбийский картель" or team == "Русская мафия") then
+		return "Наркомафия"
+	elseif(team == "Гроув-стрит" or team == "Триады" or team == "Ацтекас") then
+	    return "Бандиты"
+	elseif(team == "Полиция" or team == "Военные" or team == "ЦРУ" or team == "ФБР") then
+		return "Официалы"
+	elseif(team == "Уголовники" or team == "Байкеры" or team == "Деревенщины") then
+		return "Уголовники"
+	end
+end
+
+function getTeamGroupColor(team)
+	if(team == "Мирные жители" or team == "МЧС") then
+		return "#CCCCCC"
+	elseif(team == "Вагос" or team == "Da Nang Boys" or team == "Рифа") then
+		return "#A00000"
+	elseif(team == "Баллас" or team == "Колумбийский картель" or team == "Русская мафия") then
+		return "#B7410E"
+	elseif(team == "Гроув-стрит" or team == "Триады" or team == "Ацтекас") then
+	    return "#4E653D"
+	elseif(team == "Полиция" or team == "Военные" or team == "ЦРУ" or team == "ФБР") then
+		return "#4169E1"
+	elseif(team == "Уголовники" or team == "Байкеры" or team == "Деревенщины") then
+		return "#858585"
+	end
+end
+
+function GetBandRang(gang,reps)
+	local maks = {BandRangs[gang][1]}
+	for rang, k in ipairs(BandRangs[gang]) do
+		if(k[1] <= reps) then
+			maks[1] = k
+		else
+			if(rang ~= 1) then
+				maks[2] = k
+				break
+			end
+		end
+	end
+	return maks
+end
+
+
+
+
+function getTeamVariable(team)
+	if(team == "Мирные жители" or team == "МЧС") then
+		return tonumber(getElementData(localPlayer, "civilian"))
+	elseif(team == "Вагос" or team == "Da Nang Boys" or team == "Рифа") then
+		return tonumber(getElementData(localPlayer, "vagos"))
+	elseif(team == "Баллас" or team == "Колумбийский картель" or team == "Русская мафия") then
+		return tonumber(getElementData(localPlayer, "ballas"))	
+	elseif(team == "Гроув-стрит" or team == "Триады" or team == "Ацтекас") then
+	    return tonumber(getElementData(localPlayer, "grove"))
+	elseif(team == "Полиция" or team == "Военные" or team == "ЦРУ" or team == "ФБР") then
+		return tonumber(getElementData(localPlayer, "police"))
+	elseif(team == "Уголовники" or team == "Байкеры" or team == "Деревенщины") then
+		return tonumber(getElementData(localPlayer, "ugol"))
+	end
+	return false
+end
+
+
+function RespectMessage(group, count) 
+	local name = group
+	local myrep = 0
+	count = tonumber(count)
+
+	if(SkillLevel[tonumber(group)]) then
+		group = tonumber(group)
+		for slot = getPedStat(localPlayer, group)+1, getPedStat(localPlayer, group)+count do
+			 if SkillLevel[group][slot] then
+				triggerEvent("ToolTip", localPlayer, SkillLevel[group][slot])
+			 end
+		end
+	end
+	
+	if(SkillName[tonumber(group)]) then
+		name = SkillName[tonumber(group)]
+		myrep = getPedStat(localPlayer, tonumber(group))
+	else
+		name = getTeamGroupColor(group)..getTeamGroup(group)
+		myrep = (getTeamVariable(group)/2)+500
+	end
+				
+	if(isTimer(ToolTipTimers)) then
+		if(not RespectMsg[name]) then
+			RespectMsg[name] = {count, myrep}
+		else
+			RespectMsg[name] = {RespectMsg[name][1]+count, myrep}
+		end
+		resetTimer(ToolTipTimers)
+	else
+		RespectMsg = {[name] = {count, myrep}}
+		ToolTipTimers = setTimer(function()
+			RespectMsg = false
+			ToolTipText = ""
+		end, 3500, 1)
+		playSFX("genrl", 52, 15, false)
+	end
+	DrawToolTip()
+end
+addEvent("RespectMessage", true)
+addEventHandler("RespectMessage", localPlayer, RespectMessage)
+
+
+
+
+local ZonesDisplay = {}
+
+function DrawLocation()
+	if(ZonesDisplay[1]) then
+		dxSetRenderTarget(RenderTargets["Location"][1], true)
+		dxSetBlendMode("modulate_add")
+		
+		local scale = scale*RenderQuality
+		local x = RenderTargets["Location"][2]*RenderQuality
+		local y = RenderTargets["Location"][3]*RenderQuality
+		
+		local tw = dxGetTextWidth(ZonesDisplay[1][1], scale*2, "diploma", true)
+		local th = dxGetFontHeight(scale*2, "diploma")
+		dxDrawBorderedText(ZonesDisplay[1][1], x-tw-(5*scale), y-th-(5*scale), 0, 0, tocolor(147, 160, 168, 255), scale*2, "diploma", "left", "top", false,false,false,true,not getElementData(localPlayer, "LowPCMode"))
+	
+		dxSetBlendMode("blend")
+		dxSetRenderTarget()
+		return RenderTargets["Location"][1]
+	end
+end
+addEvent("DrawLocationHandler", true)
+addEventHandler("DrawLocationHandler", resourceRoot, DrawLocation)
+
+
+
+
+
+local IDF, NF, RANG, PING = false
+local TabScroll = 1
+local MAXSCROLL = math.floor((screenHeight/2.8)/dxGetFontHeight(scale/1.8, "default-bold"))
+local TABCurrent = 0
+
+
+
+function DrawTabPanel()
+	dxSetRenderTarget(RenderTargets["TabPanel"][1], true)
+	dxSetBlendMode("modulate_add")
+	
+	local scale = scale*RenderQuality
+	local scalex = scalex*RenderQuality
+	local scaley = scaley*RenderQuality
+
+	local x,y = 510*scalex, 270*scaley
+	dxDrawRectangle(x,y, 375*scale, 250*scale, tocolor(0, 0, 0, 180))	
+	dxDrawBorderedText(getElementData(root, "ServerName"), 540*scalex, 285*scaley, 0, 0, tocolor(200, 200, 200, 255), scale*0.7, "default-bold", "left", "top")
+	dxDrawBorderedText("ид", x+(7*scale), y+(40*scaley), 0, 0, tocolor(74, 140, 178, 255), scale*0.7, "default-bold", "left", "top")
+	dxDrawBorderedText("ник", x+(30*scale), y+(40*scaley), 0, 0, tocolor(74, 140, 178, 255), scale*0.7, "default-bold", "left", "top")
+	dxDrawBorderedText("локация", x+(165*scale), y+(40*scaley), 0, 0, tocolor(74, 140, 178, 255), scale*0.7, "default-bold", "left", "top")
+	dxDrawBorderedText("пинг", x+(350*scale), y+(40*scaley), 0, 0, tocolor(74, 140, 178, 255), scale*0.7, "default-bold", "left", "top")
+	dxDrawLine(510*scalex, 329*scaley, x+(375*scale), 329*scaley, tocolor(120,120,120,255), 1)
+	dxDrawRectangle(475*scalex, 810*scaley, 235*scale, 107*scale, tocolor(0, 0, 0, 170))
+	dxDrawBorderedText("Итоги", 500*scalex, 780*scaley, 0, 0, tocolor(255, 255, 255, 255), scale*2, "default-bold", "left", "top")
+	dxDrawRectangle(975*scalex, 810*scaley, 235*scale, 107*scale, tocolor(0, 0, 0, 170))
+	dxDrawBorderedText("Банда", 1000*scalex, 780*scaley, 0, 0, tocolor(255, 255, 255, 255), scale*2, "default-bold", "left", "top")
+	
+	local team = getTeamName(getPlayerTeam(localPlayer))
+	if(team) then
+		if(getElementData(localPlayer, "job")) then
+			dxDrawBorderedText("Работа", 1000*scalex, 780*scaley, 0, 0, tocolor(255, 255, 255, 255), scale*2, "default-bold", "left", "top")
+
+			dxDrawText("Название: "..team, 1000*scalex, 840*scaley, 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)	
+			dxDrawText("Текущий ранг: "..getElementData(localPlayer, "job"), 1000*scalex, 875*scaley, 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)	
+		else
+			dxDrawText("Название: "..team, 1000*scalex, 840*scaley, 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)	
+			local carrier = GetBandRang(team, getTeamVariable(team))
+			dxDrawText("Текущий ранг: "..carrier[1][2], 1000*scalex, 875*scaley, 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)	
+			if(carrier[2]) then
+				dxDrawText("До повышения "..(carrier[2][1]-getTeamVariable(team)).." репутации", 1000*scalex, 910*scaley, 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)	
+			end
+		end
+	end
+	local countpl = #getElementsByType("player")
+	
+	dxDrawBorderedText("Игроков"..": "..countpl, 0, 285*scaley, 510*scalex+(365*scale), 0, tocolor(180, 180, 180, 255), scale*0.7, "default-bold", "right", "top", false, false, false, true)
+	
+	dxDrawBorderedText(IDF, 530*scalex, 335*scaley, 0, 0, tocolor(255, 255, 255, 255), scale*0.7, "default-bold", "left", "top", false, false, false, true)
+	dxDrawBorderedText(NF, 570*scalex, 335*scaley, 0, 0, tocolor(255, 255, 255, 255), scale*0.7, "default-bold", "left", "top", false, false, false, true)
+	dxDrawBorderedText(RANG, 830*scalex, 335*scaley, 0, 0, tocolor(255, 255, 255, 255), scale*0.7, "default-bold", "left", "top", false, false, false, true)
+	dxDrawBorderedText(PING, 1220*scalex, 335*scaley, 0, 0, tocolor(255, 255, 255, 255), scale*0.7, "default-bold", "left", "top", false, false, false, true)
+	
+	if(getTeamVariable("Мирные жители")) then
+		local count = 0
+		if(getCameraShakeLevel() == 0) then
+			dxDrawText(SkillName[24], 490*scalex, 840*scaley+((35*scaley)*count), 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)
+			DrawProgressBar(780*scalex,845*scaley+((35*scaley)*count), getPedStat(localPlayer, 24), nil, 150)
+
+		else
+			dxDrawText(SkillName[165], 490*scalex, 840*scaley+((35*scaley)*count), 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)
+			
+			DrawProgressBar(780*scalex,845*scaley+((35*scaley)*count), getPedStat(localPlayer, 165), nil, 150)
+		end
+		
+		
+		count=count+1
+		
+		local Skill = false
+		local theVehicle = getPedOccupiedVehicle(localPlayer)
+		if(theVehicle) then
+			local VehType = GetVehicleType(theVehicle)
+			Skill = VehTypeSkill[VehType]
+			if(Skill == 160) then
+				if(string.sub(getVehiclePlateText(theVehicle), 0, 1) == "I" and string.sub(getVehiclePlateText(theVehicle), 6, 9) == "228") then
+					Skill = 161
+				end
+			end
+			dxDrawText(SkillName[Skill],  490*scalex, 840*scaley+((35*scaley)*count), 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)
+			DrawProgressBar(780*scalex,845*scaley+((35*scaley)*count), getPedStat(localPlayer, Skill), nil, 150)
+		else
+			if(getElementData(localPlayer, "fishpos")) then
+				Skill = 157
+			else
+				Skill = 22
+			end
+			dxDrawText(SkillName[Skill],  490*scalex, 840*scaley+((35*scaley)*count), 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)
+			DrawProgressBar(780*scalex,845*scaley+((35*scaley)*count), getPedStat(localPlayer, Skill), nil, 150)
+		end
+		count=count+1
+		
+		local weapon = getPedWeapon(localPlayer, slot) 
+		if(SkillName[WeaponModel[weapon][2]]) then
+			dxDrawText(SkillName[WeaponModel[weapon][2]], 490*scalex, 845*scaley+((35*scaley)*count), 0, 0, tocolor(255, 255, 255, 255), scale, "default-bold", "left", "top", false, false, false, true)
+			DrawProgressBar(780*scalex, 845*scaley+((35*scaley)*count), getPedStat(localPlayer, WeaponModel[weapon][2]), nil, 150)
+		end
+		local ServerDate = getRealTime(getElementData(root, "ServerTime"), false)
+		dxDrawBorderedText(ServerDate.monthday.." "..Month[ServerDate.month+1].." "..ServerDate.year+1900, 490*scalex, 960*scaley, 0, 0, tocolor(200, 200, 200, 255), scale*1.2, "default-bold", "left", "top", nil, nil, nil, true)		
+		
+
+		dxDrawBorderedText(Day[ServerDate.weekday+1], screenWidth, 960*scaley, 930*scalex, screenHeight, tocolor(200, 200, 200, 255), scale*1.2, "default-bold", "right", "top", nil, nil, nil, true)		
+	end
+	
+	
+	
+	local teams = {"Мирные жители", "Вагос", "Баллас", "Уголовники", "Полиция", "Гроув-стрит"}
+
+	local x = RenderTargets["TabPanel"][2]*RenderQuality
+	local FH = dxGetFontHeight(scale, "clear")*1.1
+	for i, v in pairs (teams) do
+		if(getTeamVariable(v)) then
+			dxDrawBorderedText(getTeamGroupColor(v)..getTeamGroup(v), 0, 490*scaley+(FH*(i-1)), x-(170*scalex), 0, tocolor(255, 255, 255, 255), scale, "clear", "right", "top", false, false, false, true)
+			
+			DrawProgressBar(x-160*scalex, 497*scaley+(FH*(i-1)), 500+(getTeamVariable(v)/2), nil, 150)
+		end
+	end
+	
+	
+	dxSetBlendMode("blend")
+	dxSetRenderTarget()
+	return RenderTargets["TabPanel"][1]
+end
+
+
+function DrawPlayer()
+	dxSetRenderTarget(RenderTargets["Player"][1], true)
+	dxSetBlendMode("modulate_add")
+
+	local scale = scale*RenderQuality
+	local scaley = scaley*RenderQuality
+	local scalex = scalex*RenderQuality
+
+
+	dxDrawImage(15*scalex, 60*scaley, 80*scale, 80*scale, "icons/"..getPedWeapon(localPlayer)..".png")
+	
+	if(getPedAmmoInClip(localPlayer) ~= 0 and getPedTotalAmmo(localPlayer) < 15000) then
+		local text = getPedTotalAmmo(localPlayer)-getPedAmmoInClip(localPlayer).." - "..getPedAmmoInClip(localPlayer)
+	
+		local tw = dxGetTextWidth(text, scale*0.7, "pricedown", true)
+		dxDrawTextMoney(text, 95*scalex-(tw/2), 180*scaley, 0, 0, tocolor(120, 150, 186, 255), scale*0.7, "pricedown", "left", "top")
+	end
+	local timestamp = getRealTime(getElementData(root, "ServerTime"), false)
+	local h, m = getTime() -- Для совместимости с другими серверами
+	if(timestamp) then
+		h, m = timestamp.hour, timestamp.minute 
+	end
+	local TimePosX, TimePosY = 180*scalex, 65*scaley
+	local timesize = 35*scale
+	local TimeOff = 19.5*scale
+	local Time = string.format("%02.f", h)..":"..string.format("%02.f", m)
+
+	dxDrawImage(TimePosX, TimePosY, timesize, timesize, Pricedown[string.sub(Time, 1, 1)], 0,0,0,tocolor(210,210,210,255))
+	dxDrawImage(TimePosX+(TimeOff), TimePosY, timesize,timesize, Pricedown[string.sub(Time, 2, 2)], 0,0,0,tocolor(210,210,210,255))
+	dxDrawImage(TimePosX+(TimeOff*2), TimePosY, timesize,timesize, Pricedown[string.sub(Time, 3, 3)], 0,0,0,tocolor(210,210,210,255))
+	dxDrawImage(TimePosX+(TimeOff*3), TimePosY, timesize,timesize, Pricedown[string.sub(Time, 4, 4)], 0,0,0,tocolor(210,210,210,255))
+	dxDrawImage(TimePosX+(TimeOff*4), TimePosY, timesize,timesize, Pricedown[string.sub(Time, 5, 5)], 0,0,0,tocolor(210,210,210,255))
+
+
+	
+	local armor = getPedArmor(localPlayer)*2
+	if(armor > 0) then
+		local ArmorX, ArmorY = 180*scalex, 140*scaley
+		local maxarmor = 200
+		local health = armor/maxarmor
+	
+		if(health > 1) then health = 1 end
+		
+		local size2 = maxarmor-10
+		dxDrawRectangle(ArmorX, ArmorY, maxarmor*scalex, 24*scaley , tocolor(0, 0, 0, 255), false, true)
+		dxDrawRectangle(ArmorX+(5*scalex), ArmorY+(5*scaley), size2*scalex, 14*scaley , tocolor(150, 150, 150, 255), false, true)
+		dxDrawRectangle(ArmorX+(5*scalex), ArmorY+(5*scaley), (size2*scalex)*health, 14*scaley , tocolor(230, 230, 230, 255), false, true)
+	end
+	
+	
+	local breath = getPedOxygenLevel(localPlayer)
+	if(breath < getPedMaxOxygenLevel(localPlayer)) then
+		local BreathX, BreathY = 180*scalex, 167*scaley
+		local maxbreath = 200
+		local bl = breath/getPedMaxOxygenLevel(localPlayer)
+	
+		if(bl > 1) then bl = 1 end
+		
+		local size2 = maxbreath-10
+		dxDrawRectangle(BreathX, BreathY, maxbreath*scalex, 24*scaley , tocolor(0, 0, 0, 255), false, true)
+		dxDrawRectangle(BreathX+(5*scalex), BreathY+(5*scaley), size2*scalex, 14*scaley , tocolor(120, 150, 186, 255), false, true)
+		dxDrawRectangle(BreathX+(5*scalex), BreathY+(5*scaley), (size2*scalex)*bl, 14*scaley , tocolor(170, 200, 236, 255), false, true)
+	end
+	
+	
+	local HealthX, HealthY = 180*scalex, 195*scaley
+    local stat = getPedStat(localPlayer, 24)
+	local health = getElementHealth(localPlayer)/(100+(stat-569)/4.31)
+    local maxhealth = 200
+
+	if(health > 1) then health = 1 end
+	
+	local size2 = maxhealth-10
+	dxDrawRectangle(HealthX, HealthY, maxhealth*scalex, 24*scaley , tocolor(0, 0, 0, 255), false, true)
+	dxDrawRectangle(HealthX+(5*scalex), HealthY+(5*scaley), size2*scalex, 14*scaley , tocolor(90, 12, 14, 255), false, true)
+	dxDrawRectangle(HealthX+(5*scalex), HealthY+(5*scaley), (size2*scalex)*health, 14*scaley , tocolor(180, 25, 29, 255), false, true)
+
+	local MoneyPosX, MoneyPosY = 20*scalex, 225*scaley
+	local money = getPlayerMoney(localPlayer)
+	local color = tocolor(51,94,42,255)
+	if(money < 0) then
+		money = money-money-money
+		color = tocolor(180, 25, 29,255)
+	end
+	money = "$"..string.format("%08.f", money)
+	local size = 35*scale
+	local offset = 19.5*scale
+	dxDrawImage(MoneyPosX, MoneyPosY, size, size, Pricedown[string.sub(money, 1, 1)], 0,0,0,color)
+	dxDrawImage(MoneyPosX+(offset), MoneyPosY, size,size, Pricedown[string.sub(money, 2, 2)], 0,0,0,color)
+	dxDrawImage(MoneyPosX+(offset*2), MoneyPosY, size,size, Pricedown[string.sub(money, 3, 3)], 0,0,0,color)
+	dxDrawImage(MoneyPosX+(offset*3), MoneyPosY, size,size, Pricedown[string.sub(money, 4, 4)], 0,0,0,color)
+	dxDrawImage(MoneyPosX+(offset*4), MoneyPosY, size,size, Pricedown[string.sub(money, 5, 5)], 0,0,0,color)
+	dxDrawImage(MoneyPosX+(offset*5), MoneyPosY, size,size, Pricedown[string.sub(money, 6, 6)], 0,0,0,color)
+	dxDrawImage(MoneyPosX+(offset*6), MoneyPosY, size,size, Pricedown[string.sub(money, 7, 7)], 0,0,0,color)
+	dxDrawImage(MoneyPosX+(offset*7), MoneyPosY, size,size, Pricedown[string.sub(money, 8, 8)], 0,0,0,color)
+	dxDrawImage(MoneyPosX+(offset*8), MoneyPosY, size,size, Pricedown[string.sub(money, 9, 9)], 0,0,0,color)
+	
+	local wanted = getElementData(localPlayer, "WantedLevel")
+	if(not getElementData(localPlayer, "AEZAKMI")) then
+		if(tonumber(wanted)) then
+			local WantedPosX, WantedPosY = 20*scalex, 290*scaley
+			dxDrawBorderedText("★★★★★★", WantedPosX, WantedPosY, 0, 0, tocolor(40,40,40,200), scale*1.13, "pricedown", "left", "top")
+			local tws = dxGetTextWidth("★", scale*1.13, "pricedown", false)
+			for i = 1, math.ceil(tonumber(wanted)) do
+				dxDrawBorderedText("★", WantedPosX+dxGetTextWidth("★★★★★★", scale*1.13, "pricedown", false)-(tws*i), WantedPosY, 0, 0, tocolor(255,165,0, 200),scale*1.13, "pricedown", "left", "top", nil, nil, nil, true, false)
+			end
+			
+		end
+	end
+	
+	
+	local theVehicle = getPedOccupiedVehicle(localPlayer)
+	if(theVehicle) then
+		local hardtruck = theVehicle
+		if(getVehicleTowedByVehicle(theVehicle)) then
+			hardtruck = getVehicleTowedByVehicle(theVehicle)
+		end
+		
+		
+		if(getElementData(theVehicle, "Fuel")) then
+			dxDrawBorderedText("ТОПЛИВО", 0,357*scaley,170*scalex,0, tocolor(200,200,0, 255), scale, "default-bold", "right")
+		
+			local BreathX, BreathY = 180*scalex, 360*scaley
+			local fuelcoeff = 200/getElementData(theVehicle, "MaxFuel")
+			local maxbreath = getElementData(theVehicle, "MaxFuel")*fuelcoeff
+			local bl = getElementData(theVehicle, "Fuel")*fuelcoeff
+			if(bl > 190) then
+				bl = 190
+			end
+			
+			local size2 = maxbreath-10
+			dxDrawRectangle(BreathX, BreathY, maxbreath*scalex, 24*scaley , tocolor(0, 0, 0, 255), false, true)
+			dxDrawRectangle(BreathX+(5*scalex), BreathY+(5*scaley), size2*scalex, 14*scaley , tocolor(125,125, 0, 255), false, true)
+			dxDrawRectangle(BreathX+(5*scalex), BreathY+(5*scaley), bl*scalex, 14*scaley , tocolor(200,200, 0, 255), false, true)
+		end
+		
+		
+		if(getElementData(hardtruck, "product")) then
+			dxDrawBorderedText(utf8.upper(getElementData(hardtruck, "product")), 0,387*scaley,170*scalex,0, tocolor(170, 200, 236, 255), scale, "default-bold", "right")
+		
+	
+			local BreathX, BreathY = 180*scalex, 390*scaley
+			local maxbreath = 200
+			local bl = math.floor(getElementHealth(hardtruck)/10)/100
+			
+			if(bl > 1) then bl = 1 end
+			
+			local size2 = maxbreath-10
+			dxDrawRectangle(BreathX, BreathY, maxbreath*scalex, 24*scaley , tocolor(0, 0, 0, 255), false, true)
+			dxDrawRectangle(BreathX+(5*scalex), BreathY+(5*scaley), size2*scalex, 14*scaley , tocolor(120, 150, 186, 255), false, true)
+			dxDrawRectangle(BreathX+(5*scalex), BreathY+(5*scaley), (size2*scalex)*bl, 14*scaley , tocolor(170, 200, 236, 255), false, true)
+		end
+	end
+	
+	
+	
+
+	dxSetBlendMode("blend")
+	dxSetRenderTarget()
+	return RenderTargets["Player"][1]
+end
+
+
+
+function getPedMaxOxygenLevel(ped)
+    assert(isElement(ped) and (getElementType(ped) == "ped" or getElementType(ped) == "player"), "Bad argument @ 'getPedMaxOxygenLevel' [Expected ped at argument 1, got " .. tostring(ped) .. "]")
+    local underwater_stamina = getPedStat(ped, 225)
+    local stamina = getPedStat(ped, 22)
+    local maxoxygen = 1000 + underwater_stamina * 1.5 + stamina * 1.5
+    return maxoxygen
+end
+
+
+
+
+local GPSObject = {}
+
+
+function DrawArrow()
+	dxSetRenderTarget(RenderTargets["Arrow"][1], true)
+	dxSetBlendMode("modulate_add")
+	
+	local scale = scale*RenderQuality
+	
+	dxDrawBorderedText("↑", 0, 0, 0, 0, tocolor(200, 0, 0, 255), scale*1.5, "default-bold", "left", "top", nil, nil, nil, true, false)
+	dxSetBlendMode("blend")
+	dxSetRenderTarget()
+	return RenderTargets["Arrow"][1]
+end
+addEvent("DrawArrowHandler", true)
+addEventHandler("DrawArrowHandler", resourceRoot, DrawArrow)
+
+
+
+function findRotation(x1, y1, x2, y2) 
+    local t = -math.deg(math.atan2(x2 - x1, y2 - y1))
+    return t < 0 and t + 360 or t
+end
+
+function GetMarrot(angle, rz)
+	local marrot = 0
+	if(angle > rz) then
+		marrot = -(angle-rz)
+	else
+		marrot = rz-angle
+	end
+	
+	if(marrot > 180) then
+		marrot = marrot-360
+	elseif(marrot < -180) then
+		marrot = marrot+360
+	end
+	return marrot
+end
+
+
+function removeHex (text, digits)
+    assert (type (text) == "string", "Bad argument 1 @ removeHex [String expected, got "..tostring(text).."]")
+    assert (digits == nil or (type (digits) == "number" and digits > 0), "Bad argument 2 @ removeHex [Number greater than zero expected, got "..tostring (digits).."]")
+    return string.gsub (text, "#"..(digits and string.rep("%x", digits) or "%x+"), "")
+end
+
+
+
+
+
+function DrawWindow()
+	if(not getElementData(localPlayer, "HUD")) then return false end
+	
+	local line = 1
+	for v,k in pairs(GPSObject) do
+		local x,y,z = getElementPosition(localPlayer)
+		local x2,y2,z2 = getElementPosition(v)
+		local dist = getDistanceBetweenPoints3D(x,y,z,x2,y2,z2)/2
+		if(dist >= 1000) then
+			dist = math.round((dist/1000), 1).." ".."км"
+		else
+			dist = math.round(dist, 0).." ".."м"
+		end
+		local _,_,rz = getElementRotation(localPlayer)
+		local marrot = GetMarrot(findRotation(x,y,x2,y2),rz)
+		if(x2 ~= 228 and y2 ~= 228 and z2 ~= 228) then
+			dxDrawImage(screenWidth-dxGetTextWidth(getElementData(v, "info").." #A9A9A9"..dist, scale, "default-bold", true)-(20*scale), screenHeight/2.5+(dxGetFontHeight(scale, "default-bold")*line), dxGetTextWidth("↑", scale, "default-bold", false), dxGetFontHeight(scale, "default-bold"), RenderTargets["Arrow"][1], marrot)
+			dist = " #A9A9A9"..dist.."\n"
+		else
+			dist = ""
+		end
+		dxDrawBorderedText(getElementData(v, "info")..dist, 0, screenHeight/2.5+(dxGetFontHeight(scale, "default-bold")*line), screenWidth-(5*scale), screenHeight, tocolor(200, 200, 200, 255), scale, "default-bold", "right", "top", nil, nil, nil, true)
+		line = line+1
+	end
+
+	
+	if(ZonesDisplay[1]) then
+		dxDrawImage(screenWidth-(RenderTargets["Location"][2]+15), screenHeight-(RenderTargets["Location"][3]+15), RenderTargets["Location"][2], RenderTargets["Location"][3], RenderTargets["Location"][1], 0, 0, 0, tocolor(255, 255, 255, ZonesDisplay[1][2]))
+
+		if(tonumber(ZonesDisplay[1][3])) then
+			if(ZonesDisplay[1][3] > 0) then
+				ZonesDisplay[1][3] = ZonesDisplay[1][3]-5
+				if(ZonesDisplay[1][3] <= 255) then
+					ZonesDisplay[1][2] = ZonesDisplay[1][3]
+				end
+			else
+				table.remove(ZonesDisplay, 1)
+				DrawLocation()
+			end
+		elseif(ZonesDisplay[1][2] < 255) then
+			ZonesDisplay[1][2] = ZonesDisplay[1][2]+5
+		elseif(ZonesDisplay[1][2] == 255) then
+			if(ZonesDisplay[1][3] == "fast") then
+				ZonesDisplay[1][3] = 255
+			else
+				ZonesDisplay[1][3] = 1200
+			end
+		end
+	end
+	
+	
+	local wanted = getElementData(localPlayer, "WantedLevel")
+	if(getElementData(localPlayer, "WantedLevelPrison")) then wanted = getElementData(localPlayer, "WantedLevelPrison") end
+	
+	local posx, posy = screenWidth-(RenderTargets["Player"][2]), 0
+	dxDrawImage(posx, posy, RenderTargets["Player"][2], RenderTargets["Player"][3], DrawPlayer())
+	if(not tonumber(wanted)) then
+		posx, posy = screenWidth-(screenWidth/4.5), screenHeight/3
+		dxDrawBorderedText(wanted, posx, posy, screenWidth, screenHeight, tocolor(200, 200, 200, 180), scale, "default-bold", "left", "top", nil, nil, nil, true)
+	end
+	
+	if(RespectMsg or ToolTipText ~= "") then
+		dxDrawImage(15*scalex, 15*scaley, RenderTargets["ToolTip"][2], RenderTargets["ToolTip"][3], RenderTargets["ToolTip"][1], 0, 0, 0)
+	end
+end
+addEventHandler("onClientHUDRender", root, DrawWindow)
+
+
+
+function getPlayerCity(thePlayer)
+	return getElementData(thePlayer, "City") or "San Andreas"
+end
+
+
+
+function SetZoneDisplay(zone)
+	if(zone ~= "Unknown") then
+		if(zone == "Yellow Bell Station") then zone = "Koyoen Station" end
+		
+		if(ZonesDisplay[#ZonesDisplay]) then
+			if(ZonesDisplay[#ZonesDisplay][3]) then
+				if(ZonesDisplay[#ZonesDisplay][3] > 255) then
+					ZonesDisplay[#ZonesDisplay][3] = 255 -- Для ускорения
+				end
+			else
+				ZonesDisplay[#ZonesDisplay][3] = "fast"
+			end
+		end
+		ZonesDisplay[#ZonesDisplay+1] = {zone, 0, false}
+		DrawLocation()
+	end
+end
+addEvent("SetZoneDisplay", true)
+addEventHandler("SetZoneDisplay", root, SetZoneDisplay)
+
+
+
+
+
+
+local LiquorTrack = false
+local LiquorMusic = {
+	[1] = "http://"..getElementData(root, "IP").."/engine/include/MTA/music/one-for-my-baby.mp3", 
+}
+
+
+
+function PlayerNewZone(zone, city, updateweather, withoutblend, interior, dimension)
+	if(interior == 18 and withoutblend) then
+		if(isElement(LiquorTrack)) then
+			destroyElement(LiquorTrack)
+		end
+		LiquorTrack = playSound3D(LiquorMusic[math.random(#LiquorMusic)], -222.7, 1405.7, 27.8, true)
+		setElementInterior(LiquorTrack, interior)
+		setElementDimension(LiquorTrack, dimension)
+		setSoundMaxDistance(LiquorTrack, 50)
+	end
+	
+	if(interior == 0 and dimension == 0) then
+		triggerEvent("SetZoneDisplay", localPlayer, zone)
+	end
+	triggerServerEvent("ZoneInfo", localPlayer, localPlayer, zone)
+end
+addEventHandler("PlayerNewZone", root, PlayerNewZone)
+
+
+
+function RenderTab()
+	if(PING) then
+		dxDrawImage(0,0,screenWidth,screenHeight, DrawTabPanel())
+	end
+end
+
+
+function UpdateTabEvent()
+	IDF, NF, RANG, PING = "","","",""
+	TABCurrent = 0
+	
+	local thePlayers = getElementsByType("player")
+	
+	if(TabScroll > #thePlayers) then TabScroll = #thePlayers end
+	for slot = TabScroll, #thePlayers do
+		if(TABCurrent < MAXSCROLL) then
+			if(isElement(thePlayers[slot])) then
+				local color = getElementData(thePlayers[slot], "color") or "#FFFFFF"
+				RANG = RANG..getPlayerCity(thePlayers[slot]).."\n"
+				IDF = IDF..getElementData(thePlayers[slot], "id").."\n"
+				NF = NF..color..getPlayerName(thePlayers[slot]):gsub('#%x%x%x%x%x%x', '').."\n"
+				PING = PING..getPlayerPing(thePlayers[slot]).."\n"
+				TABCurrent = TABCurrent+1
+			else
+				RANG=RANG..thePlayers[slot][2].."\n"
+				IDF = IDF..(TABCurrent+1).."\n"
+				NF = NF.."#FFFFFF"..thePlayers[slot][1].."\n"
+				PING = PING.."0".."\n"
+				TABCurrent = TABCurrent+1
+			end
+		end
+	end
+	
+	addEventHandler("onClientRender", root, RenderTab)
+end
+
+
+
+function CloseTAB()
+	IDF = false
+	NF = false
+	RANG = false
+	PING = false
+	removeEventHandler("onClientRender", root, RenderTab)
+end
+
+
+
+
+ 
+local MainMenu = false
+local MenuAction = "Multi Theft Auto: Stories"
+local MenuSelect = 0
+local MenuList = {}
+
+
+local RangsStats = {
+	[1] = {-6000, "Crackhead"}, 
+	[2] = {-4000, "Bitch-Made"},
+	[3] = {-2000, "Off-Brand"},
+	[4] = {-500, "Scandalous"}, 
+	[5] = {-1, "Playa-Hater"},  
+	[6] = {0, "Vic"},  
+	[7] = {20, "Square"}, 
+	[8] = {50, "Civilian"},  
+	[9] = {75, "Rat"}, 
+	[10] = {100, "Snitch"},  
+	[11] = {120, "Dry Snitch"},
+	[12] = {150, "Transformer"}, 
+	[13] = {200, "Punk-Ass Bitch"},  
+	[14] = {240, "Sucka"}, 
+	[15] = {270, "Poot-butt"}, 
+	[16] = {300, "Buster"}, 
+	[17] = {330, "Mark"}, 
+	[18] = {370, "Chump"}, 
+	[19] = {400, "Trick"},  
+	[20] = {450, "Red-Headed Stepchild"}, 
+	[21] = {500, "Peon"}, 
+	[22] = {550, "Pee-Wee"}, 
+	[23] = {600, "Prankster"},  
+	[24] = {610, "Fool"}, 
+	[25] = {650, "Street Cat"},  
+	[26] = {700, "Thug"},  
+	[27] = {850, "Hustler"},  
+	[28] = {1000, "Playa"},  
+	[29] = {1001, "Playa Partner"},  
+	[30] = {1150, "Mack"},  
+	[31] = {1300, "Pimp"},  
+	[32] = {1500, "Crime Partner"}, 
+	[33] = {1700, "Homeboy"},  
+	[34] = {2000, "Homie"}, 
+	[35] = {2100, "Road Dawg"},  
+	[36] = {2300, "Hoodsta"},  
+	[37] = {2500, "Hard-ass"},  
+	[38] = {2750, "Banger"}, 
+	[39] = {3000, "Lil'"},  
+	[40] = {3500, "Loc"},
+	[41] = {4000, "Jacker"},
+	[42] = {5000, "Shooter"},
+	[43] = {7500, "Foot Soldier"}, 
+	[44] = {10000, "Hoo-Rider"},  
+	[45] = {20000, "Soldier"},  
+	[46] = {30000, "Hawg"}, 
+	[47] = {40000, "Gangsta"},  
+	[48] = {50000, "Ghetto Star"},  
+	[49] = {65000, "Monster"}, 
+	[50] = {80000, "Big Homie"}, 
+	[51] = {100000, "Boss Hawg"},  
+	[52] = {150000, "Shot Caller"},  
+	[53] = {200000, "OG"}, 
+	[54] = {300000, "High Roller"}, 
+	[55] = {375000, "Four-Star General"}, 
+	[56] = {500000, "Godfather"},  
+	[57] = {1000000, "King of San Andreas"},
+}
+
+
+
+function GetRangStats()
+	local count = 0
+	count = count+(math.round(exports["statistic"]:GetStats(3)/1000))
+	count = count+(math.round(exports["statistic"]:GetStats(4)/1000))
+	
+	
+	local rang = RangsStats[1][2]
+	for slot = 1, #RangsStats do
+		if(count >= RangsStats[slot][1]) then
+			rang = RangsStats[slot][2]
+		end
+	end
+	return rang.."\n"..count
+end
+
+
+
+function DrawMainMenu()
+	dxDrawRectangle(0, 0, screenWidth, screenHeight, tocolor(0,0,0,255))	
+	dxDrawText(MenuAction,25*scale, 25*scale, 25*scale, 25*scale, tocolor(180,200,210, 255), scale, "pricedown", "left", "top", false, false, false, true)	
+
+	local out = ""
+	for slot = 0, #MenuList do
+		local color = "#495B6C"
+		if(MenuSelect == slot) then
+			color = "#BBD7FA"
+		end
+		out = out..color..MenuList[slot].."\r\n"
+	end		
+	
+	local text = ""
+	
+	if(MenuAction == "СТАТИСТИКА") then
+		if(MenuList[MenuSelect] == "ИГРОК") then
+			text = "Расстояние пешком\n"..math.round(exports["statistic"]:GetStats(3)).." ft.\n\n"..
+			"Расстояние на автомобиле\n"..math.round(exports["statistic"]:GetStats(4)).." ft.\n\n"
+		end
+	elseif(MenuAction == "ИТОГИ") then
+		if(MenuList[MenuSelect] == "ИГРОК") then
+			text = "В разработке"
+		end
+	end
+	
+	if(text ~= "") then
+		dxDrawText(GetRangStats(), screenWidth/2, screenHeight/4.8, screenWidth/2, screenHeight/4.8, tocolor(255, 255, 255, 255), scale*1.5, "default-bold", "Center", "top", false, false, false, true)	
+
+		dxDrawText(out, 50*scale, screenHeight/2.8, 50*scale, screenHeight/2.8, tocolor(255, 255, 255, 255), scale*2, "default", "Left", "top", false, false, false, true)
+		
+		dxDrawText(text, screenWidth/2, screenHeight/2.8, screenWidth/2, screenHeight/2.8, tocolor(255, 255, 255, 255), scale*1.5, "default", "Center", "top", false, false, false, true)	
+	else
+		dxDrawText(out, screenWidth/2, screenHeight/2.8, screenWidth/2, screenHeight/2.8, tocolor(255, 255, 255, 255), scale*2, "default", "Center", "top", false, false, false, true)	
+	end
+end
+
+function MainMenuEvent()
+	if(MainMenu) then
+		MainMenu = false
+		removeEventHandler("onClientHUDRender", root, DrawMainMenu)
+		triggerEvent("SetPlayerHudComponentVisible", localPlayer, "all", true)
+	else
+		playSFX("genrl", 53, 6, false)
+		MenuList = {
+			[0] = "ПРОДОЛЖИТЬ",
+			[1] = "КАРТА", 
+			[2] = "СТАТИСТИКА", 
+			[3] = "ИТОГИ",
+			[4] = "ОПЦИИ",
+			[5] = "ВЫХОД"
+		}
+		MenuAction = "Multi Theft Auto: Stories"
+		MainMenu = true
+		MenuSelect = 0
+		addEventHandler("onClientHUDRender", root, DrawMainMenu)
+		triggerEvent("SetPlayerHudComponentVisible", localPlayer, "all", false)
+	end
+end
+
+function playerPressedKey(button, press)
+	if(getPedOccupiedVehicle(localPlayer)) then
+		if(getPedOccupiedVehicleSeat(localPlayer) == 0) then
+			if(button == "lshift") then
+				local Rage = getElementData(localPlayer, "Rage")
+				if(Rage > 0) then
+					if(press) then
+						AddRage(-2)
+						RageTimer = setTimer(function() 
+							AddRage(-2)
+						end, 50, 0)
+						triggerServerEvent("Acceleration", localPlayer, localPlayer)
+					else
+						killTimer(RageTimer)
+						triggerServerEvent("AccelerationDown", localPlayer, localPlayer)
+					end
+				end
+			end
+		end
+	end
+	
+	if(MainMenu) then
+		if(press) then
+			if(button == "arrow_u" or button == "w") then
+				playSFX("genrl", 53, 4, false)
+				if(MenuSelect-1 < 0) then
+					MenuSelect = #MenuList
+				else
+					MenuSelect = MenuSelect-1
+				end
+			elseif(button == "arrow_d" or button == "s") then
+				playSFX("genrl", 53, 5, false)
+				if(MenuSelect >= #MenuList) then
+					MenuSelect = 0
+				else
+					MenuSelect = MenuSelect+1
+				end
+			elseif(button == "enter" or button == "e") then
+				playSFX("genrl", 53, 6, false)
+				local Action = MenuList[MenuSelect]
+				MenuAction = Action
+				
+				if(Action == "ВЫХОД") then
+					triggerServerEvent("kickme", localPlayer, localPlayer)
+				elseif(Action == "ПРОДОЛЖИТЬ") then
+					MainMenuEvent()
+				elseif(Action == "КАРТА") then
+					triggerEvent("ResourceMap", localPlayer, localPlayer)
+					MainMenuEvent()
+				elseif(Action == "ОПЦИИ") then
+					MenuSelect = 0
+					MenuList = {
+						[0] = "СМЕНИТЬ ПАРОЛЬ"
+					}
+				elseif(Action == "СМЕНИТЬ ПАРОЛЬ") then
+					MainMenuEvent()
+					triggerEvent("CreateButtonInputInt", localPlayer, "ChangePass", "Введи новый пароль")				
+				elseif(Action == "ИТОГИ") then
+					MenuSelect = 0
+					MenuList = {
+						[0] = "ИГРОК",
+					}
+				elseif(Action == "СТАТИСТИКА") then
+					MenuSelect = 0
+					MenuList = {
+						[0] = "ИГРОК",
+					}
+				end
+				cancelEvent()
+			elseif(button == "backspace") then
+				MainMenuEvent()
+				cancelEvent()
+			end
+		end
+	end
+
+	if(press) then
+		if(button == "escape") then
+			for name, _ in pairs(InitHud) do
+				InitInterface(name)
+				if(name == "Багажник") then
+					triggerServerEvent("TrunkClose", localPlayer, localPlayer)
+				end
+				cancelEvent()
+				return
+			end
+			
+			if(getElementData(localPlayer, "ResourceMap")) then
+				triggerEvent("ResourceMap", localPlayer, localPlayer)
+				
+				cancelEvent()
+				return
+			end
+			
+			if(not getElementData(localPlayer, "chat")) then
+				MainMenuEvent()
+				cancelEvent()
+				return
+			end
+		elseif(tonumber(button)) then
+			if(not getElementData(localPlayer, "chat")) then
+				UseBind(tonumber(button))
+			end
+		elseif(button == "mouse1") then
+			if(not isCursorShowing()) then
+				local usableslot = GetUsableSlot()
+				if(usableslot) then
+					if(PlayerInventory[usableslot[1]][usableslot[2]]["txd"] == "Удочка") then
+						if(getElementData(localPlayer, "fishpos")) then
+							triggerServerEvent("StopFish", localPlayer, localPlayer)
+						else
+							getGroundPositionFish()
+						end
+						cancelEvent()
+					end
+				end
+			end
+		elseif(button == "mouse_wheel_up") then
+			if(PING) then
+				if(TabScroll > 1) then
+					TabScroll=TabScroll-1
+					UpdateTabEvent()
+				end
+			end
+		elseif(button == "mouse_wheel_down") then
+			if(PING) then
+				if(MAXSCROLL < TABCurrent) then
+					TabScroll=TabScroll+1
+					UpdateTabEvent()
+				end
+			end
+		end
+	
+		if(NewsPaper[1]) then
+			if(NewsPaper[2]) then
+				if button == "mouse_wheel_down" then
+					injectBrowserMouseWheel(NewsPaper[1], -40, 0)
+					cancelEvent()
+				elseif button == "mouse_wheel_up" then
+					injectBrowserMouseWheel(NewsPaper[1], 40, 0)
+					cancelEvent()
+				elseif button == "escape" then
+					CloseNewsPaper()
+					cancelEvent()
+				end
+			end
+		end
+    end
+end
+addEventHandler("onClientKey", root, playerPressedKey)
+
+
+
+bindKey("tab", "down", UpdateTabEvent)
+bindKey("tab", "up", CloseTAB)
+
+
+
+
+
+
+
+function GPS(x,y,z,info,after)
+	local GPSM = createMarker(x, y, z, "checkpoint", 5, 255, 50, 50, 170)
+	setElementData(GPSM , "type", "GPS")
+	GPSObject[GPSM] = createBlipAttachedTo(GPSM)
+	if(x ~= 228 and y ~= 228 and z ~= 228) then
+		local px, py, pz = getElementPosition(localPlayer)
+		triggerServerEvent("GetPathByCoordsNEW", localPlayer, localPlayer, px, py, pz, x,y,z)
+	end
+	if(info) then setElementData(GPSM, "info", info) end
+	if(after) then setElementData(GPSM, "after", after) end
+end
+addEvent("AddGPSMarker", true)
+addEventHandler("AddGPSMarker", root, GPS)
+
+
+
+
+function RemoveGPSMarker(info)
+	for k,v in pairs(getElementsByType "marker") do
+		if(getElementData(v, "info") == info) then
+			destroyElement(GPSObject[v])
+			GPSObject[v] = nil
+			destroyElement(v)
+		end
+	end
+end
+addEvent("RemoveGPSMarker", true)
+addEventHandler("RemoveGPSMarker", root, RemoveGPSMarker)
+
+
+
+function MarkerHit(hitPlayer, Dimension)
+	if(not Dimension) then return false end
+	if(hitPlayer == localPlayer) then
+		if(getElementData(source, "type") == "GPS") then
+			destroyElement(GPSObject[source])
+			GPSObject[source] = nil
+			if(getElementData(source, "after")) then 
+				triggerEvent("helpmessageEvent", localPlayer, getElementData(source, "after"))
+				triggerServerEvent("UpdateTutorialByText", localPlayer, localPlayer, getElementData(source, "after"))
+			end
+			destroyElement(source)
+		end
+	end
+end
+addEventHandler("onClientMarkerHit", root, MarkerHit)
+
+
+
+local MissionCompletedTimer = false
+local MissionCompletedData = {}
+
+
+function DrawMissionCompleted()
+	dxSetRenderTarget(RenderTargets["MissionCompleted"][1], true)
+	dxSetBlendMode("modulate_add")
+	
+	local scale = scale*RenderQuality
+	local x = RenderTargets["MissionCompleted"][2]*RenderQuality
+	local y = RenderTargets["MissionCompleted"][3]*RenderQuality
+	
+	if(MissionCompletedData[1]) then
+		dxDrawBorderedText("#744D02"..MissionCompletedData[1], x, y/2-dxGetFontHeight(scale*3, "sans")/2, 0, 0, tocolor(255, 255, 255, 255), scale*3, "sans", "center", "top", false, false, false, true, true)
+	end
+	
+	if(MissionCompletedData[2]) then
+		if(tonumber(MissionCompletedData[2])) then
+			dxDrawBorderedText("$"..MissionCompletedData[2], x, y/2+(dxGetFontHeight(scale*2, "pricedown")/2), 0, 0, tocolor(255, 255, 255, 255), scale*2, "pricedown", "center", "top", false, false, false, true, true)
+		else
+			dxDrawBorderedText(MissionCompletedData[2], x, y/2+(dxGetFontHeight(scale*3, "sans")/2), 0, 0, tocolor(255, 255, 255, 255), scale*3, "sans", "center", "top", false, false, false, true, true)
+		end
+	end
+	
+	dxSetBlendMode("blend")
+	dxSetRenderTarget()
+	return RenderTargets["MissionCompleted"][1]
+end
+addEvent("DrawMissionCompletedHandler", true)
+addEventHandler("DrawMissionCompletedHandler", resourceRoot, DrawMissionCompleted)
+
+
+
+
+function MissionCompletedRender()
+	dxDrawImage(0, 0, RenderTargets["MissionCompleted"][2], RenderTargets["MissionCompleted"][3], RenderTargets["MissionCompleted"][1])
+	if(not getCameraTarget()) then
+		dxDrawRectangle(0,0,screenWidth, screenHeight/7, tocolor(0,0,0,255))
+		dxDrawRectangle(0,screenHeight-(screenHeight/7),screenWidth, screenHeight/7, tocolor(0,0,0,255))
+	end
+end
+
+
+
+
+function MissionCompleted(job, money)
+	MissionCompletedData = {job, money}
+	DrawMissionCompleted()	
+	if(isTimer(MissionCompletedTimer)) then
+		killTimer(MissionCompletedTimer)
+	else
+		addEventHandler("onClientPreRender", root, MissionCompletedRender)
+	end
+	
+	MissionCompletedTimer = setTimer(function()
+		removeEventHandler("onClientPreRender", root, MissionCompletedRender)
+		MissionCompletedData = {}
+	end, 3500, 1)
+	
+end
+addEvent("MissionCompleted", true)
+addEventHandler("MissionCompleted", localPlayer, MissionCompleted)
+
+
+
+
+
+
+
+

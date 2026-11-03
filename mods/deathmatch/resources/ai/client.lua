@@ -1,0 +1,927 @@
+﻿local PathNodes = exports["vehicle_node"]:GetVehicleNodesClient()
+local PedGrid = exports["vehicle_node"]:GetPedPathGrid()
+
+local PedsInStream = {}
+local ObjectInStream = {}
+
+local drx,dry,drz = getCameraMatrix()
+local StreamerDistance = 0
+
+
+function checkKey()
+	local x,y,z = getCameraMatrix()
+	local distance = getDistanceBetweenPoints3D(drx, dry, drz, x, y, z)
+	drx,dry,drz = x,y,z
+	
+	StreamerDistance = StreamerDistance+distance
+	if(StreamerDistance > 100) then
+		if(#getElementsByType("ped", resourceRoot, true) < 30) then
+			triggerServerEvent("Streamer", resourceRoot, localPlayer)
+		end
+		StreamerDistance = 0
+	end
+end
+setTimer(checkKey,100,0)
+
+
+function playerPressedKey(button, press)
+    if (press) then
+		if(button == "enter" or button == "f") then
+			local target = getPedTarget(localPlayer)
+			if(target) then
+				if(getElementType(target) == "vehicle") then
+					if(getVehicleOccupant(target)) then
+						if(getElementType(getVehicleOccupant(target)) == "ped") then  
+							local x,y,z = getElementPosition(localPlayer)
+							local tx,ty,tz = getElementPosition(target)
+							local dist = getDistanceBetweenPoints3D(tx,ty,tz, x, y, z)
+							if(dist < 5) then
+								triggerServerEvent("RemovePedFromVehicle", resourceRoot, getVehicleOccupant(target), localPlayer) 
+							end
+						end
+					end
+				end
+			end
+		end
+    end
+end
+addEventHandler("onClientKey", root, playerPressedKey)
+
+
+
+
+
+
+
+
+
+function StartAnimation(thePlayer, block, anim, times, loop, updatePosition, interruptable, freezeLastFrame, forced)
+	triggerServerEvent("StartAnimation", root, thePlayer, block, anim, times, loop, updatePosition, interruptable, freezeLastFrame, forced)
+end
+
+
+
+
+function Spawn()
+	if(#getElementsByType("ped", resourceRoot, true) < 30) then
+		triggerServerEvent("Streamer", resourceRoot, localPlayer, localPlayer)
+	end
+end
+addEventHandler("onClientPlayerSpawn", localPlayer, Spawn)
+
+
+
+local FireTimer = {}
+
+function getTeamGroup(team)
+	if(team == "Мирные жители" or team == "МЧС") then
+		return "Мирные жители"
+	elseif(team == "Вагос" or team == "Da Nang Boys" or team == "Рифа") then
+		return "Синдикат Локо"
+	elseif(team == "Баллас" or team == "Колумбийский картель" or team == "Русская мафия") then
+		return "Наркомафия"
+	elseif(team == "Гроув-стрит" or team == "Триады" or team == "Ацтекас") then
+	    return "Бандиты"
+	elseif(team == "Полиция" or team == "Военные" or team == "ЦРУ" or team == "ФБР") then
+		return "Официалы"
+	elseif(team == "Уголовники" or team == "Байкеры" or team == "Деревенщины") then
+		return "Уголовники"
+	end
+end
+
+
+function getPositionInFront(element,meters)
+	local x, y, z = getElementPosition(element)
+	local a,b,r = getElementRotation(element)
+	x = x - math.sin ( math.rad(r) ) * meters
+	y = y + math.cos ( math.rad(r) ) * meters
+	return x,y,z
+end
+
+function GetElementAttacker(element)
+	local attacker = getElementData(element, "attacker")
+	if(attacker) then
+		attacker = getPlayerFromName(attacker)
+	end
+	return attacker
+end
+
+
+function findRotation(x1, y1, x2, y2) 
+    local t = -math.deg(math.atan2(x2 - x1, y2 - y1))
+    return t < 0 and t + 360 or t
+end
+
+
+
+function GetMarrot(angle, rz)
+	local marrot = 0
+	if(angle > rz) then
+		marrot = -(angle-rz)
+	else
+		marrot = rz-angle
+	end
+	
+	if(marrot > 180) then
+		marrot = marrot-360
+	elseif(marrot < -180) then
+		marrot = marrot+360
+	end
+	return marrot
+end
+
+
+
+
+function getPlayerCity(thePlayer)
+	return getElementData(thePlayer, "City") or "San Andreas"
+end
+
+
+function getPositionInRight(element,meters)
+   local x, y, z = getElementPosition(element)
+   local a,b,r = getElementRotation(element)
+   x = x-math.cos(math.rad(r))*meters
+   y = y+math.sin(math.rad(r))*meters
+   return x,y,z
+end
+
+
+function getPositionInFR(element,meters)
+   local x, y, z = getElementPosition(element)
+   local a,b,r = getElementRotation(element)
+   x = x - math.sin ( math.rad(r-45) ) * meters
+   y = y + math.cos ( math.rad(r-45) ) * meters
+   return x,y,z
+end
+
+function getPositionInBack(element,meters)
+   local x, y, z = getElementPosition(element)
+   local a,b,r = getElementRotation(element)
+   x = x + math.sin ( math.rad(r) ) * meters
+   y = y - math.cos ( math.rad(r) ) * meters
+   return x,y,z
+end
+
+
+
+
+function getPositionInFL(element,meters)
+   local x, y, z = getElementPosition(element)
+   local a,b,r = getElementRotation(element)
+   x = x - math.sin ( math.rad(r+45) ) * meters
+   y = y + math.cos ( math.rad(r+45) ) * meters
+   return x,y,z
+end
+
+
+function getPositionInLeft(element,meters)
+   local x, y, z = getElementPosition(element)
+   local a,b,r = getElementRotation(element)
+   x = x+math.cos(math.rad(r))*meters
+   y = y-math.sin(math.rad(r))*meters
+   return x,y,z
+end
+
+local BannedMaterial = {
+	[0] = true, 
+	[1] = true, 
+	[9] = true, 
+	[75] = true, 
+	[76] = true,
+	[118] = true,
+}
+
+
+function math.round(number, decimals, method)
+    decimals = decimals or 0
+    local factor = 10 ^ decimals
+    if (method == "ceil" or method == "floor") then return math[method](number * factor) / factor
+    else return tonumber(("%."..decimals.."f"):format(number)) end
+end
+
+
+function BotCheckPath(x,y,z,x2,y2,z2,city,zone)
+	local gz = getGroundPosition(x2,y2,z2)
+	if(isLineOfSightClear(x,y,z-0.45,x2,y2,gz+0.1, true, true, true, true)) then
+		if(zone ~= "Unknown") then  
+			x, y = math.round(x, 0), math.round(y, 0)
+			if(PedGrid[city][x]) then 
+				if(PedGrid[city][x][y]) then 
+					return 4
+				end
+			end
+			
+			local gz = getGroundPosition(x2,y2,z2)
+			_,_,_,_,_,_,_,_,material = processLineOfSight(x2,y2,z2, x2,y2,gz-1, true,false,false,false,false,true,true,true,localPlayer, true)
+			if(not BannedMaterial[material]) then
+				return true
+			end
+		else
+			return true
+		end
+	end
+	return false
+end
+
+
+function FoundBotPath(ped)
+	local arr = {}
+	local x,y,z = getElementPosition(ped)
+	local x2,y2,z2 = getPositionInFront(ped, 8)
+	local zone = getZoneName(x,y,z, false)
+	local city = getPlayerCity(ped)
+	
+	if(getElementData(ped, "GROUP")) then
+		local thePlayer = getPlayerFromName(getElementData(ped, "GROUP"))
+		if(thePlayer) then
+			local xp,yp,zp = getElementPosition(thePlayer)
+			return {xp,yp,zp,0,"silent"}
+		end
+	end
+	if(BotCheckPath(x,y,z,x2,y2,z2,city,zone)) then 
+		return {x2,y2,z2,0,"silent"}
+	else
+		local x3,y3,z3 = getPositionInRight(ped, 2)
+		local a3,b3,c3 = getPositionInFR(ped, 2)
+		local x4,y4,z4 = getPositionInLeft(ped, 2)
+		local a4,b4,c4 = getPositionInFL(ped, 2)
+		if(BotCheckPath(x,y,z, a3,b3,c3,city,zone)) then
+			arr[#arr+1] = {a3,b3,c3,0,"silent"}
+		elseif(BotCheckPath(x,y,z, x3,y3,z3,city,zone)) then
+			arr[#arr+1] = {x3,y3,z3,0,"silent"}
+		end
+
+		if(BotCheckPath(x,y,z, a4,b4,c4,city,zone)) then
+			arr[#arr+1] = {a4,b4,c4,0,"silent"}
+		elseif(BotCheckPath(x,y,z, x4,y4,z4,city,zone)) then
+			arr[#arr+1] = {x4,y4,z4,0,"silent"}
+		end
+
+		if(#arr == 0) then
+			local x5,y5,z5 = getPositionInBack(ped, 8)
+			if(BotCheckPath(x,y,z, x5,y5,z5,city,zone)) then -- В крайнем случае идем назад
+				return {x5,y5,z5,0,"silent"}
+			end
+		else
+			return arr[math.random(1,#arr)] --Если спереди что то мешает выбераем рандомный свободный путь
+		end
+	end
+end
+
+
+function GetDistance(a,b)
+	local x,y,z = getElementPosition(a)
+	local x2,y2,z2 = getElementPosition(b)
+	return getDistanceBetweenPoints3D(x,y,z,x2,y2,z2)
+end
+
+local ActualBones = {1, 2, 3, 4, 5, 6, 7, 8, 21, 22, 23, 24, 25, 26, 31, 32, 33, 34, 35, 36, 41, 42, 43, 44, 51, 52, 53, 54}
+
+
+local CopCar = {
+	[433] = true, 
+	[470] = true, 
+	[596] = true, 
+	[597] = true, 
+	[598] = true, 
+	[599] = true, 
+	[427] = true, 
+	[490] = true, 
+	[523] = true, 
+}
+
+local WeaponTiming = {
+	[16] = 1500,
+	[17] = 1500,
+	[18] = 1500
+}
+
+
+local trafficlight = {
+	["0"] = "west",
+	["1"] = "west",
+	["2"] = false,
+	["3"] = "north",
+	["4"] = "north"
+}
+
+
+function GetTurretPosition(x,y,z, vx,vy,vz,rz)
+	local dist = getDistanceBetweenPoints3D(vx, vy, vz, x,y,z)/50
+	local angle = math.rad(z-vz)/dist
+	local vry = GetMarrot(findRotation(x,y,vx,vy),rz-180)
+	return -math.rad(vry), angle
+end
+
+
+
+
+
+function HornPed(thePed, thePlayer)
+	if(not isTimer(PedsInStream[thePed]["horn"])) then
+	
+		setPedControlState(thePed, "horn", true)
+		
+		PedsInStream[thePed]["horn"] = setTimer(function() 
+			if(isElement(thePed)) then
+				if(getPedControlState(thePed, "horn")) then
+					setPedControlState(thePed, "horn", false)
+				else
+					setPedControlState(thePed, "horn", true)
+				end
+			end
+		end, math.random(100,500), 5)
+		
+		
+		if(thePlayer) then
+			local rand = math.random(1,5)
+			if(rand > 2) then
+				StartAnimation(thePlayer, "ped", "fucku", 1500, false, true, true, false)
+			elseif(rand == 1) then
+				StartAnimation(thePlayer, "ped", "ev_step", 1500, false, true, true, false)
+			elseif(rand == 2) then
+				StartAnimation(thePlayer, "ped", "ev_dive", 3000,false,true,true,false)
+			end
+		end
+	end
+end
+
+
+function JumpPed(thePed)
+	if(not isTimer(PedsInStream[thePed]["jump"])) then
+		setPedControlState(thePed, "aim_weapon", false)
+		setPedControlState(thePed, "jump", true)
+		
+		PedsInStream[thePed]["jump"] = setTimer(function() 
+			if(isElement(thePed)) then
+				setPedControlState(thePed, "jump", false)
+			end
+		end, 500, 1)
+	end
+end
+
+
+local DimensionCity = {
+	[0] = "San Andreas",
+	[1] = "Liberty City", 
+	[2] = "Vice City"
+}
+
+
+local FirePos = {}
+local MovePlayerTo = {}
+function UpdateBot()
+	for _,thePed in pairs(getElementsByType("ped", resourceRoot, true)) do
+		local theVehicle = getPedOccupiedVehicle(thePed)
+		local attacker = GetElementAttacker(thePed)
+		local city = DimensionCity[getElementDimension(thePed)]
+		
+		local hx,hy,hz = getPedBonePosition(thePed, 8)
+
+		if(not attacker) then
+			if(getTeamGroup(getElementData(thePed, "team")) == "Официалы") then
+				for _,player in ipairs(getElementsByType("player", root, true)) do 
+					if(not isPedDead(player)) then
+						if(getElementData(player, "WantedLevel")) then
+							if(getElementData(player, "WantedLevel") > 0) then
+								local ax, ay, az = getElementPosition(player)
+								if(isLineOfSightClear(hx,hy,hz, ax, ay, az, true, false, false, false, false, false, false)) then
+									triggerServerEvent("PedDamage", player, thePed, -1, 160, 0)
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+		
+		
+		if(theVehicle) then
+			if(MovePlayerTo[thePed]) then MovePlayerTo[thePed] = nil end -- Костыль
+			local vx,vy,vz = getElementPosition(theVehicle)
+			local rx,ry,rz = getElementRotation(theVehicle)
+			local brakes = false
+			local maxspd = 40
+			
+			local PointDistance = 4
+			if(getElementRadius(theVehicle)) then PointDistance = PointDistance+getElementRadius(theVehicle) end
+			local mreverse = false
+			
+			local pathData = getElementData(thePed, "path")
+			local path = {0,0}
+			local nextpath = {0,0}
+			local limitspeed = false
+			
+			
+			if(PedsInStream[thePed]) then
+				local status = getElementData(thePed, "PedStatus")
+				if(status) then
+					if(status == "FireTrucker") then
+						if(not PedsInStream[thePed]["fire"]) then
+							local Fires = false
+							for _,fire in pairs(getElementsByType("colshape", resourceRoot, true)) do
+								if(getElementData(fire, "fireid")) then
+									local fx, fy, fz = getElementPosition(fire)
+									if(getDistanceBetweenPoints2D(vx, vy,fx,fy) < 600) then
+										PedsInStream[thePed]["fire"] = fire
+										attacker = PedsInStream[thePed]["fire"]
+										setVehicleSirensOn(theVehicle, true)
+										Fires = true
+									end
+								end
+							end
+							
+							if(not Fires) then
+								setVehicleSirensOn(theVehicle, false)
+								triggerServerEvent("UpdateJustDriver", resourceRoot, thePed, vx,vy,vz)
+								break
+							end
+						else
+							if(isElement(PedsInStream[thePed]["fire"])) then 
+								attacker = PedsInStream[thePed]["fire"]
+							else -- Если потух
+								PedsInStream[thePed]["fire"] = nil
+								setVehicleSirensOn(theVehicle, false)
+							end
+						end
+					elseif(status == "Medic") then
+						if(attacker) then
+							setVehicleSirensOn(theVehicle, true)
+						else
+							setVehicleSirensOn(theVehicle, false)
+						end
+					elseif(status == "Police") then
+						if(attacker) then
+							if(getElementData(attacker, "WantedLevel") > 0) then
+								setVehicleSirensOn(theVehicle, true)
+							else
+								setVehicleSirensOn(theVehicle, false)
+								triggerServerEvent("UpdateJustDriver", resourceRoot, thePed, vx,vy,vz)
+								break
+							end
+						else
+							setVehicleSirensOn(theVehicle, false)
+							triggerServerEvent("UpdateJustDriver", resourceRoot, thePed, vx,vy,vz)
+							break
+						end
+					end
+				end
+			end
+			
+			
+			
+			if(attacker) then 
+				maxspd = 60
+				local ax, ay, az = getElementPosition(attacker)
+				if(isLineOfSightClear(vx,vy,vz,ax,ay,az, true, false, false, true)) then
+					path = {ax,ay}
+					nextpath = {ax,ay}
+					if(getElementData(thePed, "path")) then
+						triggerServerEvent("RemoveDriverBot", resourceRoot, thePed)
+						pathData = false
+					end
+					limitspeed = 240
+				end
+				
+				
+				local dist = getDistanceBetweenPoints2D(ax, ay, vx,vy)
+				if(dist < PointDistance) then
+					brakes = true
+					if(getElementData(thePed, "PedStatus")) then -- Для спец служб
+						if(getElementData(thePed, "PedStatus") == "Medic") then
+							if(getElementType(attacker) == "player") then
+								local AVehicle = getPedOccupiedVehicle(attacker)
+								if(not AVehicle) then
+									triggerServerEvent("RemovePedFromVehicle", resourceRoot, thePed)
+								else
+									if(getElementVelocity(AVehicle) < 0.01 and getElementVelocity(AVehicle) > -0.01) then
+										triggerServerEvent("RemovePedFromVehicle", resourceRoot, thePed)
+									else
+										brakes = false
+									end
+								end
+							end
+						elseif(getElementData(thePed, "PedStatus") == "FireTrucker") then
+							if(getElementType(attacker) == "colshape") then
+								triggerServerEvent("RemoveFire", resourceRoot, localPlayer, getElementData(attacker, "fireid"))
+							end
+						elseif(getElementData(thePed, "PedStatus") == "Police") then
+							if(getElementType(attacker) == "player") then
+								local AVehicle = getPedOccupiedVehicle(attacker)
+								if(not AVehicle) then
+									triggerServerEvent("RemovePedFromVehicle", resourceRoot, thePed)
+								else
+									if(getElementVelocity(AVehicle) < 0.01 and getElementVelocity(AVehicle) > -0.01) then
+										triggerServerEvent("RemovePedFromVehicle", resourceRoot, thePed)
+									else
+										brakes = false
+									end
+								end
+							end
+						end
+					else -- Для обычных
+						if(getElementType(attacker) == "player") then
+							local AVehicle = getPedOccupiedVehicle(attacker)
+							if(not AVehicle) then
+								triggerServerEvent("RemovePedFromVehicle", resourceRoot, thePed)
+							else
+								if(getElementVelocity(AVehicle) < 0.01 and getElementVelocity(AVehicle) > -0.01) then
+									triggerServerEvent("RemovePedFromVehicle", resourceRoot, thePed)
+								else
+									brakes = false
+								end
+							end
+						end
+					end
+					
+				end
+			end
+			
+			
+			if(pathData) then
+				local node = PathNodes[city][pathData[1][1]][pathData[1][2]]
+				local node2 = node
+				path = {node[2], node[3]} -- x,y 
+				if(pathData[2]) then
+					node2 = PathNodes[city][pathData[2][1]][pathData[2][2]]
+					nextpath = {node2[2], node2[3]}
+					
+					if(not pathData[4]) then -- Ищем следующие координаты
+						triggerServerEvent("JustDriver", resourceRoot, thePed, city, pathData[1][1], pathData[1][2])
+					end
+				end
+				
+				local x,y,z = getElementPosition(theVehicle)
+				local x2,y2,z2 = getPositionInFront(theVehicle, 6)
+				local _,_,_,_,hitElement,_,_,_,_ = processLineOfSight(x,y,z+0.5,x2,y2,z2+0.5, false,true, nil, nil, nil, nil, nil, nil, theVehicle)
+				if(hitElement) then
+					if(getElementType(hitElement) == "vehicle") then
+						brakes = true
+						HornPed(thePed)
+					elseif(getElementType(hitElement) == "player") then
+						brakes = true
+						HornPed(thePed, hitElement)
+					end
+				end
+				
+				
+				
+				local dist = getDistanceBetweenPoints2D(path[1], path[2], vx,vy)
+				if(dist <= PointDistance) then
+					local tl = node[5]
+					if(tl) then
+						if(tl == "west" or tl == "north") then
+							if(tl == trafficlight[tostring(getTrafficLightState())]) then
+								brakes = true
+							end
+						end
+					end
+					
+					if(not brakes) then
+						triggerServerEvent("DriverBotNextPath", resourceRoot, thePed, #pathData)
+					end
+				end
+				
+			else
+				if(getElementData(thePed, "BusDriver") and not attacker) then
+					triggerServerEvent("setRandomBusStopPath", resourceRoot, thePed)
+					brakes = true
+				end
+			end
+			
+			
+			local vxv, vyv, vzv = getElementVelocity(theVehicle)
+			local s = (vxv^2 + vyv^2 + vzv^2)^(0.5)*156
+	
+			local nextrot = GetMarrot(findRotation(path[1], path[2], nextpath[1], nextpath[2]),rz)
+			if(nextrot < 0) then nextrot = nextrot-nextrot-nextrot end
+			if(nextrot > 90) then nextrot = 90 end
+
+			if(not limitspeed) then
+				limitspeed = maxspd-((maxspd-10)*(nextrot/90))
+			end
+			
+			if(brakes) then
+				setPedAnalogControlState(thePed, "accelerate", 0)
+				setPedAnalogControlState(thePed, "brake_reverse", 0)
+				setPedControlState(thePed, "handbrake", true)
+				setElementVelocity(theVehicle, 0,0,0)
+			else
+				local rot = GetMarrot(findRotation(vx,vy,path[1], path[2]),rz)
+				if(rot > 80) then 
+					if(rot > 100) then mreverse = true end
+					rot = 20 
+				elseif(rot < -20) then 
+					if(rot < -80) then mreverse = true end
+					rot = -20 
+				end
+	
+				
+				if(mreverse) then
+					setPedAnalogControlState(thePed, "brake_reverse", 1-(s*1/limitspeed))
+					setPedAnalogControlState(thePed, "accelerate", 0)
+					setPedControlState(thePed, "handbrake", false)
+					if(s > 10) then
+						setPedControlState(thePed, "handbrake", true)
+					else
+						if(rot > 0) then
+							setPedAnalogControlState(thePed, "vehicle_left", (rot)/20)
+						else
+							setPedAnalogControlState(thePed, "vehicle_right", -(rot)/20)
+						end
+					end
+				else
+					if(rot > 0) then
+						setPedAnalogControlState(thePed, "vehicle_right", (rot)/20)
+					else
+						setPedAnalogControlState(thePed, "vehicle_left", -(rot)/20)
+					end
+				
+					setPedAnalogControlState(thePed, "brake_reverse", 0)
+					setPedControlState(thePed, "handbrake", false)
+					if(s < limitspeed) then 
+						setPedAnalogControlState(thePed, "accelerate", 1-(s*1/limitspeed))
+					else
+						setPedAnalogControlState(thePed, "accelerate", 0)
+						setPedAnalogControlState(thePed, "brake_reverse", (s/limitspeed)-1)
+					end
+				end
+			end
+			
+		else
+			local dialogrz = getElementData(thePed, "dialogrz")
+			if(not dialogrz) then
+				if(attacker) then
+					local x,y,z = getPedBonePosition(attacker, ActualBones[math.random(#ActualBones)])
+					MovePlayerTo[thePed] = {x,y,z,0,"fast",false,false,true} -- x,y,z,rz,speed,event,args,fire
+					if(getElementData(thePed, "team") == "Полиция") then
+						if(getElementData(attacker, "NoFireMePolice")) then
+							MovePlayerTo[thePed][8] = false
+							if(GetDistance(thePed, attacker) < 15) then
+								if(getElementData(attacker, "NoFireMePolice") == "0") then
+									triggerServerEvent("PoliceArrest", root, thePed, attacker)
+								end
+							end
+						end
+						
+						if(getElementData(attacker, "WantedLevel") == 0) then
+							triggerServerEvent("NoAttack", root, attacker, thePed)
+							setPedControlState(thePed, "aim_weapon", false) 
+							setPedControlState(thePed, "sprint", false)
+						end
+					end
+				else
+					local x,y,z = getElementPosition(thePed)
+					local x2,y2,z2 = getPositionInFront(thePed, 2)
+					local _,_,_,_,hitElement,_,_,_,_ = processLineOfSight(x,y,z,x2,y2,z2, false,true)
+					if(hitElement) then
+						if(getElementType(hitElement) == "vehicle") then
+							if(getVehicleOccupant(hitElement)) then
+								local rand = math.random(1,5)
+								if(rand == 1) then
+									StartAnimation(thePed, "ped", "fucku", 1500, false, true, true, false)
+								elseif(rand == 2) then
+									StartAnimation(thePed, "ped", "ev_step", 1500, false, true, true, false)
+								end
+							end
+						end
+					end
+					MovePlayerTo[thePed] = FoundBotPath(thePed) or nil -- обычное поведение
+				end
+			end
+		end
+		if(MovePlayerTo[thePed]) then
+			local dialog = getElementData(thePed, "saytome")
+			local px,py,pz = getElementPosition(thePed)
+			if(dialog) then
+				setPedAimTarget(thePed,px,py,pz)
+				setPedAnalogControlState(thePed, "forwards", 0)
+			else
+				local distance = getDistanceBetweenPoints3D(px,py,pz,MovePlayerTo[thePed][1],MovePlayerTo[thePed][2],MovePlayerTo[thePed][3])
+				
+				if(distance > 1) then
+					local angle = findRotation(px,py,MovePlayerTo[thePed][1],MovePlayerTo[thePed][2])
+					if(getElementType(thePed) == "player") then
+						setPedAnalogControlState(thePed, "forwards", 1)
+						setPedControlState(thePed, "walk", true)
+						setPedCameraRotation(thePed, angle)
+					else
+						setPedAnalogControlState(thePed, "forwards", 1)
+						if(MovePlayerTo[thePed][5] == "fast") then
+							setPedControlState(thePed, "sprint", true)
+						else
+							setPedControlState(thePed, "walk", true)
+						end
+						setPedCameraRotation(thePed, -angle)
+					end
+					
+					if(GetElementAttacker(thePed)) then
+						local weapon = getPedWeapon(thePed)
+						if(weapon) then
+							local range = 2
+							if(weapon > 9 and weapon < 38) then 
+								range = getWeaponProperty(weapon, "poor", "weapon_range")/2
+							end
+							local firespeed = 300
+							if(WeaponTiming[weapon]) then firespeed = WeaponTiming[weapon] end
+							
+							local checkVeh = true
+							if(getPedOccupiedVehicle(attacker)) then checkVeh = false end
+							local fireline = isLineOfSightClear(px,py,pz, MovePlayerTo[thePed][1],MovePlayerTo[thePed][2],MovePlayerTo[thePed][3], true, checkVeh, false, true, true, true, true)
+							
+							if(not fireline) then
+								JumpPed(thePed)
+							else
+								if(range > distance) then
+									setPedAnalogControlState(thePed, "forwards", 0)
+									setPedControlState(thePed, "sprint", false)
+									setPedControlState(thePed, "walk", false)
+									if(not isTimer(FireTimer[thePed])) then
+										setPedControlState(thePed, "aim_weapon", true)
+										setPedAimTarget(thePed,MovePlayerTo[thePed][1],MovePlayerTo[thePed][2],MovePlayerTo[thePed][3])
+										
+										if(MovePlayerTo[thePed][8]) then
+											setPedControlState(thePed, "fire", true)
+										end
+										
+										FireTimer[thePed] = setTimer(function(thePed)
+											setPedControlState(thePed, "fire", false)
+											setPedAimTarget(thePed,0,0,0) -- Костыль
+										end, firespeed, 1, thePed)
+									end
+								end
+							end
+						end
+					end
+				else
+					if(getElementType(thePed) == "player") then
+						setPedControlState(thePed, "forwards", false)
+						setElementRotation(thePed, 0,0,MovePlayerTo[thePed][4],"default",true)
+						if(MovePlayerTo[thePed][6]) then
+							triggerServerEvent(MovePlayerTo[thePed][6], thePed, thePed, unpack(MovePlayerTo[thePed][7]))
+						end
+						MovePlayerTo[thePed] = nil
+					end
+				end
+			end
+		end
+	end
+end
+
+
+
+addEventHandler("onClientVehicleExplode", root, function()
+	if(isElementSyncer(source)) then
+		local x,y,z = getElementPosition(source)
+		local rand = math.random(0, 4)
+		if(rand > 0) then
+			local arr = {}
+			for slot = 1, rand do
+				local randx, randy = math.random(-5,5), math.random(-5,5)
+				z = getGroundPosition(x+randx,y+randy,z)
+				arr[#arr+1] = {x+randx, y+randy, z}
+			end
+			triggerServerEvent("CreateFire", resourceRoot, toJSON(arr))
+		end
+	end
+	if(getElementModel(source) == 592) then
+		local x,y,z = getElementPosition(source)
+		for slot = 1, 40 do
+			createExplosion(x+(math.random(-40,40)), y+(math.random(-40,40)), z, 6)
+			createEffect("explosion_large", x+(math.random(-40,40)), y+(math.random(-40,40)), z)
+		end
+	end
+end)
+
+
+
+
+function updateWorld()
+	UpdateBot()
+end
+setTimer(updateWorld, 150, 0)
+
+
+function handleVehicleDamage(attacker, weapon, loss, x, y, z, tire)
+	if(attacker) then
+		if(attacker == localPlayer) then
+			if(not isElementSyncer(source)) then
+				triggerServerEvent("SyncEl", resourceRoot, attacker, source)
+			end
+		end
+	end
+end
+addEventHandler("onClientVehicleDamage", resourceRoot, handleVehicleDamage)
+
+
+
+function handlePedDamage(attacker, weapon, bodypart, loss)
+	if(attacker) then
+		if(attacker == localPlayer) then
+			if(not isElementSyncer(source)) then
+				triggerServerEvent("SyncEl", resourceRoot, attacker, source)
+			end
+		end
+	end
+end
+addEventHandler("onClientPedDamage", resourceRoot, handlePedDamage)
+
+
+
+
+
+
+
+
+function StreamIn()
+	if(getElementType(source) == "ped") then
+		PedsInStream[source] = {}
+		UpdateBot()
+		
+		triggerServerEvent("SyncEl", resourceRoot, localPlayer, source)
+	end
+end
+addEvent("onClientElementStreamIn", true)
+addEventHandler("onClientElementStreamIn", root, StreamIn)
+
+
+
+
+function scoreChangeTracker(theKey, oldValue, newValue)
+    if (getElementType(source) == "colshape") and (theKey == "fireid") then
+		local x,y,z = getElementPosition(source)
+		ObjectInStream[source] = {}
+		ObjectInStream[source]["fire"] = createEffect("fire", x,y,z-1,x,y,z+2,500)
+		ObjectInStream[source]["light"] = createLight(0, x,y,z-1, 6, 255, 165, 0, nil, nil, nil, true)
+    end
+end
+addEventHandler("onClientElementDataChange", resourceRoot, scoreChangeTracker)
+
+
+addEventHandler("onClientElementDestroy", root, function ()
+	if getElementType(source) == "colshape" then
+		if(ObjectInStream[source]) then
+			for _, obj in pairs(ObjectInStream[source]) do
+				if(isElement(obj)) then
+					destroyElement(obj)
+				end
+			end
+		end
+	end
+end)
+
+
+
+function onClientElementStreamOut()
+	if(getElementType(source) == "ped") then		
+		if(PedsInStream[source]) then
+			for _, obj in pairs(PedsInStream[source]) do
+				if(isElement(obj)) then
+					destroyElement(obj)
+				end
+			end
+		end
+	elseif(getElementType(source) == "object") then		
+		if(ObjectInStream[source]) then
+			for _, obj in pairs(ObjectInStream[source]) do
+				if(isElement(obj)) then
+					destroyElement(obj)
+				end
+			end
+		end
+	end
+end
+addEvent("onClientElementStreamOut", true)
+addEventHandler("onClientElementStreamOut", root, onClientElementStreamOut)
+
+
+function onClientColShapeHit(theElement, matchingDimension)
+    if(theElement == localPlayer) then
+		if(getElementData(source, "fireid")) then
+			setElementOnFire(localPlayer, true)
+		end
+    end
+end
+addEventHandler("onClientColShapeHit", resourceRoot, onClientColShapeHit)
+
+function Start()
+	for _,thePed in pairs(getElementsByType("ped", resourceRoot, true)) do
+		triggerEvent("onClientElementStreamIn", thePed)
+	end
+	
+	for _,theCol in pairs(getElementsByType("colshape", resourceRoot, true)) do -- Инициализация огня
+		if(getElementData(theCol, "fireid")) then
+			triggerEvent("onClientElementDataChange", theCol, "fireid", getElementData(theCol, "fireid"))
+		end
+	end
+end
+addEventHandler("onClientResourceStart", getResourceRootElement(), Start)
+
+
+
+
+
+
+
+

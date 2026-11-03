@@ -1,0 +1,10 @@
+<meta>
+	<info name="veh" version="1.0.0" type="script" author="alexaxel705" description="veh"/>
+
+	<file src="mta-helper.fx" download="true" />
+	<file src="body_deform.fx" download="true" />
+	<file src="ped_morph.fx" download="true" />
+	
+	
+	<script src="client.lua" type="client"/>
+</meta>

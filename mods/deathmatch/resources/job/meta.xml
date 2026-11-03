@@ -1,0 +1,19 @@
+<meta>
+	<info name="job" version="1.0.0" type="script" author="alexaxel705" description="job"/>
+	
+	--- [Работа дальнобойщика]
+	<script src="hardtruck.lua" type="shared"/>
+	
+	--- [Работа такси]
+	<script src="taxi.lua" type="shared"/>
+	<file src="taxi_background.png" />
+	<file src="start_bu.png" />
+	<file src="q_bu.png" />
+	
+	--- [Работа пизавоза]
+	<script src="pizzaserver.lua" type="server" />
+	<script src="pizzaclient.lua" type="client" />
+	<file src="background.png" />
+	<file src="bu.png" />
+	<file src="bu2.png" />
+</meta>

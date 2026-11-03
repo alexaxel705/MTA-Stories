@@ -1,0 +1,18 @@
+<meta>
+	<info author="iil" version="1.0" name="Dirt on transport + washing" type="script" />
+
+	<script src="client/settings.lua" type="client" cache="false" />
+	<script src="client/function.lua" type="client" cache="false" />
+
+	<script src="server/function.lua" type="server" />
+
+	<file src="files/paintjob.fx" />
+
+	<file src="files/0.png" />
+	<file src="files/1.png" />
+	<file src="files/2.png" />
+	<file src="files/3.png" />
+	<file src="files/4.png" />
+	<file src="files/5.png" />
+	<file src="files/6.png" />
+</meta>

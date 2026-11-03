@@ -1,0 +1,43 @@
+<meta>
+	<info author="Dark_ALEX" type="gamemode" name="SAxVCxLC Stories" version="2.8" description="Томский RPRL сервер" />
+	<map src="228.map" dimension="0"/>
+	<min_mta_version client="1.5.7" server="1.5.7" />
+   	<script src="mapEditorScriptingExtension_s.lua" type="server"></script>
+    <script src="mapEditorScriptingExtension_c.lua" type="client" validate="false"></script>
+	<!--<script src="DynamicObject.lua" type="server" />-->
+    <sync_map_element_data>true</sync_map_element_data> 
+	<oop>false</oop>
+	
+	<export function="CreateVehicle" type="server"/>
+	<export function="AddPlayerMoney" type="server"/>
+	<export function="AddSkill" type="server"/>
+	<export function="Respect" type="server"/>
+	<export function="GetVehicleGround" type="server"/>
+	
+	<export function="GetSkinJob" type="shared"/>
+	<export function="GetSkinData" type="shared"/>
+	
+	<file src="lang/Ru_ru.po" download="true" />
+	<file src="lang/Ru_az.po" download="true" />
+	<file src="lang/Ru_en.po" download="true" />
+	
+	<file src="texreplace.fx" download="true" />
+	
+	<file src="models/des_a51infenc.col" download="true" />
+	<file src="models/des_a51infenc.dff" download="true" />
+	<file src="models/des_a51_labs.col" download="true" />
+	
+	<file src="models/prison-gates.col" download="true" />
+	<file src="models/prison-gates.dff" download="true" />
+	<file src="models/kb_tr_main.col" download="true" />
+	<file src="models/trukstp01.col" download="true" />
+	<file src="models/bdupsnew.col" download="true" />
+	<file src="models/mc_straps_int.col" download="true" />
+	<file src="models/kylie_barn.col" download="true" />
+	<file src="models/bdups_main.col" download="true" />
+	<file src="models/BDups_interior.col" download="true" />
+	
+	<script src="shared.lua" type="shared" />
+	<script src="client.lua" type="client" validate="true" />
+	<script src="script.lua" type="server" />
+</meta>

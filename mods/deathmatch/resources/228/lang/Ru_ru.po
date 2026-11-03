@@ -1,0 +1,760 @@
+# Alexey516 <alexaxel705@gmail.com>, 2017
+msgid ""
+msgstr ""
+"Project-Id-Version: MTA-Tomsk\n"
+"Report-Msgid-Bugs-To: http://109.227.228.4/\n"
+"POT-Creation-Date: 2011-06-23 11:00+0200\n"
+"PO-Revision-Date: 2012-07-26 13:31+0000\n"
+"Last-Translator: Alexey516 <alexaxel705@gmail.com>\n"
+"Language-Team: Russian (http://109.227.228.4/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Регистрация/Вход"
+msgstr "Регистрация/Вход"
+
+msgid "Служба - Найди способ нажраться"
+msgstr "Служба - Найди способ нажраться"
+
+msgid "Посади заключенного на бутылку"
+msgstr "Посади заключенного на бутылку"
+
+msgid "МИССИЯ ВЫПОЛНЕНА"
+msgstr "МИССИЯ ВЫПОЛНЕНА"
+
+msgid "Дойди до магазина"
+msgstr "Дойди до магазина"
+
+msgid "Зайди в магазин и купи пачку #596289сигарет"
+msgstr "Зайди в магазин и купи пачку #596289сигарет"
+
+msgid "Посети участок"
+msgstr "Посети участок"
+
+msgid "Зайди в раздевалку и получи #596289экипировку"
+msgstr "Зайди в раздевалку и получи #596289экипировку"
+
+msgid "Плантация"
+msgstr "Плантация"
+
+msgid "Притон"
+msgstr "Притон"
+
+msgid "СЛОМАНО"
+msgstr "СЛОМАНО"
+
+msgid "ПОТРАЧЕНО"
+msgstr "ПОТРАЧЕНО"
+
+msgid "Игроков"
+msgstr "Игроков"
+
+msgid "Благодарности"
+msgstr "Благодарности"
+
+msgid "Над сервером работали"
+msgstr "Над сервером работали"
+
+msgid "пинг"
+msgstr "пинг"
+
+msgid "Не авторизирован"
+msgstr "Не авторизирован"
+
+msgid "место в рейтинге"
+msgstr "место в рейтинге"
+
+msgid "ник"
+msgstr "ник"
+
+msgid "Масса"
+msgstr "Масса"
+
+msgid "Цена"
+msgstr "Цена"
+
+msgid "ид"
+msgstr "ид"
+
+msgid "Итоги"
+msgstr "Итоги"
+
+msgid "Введи номер или ИД игрока"
+msgstr "Введи номер или ИД игрока"
+
+msgid "наше время"
+msgstr "наше время"
+
+msgid "наши дни"
+msgstr "наши дни"
+
+msgid "#FFA500Психиатрическая больница"
+msgstr "#FFA500Психиатрическая больница"
+
+msgid "До освобождения"
+msgstr "До освобождения"
+
+msgid "До выписки"
+msgstr "До выписки"
+
+msgid "hp"
+msgstr "hp"
+
+msgid "Бронежилет"
+msgstr "Бронежилет"
+
+msgid "Канистра"
+msgstr "Канистра"
+
+msgid "Реликвия"
+msgstr "Реликвия"
+
+msgid "Подкова"
+msgstr "Подкова"
+
+msgid "Телефон"
+msgstr "Телефон"
+
+msgid "47 Хромосома"
+msgstr "47 Хромосома"
+
+msgid "Рюкзак"
+msgstr "Рюкзак"
+
+msgid "Чемодан"
+msgstr "Чемодан"
+
+msgid "Пакет"
+msgstr "Пакет"
+
+msgid "АК-47"
+msgstr "АК-47"
+
+msgid "Граната"
+msgstr "Граната"
+
+msgid "Молотов"
+msgstr "Молотов"
+
+msgid "М16"
+msgstr "М16"
+
+msgid "Кольт 45"
+msgstr "Кольт 45"
+
+msgid "USP-S"
+msgstr "USP-S"
+
+msgid "Deagle"
+msgstr "Deagle"
+
+msgid "Кровь"
+msgstr "Кровь"
+
+msgid "Pissh"
+msgstr "Pissh"
+
+msgid "Pissh Gold"
+msgstr "Pissh Gold"
+
+msgid "KBeer"
+msgstr "KBeer"
+
+msgid "KBeer Dark"
+msgstr "KBeer Dark"
+
+msgid "isabella"
+msgstr "isabella"
+
+msgid "Фекалии"
+msgstr "Фекалии"
+
+msgid "CoK"
+msgstr "CoK"
+
+msgid "Сигарета"
+msgstr "Сигарета"
+
+msgid "Mossberg"
+msgstr "Mossberg"
+
+msgid "Sawed-Off"
+msgstr "Sawed-Off"
+
+msgid "SPAS-12"
+msgstr "SPAS-12"
+
+msgid "Узи"
+msgstr "Узи"
+
+msgid "MP5"
+msgstr "MP5"
+
+msgid "Tec-9"
+msgstr "Tec-9"
+
+msgid "ИЖ-12"
+msgstr "ИЖ-12"
+
+msgid "M40"
+msgstr "M40"
+
+msgid "Dildo XXL"
+msgstr "Dildo XXL"
+
+msgid "Dildo"
+msgstr "Dildo"
+
+msgid "Вибратор"
+msgstr "Вибратор"
+
+msgid "Клюшка"
+msgstr "Клюшка"
+
+msgid "Лопата"
+msgstr "Лопата"
+
+msgid "Бита"
+msgstr "Бита"
+
+msgid "Нож"
+msgstr "Нож"
+
+msgid "Катана"
+msgstr "Катана"
+
+msgid "Камера"
+msgstr "Камера"
+
+msgid "Бензопила"
+msgstr "Бензопила"
+
+msgid "Лазерный прицел"
+msgstr "Лазерный прицел"
+
+msgid "9-мм"
+msgstr "9-мм"
+
+msgid "5.56-мм"
+msgstr "5.56-мм"
+
+msgid "7.62-мм"
+msgstr "7.62-мм"
+
+msgid "18.5-мм"
+msgstr "18.5-мм"
+
+msgid "Кулак"
+msgstr "Кулак"
+
+msgid "Конопля"
+msgstr "Конопля"
+
+msgid "Кока"
+msgstr "Кока"
+
+msgid "Косяк"
+msgstr "Косяк"
+
+msgid "Спанк"
+msgstr "Спанк"
+
+msgid "Удочка"
+msgstr "Удочка"
+
+msgid "Рыба"
+msgstr "Рыба"
+
+msgid "Черепаха"
+msgstr "Черепаха"
+
+msgid "Акула"
+msgstr "Акула"
+
+msgid "Дельфин"
+msgstr "Дельфин"
+
+msgid "Парашют"
+msgstr "Парашют"
+
+msgid "Запаска"
+msgstr "Запаска"
+
+msgid "Скот"
+msgstr "Скот"
+
+msgid "Сено"
+msgstr "Сено"
+
+msgid "Газета"
+msgstr "Газета"
+
+msgid "Деньги"
+msgstr "Деньги"
+
+msgid "Кредитка"
+msgstr "Кредитка"
+
+msgid "Передать {name}"
+msgstr "Передать {name}"
+
+msgid "Посадить {name}"
+msgstr "Посадить {name}"
+
+msgid "Извлечь {item}"
+msgstr "Извлечь {item}"
+
+msgid "Использовать"
+msgstr "Использовать"
+
+msgid "Выбросить"
+msgstr "Выбросить"
+
+msgid "Введи количество"
+msgstr "Введи количество"
+
+msgid "Урон"
+msgstr "Урон"
+
+msgid "Расстояние"
+msgstr "Расстояние"
+
+msgid "Магазин"
+msgstr "Магазин"
+
+msgid "Калибр"
+msgstr "Калибр"
+
+msgid "Здоровье"
+msgstr "Здоровье"
+
+msgid "Вождение"
+msgstr "Вождение"
+
+msgid "Мотоциклист"
+msgstr "Мотоциклист"
+
+msgid "Велосипедист"
+msgstr "Велосипедист"
+
+msgid "Летчик"
+msgstr "Летчик"
+
+msgid "Грузоперевозки"
+msgstr "Грузоперевозки"
+
+msgid "Рыболов"
+msgstr "Рыболов"
+
+msgid "Рукопашный бой"
+msgstr "Рукопашный бой"
+
+msgid "Пистолет"
+msgstr "Пистолет"
+
+msgid "Пистолет с глуш."
+msgstr "Пистолет с глуш."
+
+msgid "Дигл"
+msgstr "Дигл"
+
+msgid "Дробовик"
+msgstr "Дробовик"
+
+msgid "Sawn-Off"
+msgstr "Sawn-Off"
+
+msgid "SPAZ-12"
+msgstr "SPAZ-12"
+
+msgid "УЗИ"
+msgstr "УЗИ"
+
+msgid "Винтовка"
+msgstr "Винтовка"
+
+msgid "Выносливость"
+msgstr "Выносливость"
+
+msgid "Качество"
+msgstr "Качество"
+
+msgid "Выпадает после смерти"
+msgstr "Выпадает после смерти"
+
+msgid "Чтобы использовать этот предмет возьми его в руки"
+msgstr "Чтобы использовать этот предмет возьми его в руки"
+
+msgid "кг"
+msgstr "кг"
+
+msgid "г"
+msgstr "г"
+
+msgid "км"
+msgstr "км"
+
+msgid "м"
+msgstr "м"
+
+msgid "КМ/Ч"
+msgstr "КМ/Ч"
+
+msgid "отвратительное"
+msgstr "отвратительное"
+
+msgid "мерзкое"
+msgstr "мерзкое"
+
+msgid "гадкое"
+msgstr "гадкое"
+
+msgid "плохое"
+msgstr "плохое"
+
+msgid "обычное"
+msgstr "обычное"
+
+msgid "хорошее"
+msgstr "хорошее"
+
+msgid "очень хорошее"
+msgstr "очень хорошее"
+
+msgid "отличное"
+msgstr "отличное"
+
+msgid "высокое"
+msgstr "высокое"
+
+msgid "великолепное"
+msgstr "великолепное"
+
+msgid "превосходное"
+msgstr "превосходное"
+
+msgid "Закончилось место в инвентаре"
+msgstr "Закончилось место в инвентаре"
+
+msgid ""
+"Для сбора урожая удерживай\n"
+"скорость в пределах зеленой зоны"
+msgstr ""
+"Для сбора урожая удерживай\n"
+"скорость в пределах зеленой зоны"
+
+msgid "Мирные жители"
+msgstr "Мирные жители"
+
+msgid "Уголовники"
+msgstr "Уголовники"
+
+msgid "Официалы"
+msgstr "Официалы"
+
+msgid "Бандиты"
+msgstr "Бандиты"
+
+msgid "Колумбийский картель"
+msgstr "Колумбийский картель"
+
+msgid "Синдикат Локо"
+msgstr "Синдикат Локо"
+
+msgid "Наркомафия"
+msgstr "Наркомафия"
+
+msgid "Баллас"
+msgstr "Баллас"
+
+msgid "Гроув-стрит"
+msgstr "Гроув-стрит"
+
+msgid "МЧС"
+msgstr "МЧС"
+
+msgid "Полиция"
+msgstr "Полиция"
+
+msgid "ЦРУ"
+msgstr "ЦРУ"
+
+msgid "Военные"
+msgstr "Военные"
+
+msgid "Триады"
+msgstr "Триады"
+
+msgid "Якудзы"
+msgstr "Якудзы"
+
+msgid "Русская мафия"
+msgstr "Русская мафия"
+
+msgid "Байкеры"
+msgstr "Байкеры"
+
+msgid "Вагос"
+msgstr "Вагос"
+
+msgid "ФБР"
+msgstr "ФБР"
+
+msgid "Рифа"
+msgstr "Рифа"
+
+msgid "Деревенщины"
+msgstr "Деревенщины"
+
+msgid "Ацтекас"
+msgstr "Ацтекас"
+
+msgid "Частная собственность"
+msgstr "Частная собственность"
+
+msgid "Января"
+msgstr "Января"
+
+msgid "Февраля"
+msgstr "Февраля"
+
+msgid "Марта"
+msgstr "Марта"
+
+msgid "Апреля"
+msgstr "Апреля"
+
+msgid "Мая"
+msgstr "Мая"
+
+msgid "Июня"
+msgstr "Июня"
+
+msgid "Июля"
+msgstr "Июля"
+
+msgid "Августа"
+msgstr "Августа"
+
+msgid "Сентября"
+msgstr "Сентября"
+
+msgid "Октября"
+msgstr "Октября"
+
+msgid "Ноября"
+msgstr "Ноября"
+
+msgid "Декабря"
+msgstr "Декабря"
+
+msgid "КУПЛЕНО"
+msgstr "КУПЛЕНО"
+
+msgid "БЕСПЛАТНО"
+msgstr "БЕСПЛАТНО"
+
+msgid ""
+"Поступил новый вызов!\n"
+" #FFFFFFОтправляйся на #FF0000красный маркер"
+msgstr ""
+"Поступил новый вызов!\n"
+" #FFFFFFОтправляйся на #FF0000красный маркер"
+
+msgid "пополнить"
+msgstr "пополнить"
+
+msgid "снять"
+msgstr "снять"
+
+msgid "Карьер «Hunter Quarry»"
+msgstr "Карьер «Hunter Quarry»"
+
+msgid "Свалка Angel Pine"
+msgstr "Свалка Angel Pine"
+
+msgid "Аэропорт Los Santos"
+msgstr "Аэропорт Los Santos"
+
+msgid "Аэропорт San Fierro"
+msgstr "Аэропорт San Fierro"
+
+msgid "Аэропорт Las Venturas"
+msgstr "Аэропорт Las Venturas"
+
+msgid "Пожарная станция Los Santos"
+msgstr "Пожарная станция Los Santos"
+
+msgid "Пожарная станция San Fierro"
+msgstr "Пожарная станция San Fierro"
+
+msgid "Пожарная станция Las Venturas №3"
+msgstr "Пожарная станция Las Venturas №3"
+
+msgid "База грузоперевозок"
+msgstr "База грузоперевозок"
+
+msgid "НПЗ «Green Palms»"
+msgstr "НПЗ «Green Palms»"
+
+msgid "Тренажерный зал"
+msgstr "Тренажерный зал"
+
+msgid "Больница"
+msgstr "Больница"
+
+msgid "Медицинский центр San Fierro"
+msgstr "Медицинский центр San Fierro"
+
+msgid "Тюнинг"
+msgstr "Тюнинг"
+
+msgid "Закусочная"
+msgstr "Закусочная"
+
+msgid "Ресторан"
+msgstr "Ресторан"
+
+msgid "Банк"
+msgstr "Банк"
+
+msgid "Полицейский участок Los Santos"
+msgstr "Полицейский участок Los Santos"
+
+msgid "Полицейский участок Las Venturas"
+msgstr "Полицейский участок Las Venturas"
+
+msgid "Полицейский участок San Fierro"
+msgstr "Полицейский участок San Fierro"
+
+msgid "Медицинский центр Fort Caston"
+msgstr "Медицинский центр Fort Caston"
+
+msgid "Клуб"
+msgstr "Клуб"
+
+msgid "Автосалон «Wang Cars»"
+msgstr "Автосалон «Wang Cars»"
+
+msgid "Склад «Redsands West»"
+msgstr "Склад «Redsands West»"
+
+msgid "Мотосалон «Dillmore»"
+msgstr "Мотосалон «Dillmore»"
+
+msgid "ВС"
+msgstr "ВС"
+
+msgid "ПН"
+msgstr "ПН"
+
+msgid "ВТ"
+msgstr "ВТ"
+
+msgid "СР"
+msgstr "СР"
+
+msgid "ЧТ"
+msgstr "ЧТ"
+
+msgid "ПТ"
+msgstr "ПТ"
+
+msgid "СБ"
+msgstr "СБ"
+
+msgid "Нажми {key} чтобы припарковать машину"
+msgstr "Нажми {key} чтобы припарковать машину"
+
+msgid "Нажми {key} чтобы переодеться"
+msgstr "Нажми {key} чтобы переодеться"
+
+msgid "Нажми {key} чтобы встать"
+msgstr "Нажми {key} чтобы встать"
+
+msgid "Нажми {key} чтобы купить"
+msgstr "Нажми {key} чтобы купить"
+
+msgid "Sprunk стоимость #3B7231$20#FFFFFF"
+msgstr "Sprunk стоимость #3B7231$20#FFFFFF"
+
+msgid "Нажми {key} чтобы лечь"
+msgstr "Нажми {key} чтобы лечь"
+
+msgid "Информация"
+msgstr "Информация"
+
+msgid "Дата рождения"
+msgstr "Дата рождения"
+
+msgid "Фракция"
+msgstr "Фракция"
+
+msgid "Работа"
+msgstr "Работа"
+
+msgid "{age} лет"
+msgstr "{age} лет"
+
+msgid ""
+"На #4682B4карту#FFFFFF добавлена #ff0000точка#FFFFFF! Используй клавишу "
+"{key} для автоматического перемещения"
+msgstr ""
+"На #4682B4карту#FFFFFF добавлена #ff0000точка#FFFFFF! Используй клавишу "
+"{key} для автоматического перемещения"
+
+msgid "Группа ВКонтакте {link}"
+msgstr "Группа ВКонтакте {link}"
+
+msgid "Исходный код сервера {link}"
+msgstr "Исходный код сервера {link}"
+
+msgid "Нажми {key} чтобы писать в общий чат"
+msgstr "Нажми {key} чтобы писать в общий чат"
+
+msgid "Нажми {key} чтобы писать в командный чат"
+msgstr "Нажми {key} чтобы писать в командный чат"
+
+msgid "Нажми {key} чтобы войти"
+msgstr "Нажми {key} чтобы войти"
+
+msgid "Нажми {key} чтобы выйти"
+msgstr "Нажми {key} чтобы выйти"
+
+msgid "Нажми {key} чтобы купить дом"
+msgstr "Нажми {key} чтобы купить дом"
+
+msgid "Нажми {key} чтобы открыть дом"
+msgstr "Нажми {key} чтобы открыть дом"
+
+msgid "Нажми {key} чтобы закрыть дом"
+msgstr "Нажми {key} чтобы закрыть дом"
+
+msgid "Нажми {key} чтобы продать дом {money}"
+msgstr "Нажми {key} чтобы продать дом {money}"
+
+msgid "Нажми {key} чтобы открыть гараж"
+msgstr "Нажми {key} чтобы открыть гараж"
+
+msgid "Нажми {key} чтобы закрыть гараж"
+msgstr "Нажми {key} чтобы закрыть гараж"
+
+msgid "ЗАКРЫТО НА РЕМОНТ"
+msgstr "ЗАКРЫТО НА РЕМОНТ"
+
+msgid "НОВЫЙ ДВИГАТЕЛЬ И ПОКРАСКА"
+msgstr "НОВЫЙ ДВИГАТЕЛЬ И ПОКРАСКА"
+
+msgid "Нажми {key} чтобы начать заправку"
+msgstr "Нажми {key} чтобы начать заправку"
+
+msgid "Нажми {key} чтобы остановить заправку"
+msgstr "Нажми {key} чтобы остановить заправку"
+
+msgid ""
+"В #4682B4инвентарь#FFFFFF добавлен предмет {item}, нажми {key} чтобы "
+"посмотреть"
+msgstr ""
+"В #4682B4инвентарь#FFFFFF добавлен предмет {item}, нажми {key} чтобы "
+"посмотреть"

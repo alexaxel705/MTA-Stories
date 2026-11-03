@@ -1,0 +1,5 @@
+<meta>
+	<info name="target" version="1.0.0" type="script" author="alexaxel705" description="target"/>
+	
+	<script src="target.lua" type="client"/>
+</meta>

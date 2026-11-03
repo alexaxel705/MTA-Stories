@@ -1,0 +1,4 @@
+<meta>
+	<info name="Object_Texture_Loader" version="1.0.0" type="script" author="alexaxel705" description="Object Image"/>
+	<script src="client.lua" type="client"/>
+</meta>

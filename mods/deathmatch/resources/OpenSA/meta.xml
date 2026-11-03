@@ -1,0 +1,64 @@
+<meta>
+	<info name="OpenSA" version="1.0.0" type="script" author="alexaxel705" description="OpenSA"/>
+	
+	<file src="models/tcehilouse02.dff" />
+	<file src="models/tcehilouse02.col"  />
+	
+	<file src="models/des_ruin2_.dff" />
+	<file src="models/des_ruin2_.col"  />
+	
+	<file src="models/conhoos1.dff" />
+	<file src="models/conhoos1.col"  />
+	
+	<file src="models/conhoos2.dff" />
+	<file src="models/conhoos2.col" />
+	
+	<file src="models/lae711block01.dff" />
+	<file src="models/lae711block01.col" />
+	
+	<file src="models/laepetrol1a.dff" />
+	<file src="models/laepetrol1a.col" />
+	
+	<file src="models/des_ntcafe.dff" />
+	<file src="models/des_ntcafe.col" />
+	
+	<file src="models/carlshou1_lae2.dff" />
+	<file src="models/carlshou1_lae2.col" />
+	
+	<file src="models/sw_lasershop.dff" />
+	<file src="models/sw_lasershop.col" />
+	
+	<file src="models/sw_block01a.dff" />
+	<file src="models/sw_block01a.col" />
+	
+	<file src="models/sw_shack02.dff" />
+	<file src="models/sw_shack02.col" />
+	
+	<file src="models/sw_bigburb_01.dff" />
+	<file src="models/sw_bigburb_01.col" />
+	
+	<file src="models/sw_bigburb_02.dff" />
+	<file src="models/sw_bigburb_02.col" />
+	
+	<file src="models/sw_bigburb_04.dff" />
+	<file src="models/sw_bigburb_04.col" />
+	
+	<file src="models/swburbhaus01.dff" />
+	<file src="models/swburbhaus01.col" />
+	
+	<file src="models/swburbhaus03.dff" />
+	<file src="models/swburbhaus03.col" />
+	
+	<file src="models/sw_bigburb_03.dff" />
+	<file src="models/sw_bigburb_03.col" />
+	
+	<file src="models/laeexaminerbuild1.dff" />
+	<file src="models/laeexaminerbuild1.col" />
+	
+	<file src="models/ganghous05_LAx.dff" />
+	<file src="models/ganghous05_LAx.col" />
+	
+	<script src="client.lua" type="client"/>
+	<script src="server.lua" type="server"/>
+	
+</meta>
