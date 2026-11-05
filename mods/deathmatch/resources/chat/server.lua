@@ -1,5 +1,6 @@
 ﻿local SkinData = exports["228"]:GetSkinData()
 local help = {}
+local GlobalChat = true -- Для глобального\локального чата
 local MainChat = {}
 local Zones = {
 	[1] = createColRectangle(1441, -1721, 77, 117),
@@ -160,7 +161,6 @@ function onPlayerChat(message, messageType, messagenovision)
 			cancelEvent()
 			return false
 		end
-
 		if messageType == 0 then
 			if(Phones[source]) then
 				local CallTo = PhonesAbonent[source]
@@ -357,7 +357,7 @@ addEventHandler("OutputChat", root, OutputChat)
 
 function OutputMainChat(message, from, forced)
 	for _, thePlayer in pairs(getElementsByType "player") do
-		if(MainChat[thePlayer] or forced) then
+		if(MainChat[thePlayer] or forced or GlobalChat) then
 			triggerClientEvent(thePlayer, "OutputChat", thePlayer, message, from)
 		end
 	end

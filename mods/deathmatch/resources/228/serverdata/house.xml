@@ -36,7 +36,7 @@
     <h34 x="-1589.8" y="2706.5" z="56.2" price="70000" locked="1" type="Маленькая комната" int="OG Loc&apos;s House"></h34>
     <h35 x="-1604.2" y="2689.7" z="55.3" price="150000" locked="0" type="Маленькая комната" int="Denise&apos;s Place"></h35>
     <h36 x="-1587" y="2650.1" z="55.9" price="65000" locked="1" type="Маленькая комната" int="OG Loc&apos;s House"></h36>
-    <h37 x="-1563.6" y="2651.2" z="55.9" price="65000" locked="0" type="Маленькая комната" int="OG Loc&apos;s House" dolg="55136">Tim.Ismag</h37>
+    <h37 x="-1563.6" y="2651.2" z="55.9" price="65000" locked="0" type="Маленькая комната" int="OG Loc&apos;s House" dolg="55200">Tim.Ismag</h37>
     <h38 x="-1568.2" y="2630.3" z="55.8" price="60000" locked="0" type="Маленькая комната" int="Abandonded AC Woter"></h38>
     <h39 x="-1669.6" y="2597.5" z="81.4" price="65000" locked="1" type="Маленькая комната" int="Denise&apos;s Place"></h39>
     <h40 x="-1670.2" y="2546.4" z="85.2" price="50000" locked="1" type="Маленькая комната" int="Millie&apos;s Bedroom"></h40>
@@ -555,7 +555,7 @@
     <h553 x="1595.5" y="2038.4" z="11.5" price="420000" locked="1" type="Дом 1 этаж (нормальный)" int="Wu Zi Mu&apos;s Betting place"></h553>
     <h554 x="1554.4" y="2074.1" z="11.4" price="380000" locked="1" type="Дом 1 этаж (нормальный)" int="Wu Zi Mu&apos;s Betting place"></h554>
     <h555 x="1550.3" y="2096.4" z="11.5" price="420000" locked="1" type="Дом 1 этаж (нормальный)" int="Burglary House 19"></h555>
-    <h556 x="1549.4" y="2125.6" z="11.5" price="400000" locked="0" type="Дом 1 этаж (нормальный)" int="Budget Inn Motel Room" dolg="193600">LittleGuitar92</h556>
+    <h556 x="1549.4" y="2125.6" z="11.5" price="400000" locked="0" type="Дом 1 этаж (нормальный)" int="Budget Inn Motel Room" dolg="194000">LittleGuitar92</h556>
     <h557 x="1488.6" y="360.9" z="19.4" price="145000" locked="1" type="Дом 1 этаж (бедный)" int="Burglary House 1"></h557>
     <h558 x="1469.7" y="351.5" z="18.9" price="140000" locked="1" type="Дом 1 этаж (бедный)" int="The Crack Den"></h558>
     <h559 x="1461.1" y="342.5" z="19" price="143000" locked="1" type="Дом 1 этаж (бедный)" int="Burglary House 1"></h559>

@@ -3493,3 +3493,270 @@ debuguptime              sfakelag
 [2026-09-08 17:39:34] Stopping 228
 [2026-09-08 17:39:34] Starting 228
 [2026-09-08 17:39:35] 228 restarted successfully
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-04 01:03:21] Compacting accounts database 'internal.db' ...
+[2026-11-04 01:03:27] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-04 01:03:34] Resources: 230 loaded, 0 failed
+[2026-11-04 01:03:34] Compacting database 'registry.db' ...
+[2026-11-04 01:03:34] Starting resources...
+[2026-11-04 01:03:34] Please wait...
+[2026-11-04 01:03:34] Please wait...
+[2026-11-04 01:03:35] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-04 01:03:36] ERROR: 228\script.lua:14450: exports: Call to non-running server resource (chat) [string "?"]
+[2026-11-04 01:03:36] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-04 01:03:36] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-04 01:03:36] Server started and is ready to accept connections!
+[2026-11-04 01:03:36] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-04 01:03:36] Type 'help' for a list of commands.
+[2026-11-04 01:04:09] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24149.0)
+[2026-11-04 01:04:10] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-04 01:04:32] CONNECT: SquealingBanquette53 connected (IP: 95.104.187.103  Serial: BBEDFA5E363AAD2563BC7C493F5DA6E3  Version: 1.6.0-9.24149.0)
+[2026-11-04 01:04:33] JOIN: SquealingBanquette53 joined the game (IP: 95.104.187.103)
+[2026-11-04 01:04:38] DIAGNOSTIC: SquealingBanquette53 #1002 HTTP server file mismatch! (vehicle_node) VehicleNodeSA.lua [File not readable: C:\Program Files (x86)\MTA San Andreas 1.6\mods\deathmatch\resources\vehicle_node\VehicleNodeSA.lua]
+[2026-11-04 01:05:32] restart: Requested by Console
+[2026-11-04 01:05:32] restart: Resource '228' restarting...
+[2026-11-04 01:05:32] Stopping 228
+[2026-11-04 01:05:32] Resource '228' changed, reloading and starting
+[2026-11-04 01:05:32] Starting 228
+[2026-11-04 01:05:33] 228 restarted successfully
+[2026-11-04 01:05:47] restart: Requested by Console
+[2026-11-04 01:05:47] restart: Resource 'chat' restarting...
+[2026-11-04 01:05:47] Stopping chat
+[2026-11-04 01:05:47] Starting chat
+[2026-11-04 01:05:47] chat restarted successfully
+[2026-11-04 01:09:46] QUIT: alexaxel705 left the game [Quit] 
+[2026-11-04 01:09:58] KICK: SquealingBanquette53 was kicked from the game by Console
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-05 22:59:40] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-05 22:59:57] Resources: 230 loaded, 0 failed
+[2026-11-05 22:59:57] Starting resources...
+[2026-11-05 22:59:57] Please wait...
+[2026-11-05 22:59:57] Please wait...
+[2026-11-05 22:59:58] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-05 22:59:58] ERROR: 228\script.lua:14450: exports: Call to non-running server resource (chat) [string "?"]
+[2026-11-05 22:59:59] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-05 22:59:59] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-05 22:59:59] Server started and is ready to accept connections!
+[2026-11-05 22:59:59] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-05 22:59:59] Type 'help' for a list of commands.
+[2026-11-05 23:00:02] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24149.0)
+[2026-11-05 23:00:02] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-05 23:03:02] restart: Requested by Console
+[2026-11-05 23:03:02] restart: Resource '228' restarting...
+[2026-11-05 23:03:02] Stopping 228
+[2026-11-05 23:03:02] Starting 228
+[2026-11-05 23:03:02] 228 restarted successfully
+[2026-11-05 23:03:21] QUIT: alexaxel705 left the game [Quit] 
+[2026-11-05 23:03:22] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24149.0)
+[2026-11-05 23:03:22] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-05 23:12:18] QUIT: alexaxel705 left the game [Quit] 
+[2026-11-05 23:12:18] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24149.0)
+[2026-11-05 23:12:19] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-05 23:20:52] QUIT: alexaxel705 left the game [Quit] 
+[2026-11-05 23:31:54] restart: Requested by Console
+[2026-11-05 23:31:54] restart: Resource 'chat' restarting...
+[2026-11-05 23:31:54] Stopping chat
+[2026-11-05 23:31:54] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:31:54] Starting chat
+[2026-11-05 23:31:54] chat restarted successfully
+[2026-11-05 23:32:13] restart: Requested by Console
+[2026-11-05 23:32:13] restart: Resource 'chat' restarting...
+[2026-11-05 23:32:13] Stopping chat
+[2026-11-05 23:32:13] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:32:13] Starting chat
+[2026-11-05 23:32:13] chat restarted successfully
+[2026-11-05 23:32:47] restart: Requested by Console
+[2026-11-05 23:32:47] restart: Resource 'chat' restarting...
+[2026-11-05 23:32:47] Stopping chat
+[2026-11-05 23:32:47] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:32:47] Starting chat
+[2026-11-05 23:32:47] chat restarted successfully
+[2026-11-05 23:33:16] restart: Requested by Console
+[2026-11-05 23:33:16] restart: Resource 'chat' restarting...
+[2026-11-05 23:33:16] Stopping chat
+[2026-11-05 23:33:16] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:33:16] Starting chat
+[2026-11-05 23:33:16] chat restarted successfully
+[2026-11-05 23:33:34] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24149.0)
+[2026-11-05 23:33:34] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-05 23:33:53] restart: Requested by Console
+[2026-11-05 23:33:53] restart: Resource 'chat' restarting...
+[2026-11-05 23:33:53] Stopping chat
+[2026-11-05 23:33:53] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:33:53] Starting chat
+[2026-11-05 23:33:53] chat restarted successfully
+[2026-11-05 23:34:15] restart: Requested by Console
+[2026-11-05 23:34:15] restart: Resource 'chat' restarting...
+[2026-11-05 23:34:15] Stopping chat
+[2026-11-05 23:34:15] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:34:15] Starting chat
+[2026-11-05 23:34:15] chat restarted successfully
+[2026-11-05 23:34:22] restart: Requested by Console
+[2026-11-05 23:34:22] restart: Resource 'chat' restarting...
+[2026-11-05 23:34:22] Stopping chat
+[2026-11-05 23:34:22] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:34:22] Starting chat
+[2026-11-05 23:34:22] chat restarted successfully
+[2026-11-05 23:34:34] restart: Requested by Console
+[2026-11-05 23:34:34] restart: Resource 'chat' restarting...
+[2026-11-05 23:34:34] Stopping chat
+[2026-11-05 23:34:34] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:34:34] Starting chat
+[2026-11-05 23:34:34] chat restarted successfully
+[2026-11-05 23:35:15] restart: Requested by Console
+[2026-11-05 23:35:15] restart: Resource 'chat' restarting...
+[2026-11-05 23:35:15] Stopping chat
+[2026-11-05 23:35:15] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:35:15] Starting chat
+[2026-11-05 23:35:15] chat restarted successfully
+[2026-11-05 23:35:17] WARNING: chat\server.lua:200: Bad argument @ 'triggerClientEvent' [Expected string at argument 1, got nil]
+[2026-11-05 23:35:23] WARNING: chat\server.lua:200: Bad argument @ 'triggerClientEvent' [Expected string at argument 1, got nil]
+[2026-11-05 23:36:23] restart: Requested by Console
+[2026-11-05 23:36:23] restart: Resource 'chat' restarting...
+[2026-11-05 23:36:23] Stopping chat
+[2026-11-05 23:36:23] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:36:23] Starting chat
+[2026-11-05 23:36:23] chat restarted successfully
+[2026-11-05 23:36:52] WARNING: 228\script.lua:4289: Bad argument @ 'setPedAnimation' [Expected number at argument 4, got boolean (false)]
+[2026-11-05 23:40:17] WARNING: 228\script.lua:11462: Bad argument @ 'setVehicleDoorOpenRatio' [Expected element at argument 1, got boolean]
+[2026-11-05 23:40:17] Stopping draw_intro
+[2026-11-05 23:40:17] Starting draw_intro
+[2026-11-05 23:40:17] draw_intro restarted successfully
+[2026-11-05 23:41:41] restart: Requested by Console
+[2026-11-05 23:41:41] restart: Resource 'chat' restarting...
+[2026-11-05 23:41:41] Stopping chat
+[2026-11-05 23:41:41] Resource 'chat' changed, reloading and starting
+[2026-11-05 23:41:41] Starting chat
+[2026-11-05 23:41:41] chat restarted successfully
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-05 23:55:42] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-05 23:55:49] Resources: 230 loaded, 0 failed
+[2026-11-05 23:55:49] Starting resources...
+[2026-11-05 23:55:49] Please wait...
+[2026-11-05 23:55:49] Please wait...
+[2026-11-05 23:55:50] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-05 23:55:50] ERROR: 228\script.lua:14450: exports: Call to non-running server resource (chat) [string "?"]
+[2026-11-05 23:55:51] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-05 23:55:51] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-05 23:55:51] Server started and is ready to accept connections!
+[2026-11-05 23:55:51] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-05 23:55:51] Type 'help' for a list of commands.
+[2026-11-05 23:55:56] addaccount: Syntax is 'addaccount <nick> <password>'
+[2026-11-05 23:55:58] Server stopped!
+[2026-11-05 23:55:58] Stopping resources...................
+[2026-11-05 23:55:58] Closing SQLite3 database
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-05 23:56:05] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-05 23:56:11] Resources: 230 loaded, 0 failed
+[2026-11-05 23:56:11] Starting resources...
+[2026-11-05 23:56:11] Please wait...
+[2026-11-05 23:56:11] Please wait...
+[2026-11-05 23:56:12] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-05 23:56:12] ERROR: 228\script.lua:14450: exports: Call to non-running server resource (chat) [string "?"]
+[2026-11-05 23:56:13] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-05 23:56:13] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-05 23:56:13] Server started and is ready to accept connections!
+[2026-11-05 23:56:13] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-05 23:56:13] Type 'help' for a list of commands.
+[2026-11-05 23:56:20] ACCOUNTS: Console added account 'admin'
+[2026-11-06 00:00:13] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24149.0)
+[2026-11-06 00:00:13] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-06 00:00:28] WARNING: 228\script.lua:4289: Bad argument @ 'setPedAnimation' [Expected number at argument 4, got boolean (false)]
+[2026-11-06 00:00:31] ERROR: chat\server.lua:151: bad argument #1 to 'pairs' (table expected, got nil)
+[2026-11-06 00:00:37] WARNING: 228\script.lua:4289: Bad argument @ 'setPedAnimation' [Expected number at argument 4, got boolean (false)]
+[2026-11-06 00:00:46] WARNING: 228\script.lua:4289: Bad argument @ 'setPedAnimation' [Expected number at argument 4, got boolean (false)]
+[2026-11-06 00:00:48] ERROR: chat\server.lua:151: bad argument #1 to 'pairs' (table expected, got nil)
+[2026-11-06 00:00:54] ERROR: chat\server.lua:151: bad argument #1 to 'pairs' (table expected, got nil)
+[2026-11-06 00:00:54] WARNING: 228\script.lua:4289: Bad argument @ 'setPedAnimation' [Expected number at argument 4, got boolean (false)]
+[2026-11-06 00:03:14] restart: Requested by Console
+[2026-11-06 00:03:14] restart: Resource 'chat' restarting...
+[2026-11-06 00:03:14] Stopping chat
+[2026-11-06 00:03:14] Resource 'chat' changed, reloading and starting
+[2026-11-06 00:03:14] Starting chat
+[2026-11-06 00:03:14] chat restarted successfully
+[2026-11-06 00:03:17] WARNING: chat\server.lua:204: Bad argument @ 'triggerClientEvent' [Expected string at argument 1, got nil]
+[2026-11-06 00:03:29] restart: Requested by Console
+[2026-11-06 00:03:29] restart: Resource 'chat' restarting...
+[2026-11-06 00:03:29] Stopping chat
+[2026-11-06 00:03:29] Resource 'chat' changed, reloading and starting
+[2026-11-06 00:03:29] Starting chat
+[2026-11-06 00:03:29] chat restarted successfully
+[2026-11-06 00:03:32] WARNING: chat\server.lua:205: Bad argument @ 'triggerClientEvent' [Expected string at argument 1, got nil]
+[2026-11-06 00:04:59] restart: Requested by Console
+[2026-11-06 00:04:59] restart: Resource 'chat' restarting...
+[2026-11-06 00:04:59] Stopping chat
+[2026-11-06 00:04:59] Resource 'chat' changed, reloading and starting
+[2026-11-06 00:04:59] Starting chat
+[2026-11-06 00:04:59] chat restarted successfully
+[2026-11-06 00:07:40] restart: Requested by Console
+[2026-11-06 00:07:40] restart: Resource 'chat' restarting...
+[2026-11-06 00:07:40] Stopping chat
+[2026-11-06 00:07:40] Resource 'chat' changed, reloading and starting
+[2026-11-06 00:07:40] Starting chat
+[2026-11-06 00:07:40] chat restarted successfully
+[2026-11-06 00:07:54] restart: Requested by Console
+[2026-11-06 00:07:54] restart: Resource 'chat' restarting...
+[2026-11-06 00:07:54] Stopping chat
+[2026-11-06 00:07:54] Resource 'chat' changed, reloading and starting
+[2026-11-06 00:07:54] Starting chat
+[2026-11-06 00:07:54] chat restarted successfully
+[2026-11-06 00:08:32] restart: Requested by Console
+[2026-11-06 00:08:32] restart: Resource 'chat' restarting...
+[2026-11-06 00:08:32] Stopping chat
+[2026-11-06 00:08:32] Resource 'chat' changed, reloading and starting
+[2026-11-06 00:08:32] Starting chat
+[2026-11-06 00:08:32] chat restarted successfully
+[2026-11-06 00:09:15] restart: Requested by Console
+[2026-11-06 00:09:15] restart: Resource 'chat' restarting...
+[2026-11-06 00:09:15] Stopping chat
+[2026-11-06 00:09:15] Resource 'chat' changed, reloading and starting
+[2026-11-06 00:09:15] Starting chat
+[2026-11-06 00:09:15] chat restarted successfully

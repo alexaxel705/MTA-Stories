@@ -1,5 +1,9 @@
-	["Blueberry Acres"] = {
-		[1] = {true, 0, 0, 0, false}, 
-		[2] = {true, 0, 0, 0, false}, 
-		[3] = {true, 0, 0, 0, false}, 
-		[4] = {true, 0, 0, 0
+	["Fern Ridge"] = {
+		[1] = {true, 732.4, 51.2, 57.9, false}, 
+		[2] = {true, 726.2, 66.1, 55.9, false}, 
+		[3] = {true, 722.1, 75.6, 52.3, false}, 
+		[4] = {true, 718.3, 84.9, 47.7, false}, 
+		[5] = {true, 714.4, 94.1, 42.7, false}, 
+		[6] = {true, 717.6, 86.4, 46.9, false}, 
+		[7] = {true, 721.6, 76.9, 51.8, false}, 
+		[8] = {true, 748.2, 13.7, 46.2

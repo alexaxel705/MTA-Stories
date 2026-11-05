@@ -1,4 +1,4 @@
-local SERVER_IP = "mta-stories.3dkv.ru"
+local SERVER_IP = "90.188.88.152"
 setElementData(root, "IP", SERVER_IP)
 local ids = {}
 local OneMinute = 1000 -- 1 минута = 1 секунда

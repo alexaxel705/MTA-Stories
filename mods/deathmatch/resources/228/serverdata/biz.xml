@@ -99,14 +99,14 @@
         <VAC name="Врач"></VAC>
     </MEDSF>
     <AMMOLS owner="." xyz="[1366.5, -1274.2, 13.5]" price="2500000" money="121595"></AMMOLS>
-    <MERLS owner="" price="0" money="0" srok="326" biz="Мэр Los Santos">
+    <MERLS owner="" price="0" money="0" srok="324" biz="Мэр Los Santos">
         <VAC name="Начальник LSPD" jobbiz="PLSPD"></VAC>
     </MERLS>
-    <MERSF owner="" price="0" money="0" srok="379" biz="Мэр San Fierro">
+    <MERSF owner="" price="0" money="0" srok="377" biz="Мэр San Fierro">
         <VAC name="ФБР" jobbiz="FBISF"></VAC>
         <VAC name="Начальник SFPD" jobbiz="PSFPD"></VAC>
     </MERSF>
-    <MERLV owner="" price="0" money="0" srok="380" biz="Мэр Las Venturas">
+    <MERLV owner="" price="0" money="0" srok="378" biz="Мэр Las Venturas">
         <VAC name="Директор ЦРУ" jobbiz="CIASA"></VAC>
     </MERLV>
     <CIASA owner="" xyz="[213.1, 1822.8, 6.4]" price="0" money="0">
