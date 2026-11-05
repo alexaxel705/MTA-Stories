@@ -3760,3 +3760,5 @@ debuguptime              sfakelag
 [2026-11-06 00:09:15] Resource 'chat' changed, reloading and starting
 [2026-11-06 00:09:15] Starting chat
 [2026-11-06 00:09:15] chat restarted successfully
+[2026-11-06 00:23:06] QUIT: alexaxel705 left the game [Quit] 
+[2026-11-06 00:23:11] ERROR: 228\script.lua:12035: Bad argument @ 'removeElementData' [Expected element at argument 1]
