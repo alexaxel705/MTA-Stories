@@ -9459,6 +9459,7 @@ local DeathMatchs = {-- x,y,z,i,d,rz
 	
 }
 local ListDeathmatchs = {}
+local wanktimers = {}
 for name, _ in pairs(DeathMatchs) do
 	ListDeathmatchs[#ListDeathmatchs+1] = name
 end
@@ -13292,7 +13293,6 @@ end
 
 
 
-local wanktimers = {}
 function iznas2(thePlayer, thePed)
 	if(not isTimer(PData[thePlayer]["ActionTimer"])) then
 		if(thePed) then
