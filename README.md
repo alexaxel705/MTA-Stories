@@ -43,5 +43,5 @@
 
 ## Связанные репозитории
 
-- Актуальная разработка: [zoan96/MTA-Stories](https://github.com/zoan96/MTA-Stories)
-- Зеркало: [alexaxel705/MTA-Stories](https://github.com/alexaxel705/MTA-Stories)
+- Оригинальный репозиторий (автор проекта): [alexaxel705/MTA-Stories](https://github.com/alexaxel705/MTA-Stories)
+- Зеркало: тестирование и AI-модернизация — [zoan96/MTA-Stories](https://github.com/zoan96/MTA-Stories)
