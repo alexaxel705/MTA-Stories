@@ -227,7 +227,6 @@ function destroyJob ( thePlayer )
     blips [ thePlayer ] = nil
     peds [ thePlayer ] = nil
 end
-end
 
 function consoleSetPlayerPosition ( source, commandName, posX, posY, posZ )
 	setElementPosition ( source, posX, posY, posZ )
