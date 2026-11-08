@@ -2049,6 +2049,7 @@ addEventHandler("AddPlayerArmas", root, AddPlayerArmas)
 
 
 function RemovePlayerArmas(thePlayer, model)
+	if(not thePlayer or not isElement(thePlayer)) then return end
 	if(getElementData(thePlayer, "armasplus")) then
 		local arr = fromJSON(getElementData(thePlayer, "armasplus"))
 		arr[tostring(model)] = nil
@@ -4286,7 +4287,7 @@ function StartAnimation(thePlayer, block, anim, times, loop, updatePosition, int
 	if(getElementHealth(thePlayer) < 20 and not forced) then
 		return false
 	end
-	setPedAnimation(thePlayer, block, anim, times, loop, updatePosition, interruptable, freezeLastFrame)
+	setPedAnimation(thePlayer, block, anim, tonumber(times) or -1, loop, updatePosition, interruptable, freezeLastFrame)
 	
 	
 	if(block == "FOOD" and anim == "EAT_Vomit_P") then
@@ -11574,7 +11575,10 @@ function restartMode(thePlayer)
 		datess = ""
 		tmpi = 1
 		tmpcity = ""
-		setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 0, 1, 200)
+		local veh = getPedOccupiedVehicle(thePlayer)
+		if(veh and isElement(veh)) then
+			setVehicleDoorOpenRatio(veh, 0, 1, 200)
+		end
 	end
 end
 
@@ -12026,11 +12030,13 @@ function DrinkSprunk(thePlayer, model)
 				AddBizMoney("SPRUNK", 20)
 
 				PData[thePlayer]["anitimer"] = setTimer(function(thePlayer)
+					if(not isElement(thePlayer)) then return end
 					AddPlayerArmas(thePlayer, 2769)
 					StartAnimation(thePlayer, "VENDING", "vend_eat1_P",false,false,false,false)
 					setElementHealth(thePlayer, getElementHealth(thePlayer) + 20)
 
 					PData[thePlayer]["anitimer"] = setTimer(function(thePlayer)
+						if(not isElement(thePlayer)) then return end
 						RemovePlayerArmas(thePlayer, 2769)
 					end, 2600, 1, thePlayer)
 				end, 2500, 1, thePlayer)
@@ -14640,67 +14646,49 @@ end
 
 
 function VehicleBindKeyHood(thePlayer)
-	if(getPedOccupiedVehicleSeat(thePlayer)) then
-		if(getVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 0) == 0) then
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 0, 1, 200)
-		else
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 0, 0, 200)
-		end
+	local veh = getPedOccupiedVehicle(thePlayer)
+	if(veh and isElement(veh) and getPedOccupiedVehicleSeat(thePlayer)) then
+		setVehicleDoorOpenRatio(veh, 0, (getVehicleDoorOpenRatio(veh, 0) == 0) and 1 or 0, 200)
 	end
 end
 
 
 function VehicleBindKeyTrunk(thePlayer)
-	if(getPedOccupiedVehicleSeat(thePlayer)) then
-		if(getVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 1) == 0) then
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 1, 1, 200)
-		else
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 1, 0, 200)
-		end
+	local veh = getPedOccupiedVehicle(thePlayer)
+	if(veh and isElement(veh) and getPedOccupiedVehicleSeat(thePlayer)) then
+		setVehicleDoorOpenRatio(veh, 1, (getVehicleDoorOpenRatio(veh, 1) == 0) and 1 or 0, 200)
 	end
 end
 
 
 function VehicleBindKeyFL(thePlayer)
-	if(getPedOccupiedVehicleSeat(thePlayer)) then
-		if(getVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 2) == 0) then
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 2, 1, 200)
-		else
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 2, 0, 200)
-		end
+	local veh = getPedOccupiedVehicle(thePlayer)
+	if(veh and isElement(veh) and getPedOccupiedVehicleSeat(thePlayer)) then
+		setVehicleDoorOpenRatio(veh, 2, (getVehicleDoorOpenRatio(veh, 2) == 0) and 1 or 0, 200)
 	end
 end
 
 
 function VehicleBindKeyFR(thePlayer)
-	if(getPedOccupiedVehicleSeat(thePlayer)) then
-		if(getVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 3) == 0) then
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 3, 1, 200)
-		else
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 3, 0, 200)
-		end
+	local veh = getPedOccupiedVehicle(thePlayer)
+	if(veh and isElement(veh) and getPedOccupiedVehicleSeat(thePlayer)) then
+		setVehicleDoorOpenRatio(veh, 3, (getVehicleDoorOpenRatio(veh, 3) == 0) and 1 or 0, 200)
 	end
 end
 
 
 function VehicleBindKeyRL(thePlayer)
-	if(getPedOccupiedVehicleSeat(thePlayer)) then
-		if(getVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 4) == 0) then
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 4, 1, 200)
-		else
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 4, 0, 200)
-		end
+	local veh = getPedOccupiedVehicle(thePlayer)
+	if(veh and isElement(veh) and getPedOccupiedVehicleSeat(thePlayer)) then
+		setVehicleDoorOpenRatio(veh, 4, (getVehicleDoorOpenRatio(veh, 4) == 0) and 1 or 0, 200)
 	end
 end
 
 
 function VehicleBindKeyRR(thePlayer)
-	if(getPedOccupiedVehicleSeat(thePlayer)) then
-		if(getVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 5) == 0) then
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 5, 1, 200)
-		else
-			setVehicleDoorOpenRatio(getPedOccupiedVehicle(thePlayer), 5, 0, 200)
-		end
+	local veh = getPedOccupiedVehicle(thePlayer)
+	if(veh and isElement(veh) and getPedOccupiedVehicleSeat(thePlayer)) then
+		setVehicleDoorOpenRatio(veh, 5, (getVehicleDoorOpenRatio(veh, 5) == 0) and 1 or 0, 200)
 	end
 end
 
