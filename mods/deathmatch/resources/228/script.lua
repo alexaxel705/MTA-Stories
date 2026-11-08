@@ -15311,8 +15311,10 @@ function hesoyam(thePlayer)
 	AddPlayerMoney(thePlayer, 25000)
 	setPedArmor(thePlayer, 100)
 	local theVehicle = getPedOccupiedVehicle(thePlayer)
-	if(theVehicle) then fixVehicle(theVehicle) end
-	exports["deformation"]:resetVehicleDeformation(theVehicle)
+	if(theVehicle) then
+		fixVehicle(theVehicle)
+		exports["deformation"]:resetVehicleDeformation(theVehicle)
+	end
 end
 addEvent("hesoyam", true)
 addEventHandler("hesoyam", resourceRoot, hesoyam)

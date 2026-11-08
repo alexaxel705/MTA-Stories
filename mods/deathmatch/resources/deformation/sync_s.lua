@@ -1,5 +1,6 @@
 addEvent("updateVehicleDeformation", true)
 addEventHandler("updateVehicleDeformation", resourceRoot, function(vehicle)
+	if(not vehicle or not isElement(vehicle) or getElementType(vehicle) ~= "vehicle") then return end
 	triggerClientEvent(root, "updateVehicleDeformation", root, vehicle)
 end)
 
@@ -13,6 +14,7 @@ function getVehicleDeformation(vehicle)
 end
 
 function setVehicleDeformation(vehicle, data)
+	if(not vehicle or not isElement(vehicle) or getElementType(vehicle) ~= "vehicle") then return false end
 	deformations = {}
 	for i = 1,22 do
 		deformations["deformationPos" .. i] = {0, 0, 0}
@@ -25,6 +27,7 @@ function setVehicleDeformation(vehicle, data)
 end
 
 function resetVehicleDeformation(vehicle)
+	if(not vehicle or not isElement(vehicle) or getElementType(vehicle) ~= "vehicle") then return false end
 	deformations = {}
 	for i = 1,22 do
 		deformations["deformationPos" .. i] = {0, 0, 0}
