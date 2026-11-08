@@ -378,6 +378,7 @@ end
 
 
 function GetZoneName(x,y,z, citiesonly, City)
+	if(not x or not y or not z) then return "Unknown" end
 	if(City) then
 		if(City == "Liberty City") then 
 			if(not citiesonly) then -- Если ничего не находит отображает название больших районов

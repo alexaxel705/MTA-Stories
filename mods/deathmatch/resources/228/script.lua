@@ -3917,6 +3917,7 @@ end
 
 
 function GetPlayerLocation(thePlayer)
+	if(not thePlayer or not isElement(thePlayer)) then return false, false, false end
 	if(getElementInterior(thePlayer) == 0) then
 		return getElementPosition(thePlayer)
 	else
@@ -9488,6 +9489,7 @@ function SpawnthePlayer(thePlayer, typespawn, zone)
 
 	if(not zone) then
 		local x,y,z = GetPlayerLocation(thePlayer)
+		if(not x) then return false end
 		zone = exports["ps2_weather"]:GetZoneName(x,y,z,true, getElementData(thePlayer, "City"))
 	end
 	
@@ -12485,6 +12487,11 @@ function quitPlayer()
 		end
 		PData[source] = nil
 	end
+
+	if(isTimer(wanktimers[source])) then
+		killTimer(wanktimers[source])
+	end
+	wanktimers[source] = nil
 end
 addEventHandler("onPlayerQuit", root, quitPlayer)
 
@@ -13555,26 +13562,33 @@ addEventHandler("razd", root, razd)
 
 
 
+local WANK_POS = {351.9, 163.9, 1020.7}
+local WANK_RADIUS = 10
+
 function wank(thePlayer, command, h)
 	if(isTimer(wanktimers[thePlayer])) then
 		outputChatBox("#FF0033Не встает!", thePlayer, 255,255,255,true)
-	else
-		local x,y,z = getElementPosition(thePlayer)
-		if(getDistanceBetweenPoints3D(x, y, z, 351.9, 163.9, 1020.7) < 10) then
-			local playeraccount = getPlayerAccount(thePlayer)
+		return
+	end
+
+	local x,y,z = getElementPosition(thePlayer)
+
+	StartAnimation(thePlayer, "PAULNMAC", "wank_out",false,false,false,false)
+	wanktimers[thePlayer] = setTimer(function() end, 240000, 1)
+
+	if(getDistanceBetweenPoints3D(x, y, z, WANK_POS[1], WANK_POS[2], WANK_POS[3]) < WANK_RADIUS) then
+		setTimer(function()
+			if(not isElement(thePlayer)) then return end
+			local nx,ny,nz = getElementPosition(thePlayer)
+			if(getDistanceBetweenPoints3D(nx, ny, nz, WANK_POS[1], WANK_POS[2], WANK_POS[3]) >= WANK_RADIUS) then return end
 			local money = GetDatabaseAccount(thePlayer, "kresp")+GetDatabaseAccount(thePlayer, "ballas")+GetDatabaseAccount(thePlayer, "civilian")+
 			GetDatabaseAccount(thePlayer, "grove")+GetDatabaseAccount(thePlayer, "police")+GetDatabaseAccount(thePlayer, "ugol")
 			if(money > 0) then
-				setTimer(function()
-					AddPlayerMoney(thePlayer, money*10, "СПЕРМА СДАНА!")
-				end, 7000, 1)
+				AddPlayerMoney(thePlayer, money*10, "СПЕРМА СДАНА!")
 			else
 				outputChatBox("Твоя сперма никому не нужна...", thePlayer, 255,255,255, true)
 			end
-		end
-
-		StartAnimation(thePlayer, "PAULNMAC", "wank_out",false,false,false,false)
-		wanktimers[thePlayer] = setTimer(function() end, 240000, 1)
+		end, 7000, 1)
 	end
 end
 addEvent("wank", true)
