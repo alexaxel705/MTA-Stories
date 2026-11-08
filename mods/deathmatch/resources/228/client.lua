@@ -1728,6 +1728,33 @@ addEventHandler("PoliceAddMarker", root, PoliceAddMarker)
 
 
 
+-- Расследование: коп видит разыскиваемого — репорт позиции (throttle 2 сек)
+local LastPoliceSpot = 0
+setTimer(function()
+	if(getElementData(localPlayer, "PlayerStatus") ~= "play") then return end
+	local myTeam = getTeamName(getPlayerTeam(localPlayer))
+	if(not myTeam or getTeamGroup(myTeam) ~= "Официалы") then return end
+	for _,target in pairs(getElementsByType "player") do
+		if(isElementStreamedIn(target) and target ~= localPlayer) then
+			local wanted = tonumber(getElementData(target, "WantedLevel")) or 0
+			if(wanted > 0) then
+				local tx,ty,tz = getPedBonePosition(target, 8)
+				local mx,my,mz = getPedBonePosition(localPlayer, 8)
+				if(tx and mx and getDistanceBetweenPoints3D(tx,ty,tz,mx,my,mz) < 100
+					and isLineOfSightClear(mx,my,mz,tx,ty,tz,true,true,false,true)) then
+					local now = getTickCount()
+					if(now - LastPoliceSpot > 2000) then
+						LastPoliceSpot = now
+						triggerServerEvent("PoliceSpot", localPlayer, target)
+					end
+				end
+			end
+		end
+	end
+end, 2000, 0)
+
+
+
 
 
 

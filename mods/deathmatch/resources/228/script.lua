@@ -4441,6 +4441,9 @@ CreateEnter(-2172.4, 679.9, 55.2, 270, 0, 0, false, 2548.8, -1294.6, 1061, 270, 
 
 
 
+-- Состояние розыска: [player] = {pos, lastSeen, searching, fade, bx, by}
+local WantedSearch = {}
+
 function WantedLevel(thePlayer, count)
 	if(getElementData(thePlayer, "AEZAKMI") or PData[thePlayer]["DeathMatch"]) then
 		if(count == "AEZAKMI") then
@@ -4477,10 +4480,124 @@ function WantedLevel(thePlayer, count)
 	
 		SetDatabaseAccount(thePlayer, "wanted", wanted)
 		setElementData(thePlayer, "WantedLevel", wanted)
+
+		-- Расследование: синхронизация состояния розыска
+		if(isElement(thePlayer) and getElementType(thePlayer) == "player") then
+			if(wanted > 0) then
+				if(not WantedSearch[thePlayer]) then
+					local px,py,pz = getElementPosition(thePlayer)
+					WantedSearch[thePlayer] = {pos={px,py,pz}, lastSeen=getTickCount(), searching=false, fade=0}
+				end
+				setElementData(thePlayer, "WantedSearching", WantedSearch[thePlayer].searching)
+			else
+				WantedSearch[thePlayer] = nil
+				setElementData(thePlayer, "WantedSearching", false)
+			end
+		end
 	end
 end
 addEvent("WantedLevel", true)
 addEventHandler("WantedLevel", root, WantedLevel)
+
+
+
+-- === Расследование ( WitnessedCrime / PoliceSpot / затухание ) ===
+
+-- Проверка свидетелей преступления.
+-- isNoise = true: шум (сигнализация/тревога) — LOS не требуется, звёзды выдаются всегда, вызов полиции всем копам в радиусе.
+-- Возвращает true, если преступление увидено/услышано.
+function WitnessedCrime(criminal, count, info, radius, isNoise)
+	if(not isElement(criminal) or getElementType(criminal) ~= "player") then return false end
+	if(getElementData(criminal, "AEZAKMI") or PData[criminal]["DeathMatch"]) then return false end
+	local x,y,z = getElementPosition(criminal)
+	local dim = getElementDimension(criminal)
+	local seen = false
+	local witness
+	for _,w in pairs(getElementsByType "player") do
+		if(w ~= criminal and getElementDimension(w) == dim) then
+			local wx,wy,wz = getElementPosition(w)
+			if(getDistanceBetweenPoints3D(x,y,z,wx,wy,wz) < (radius or 60)) then
+				if(isNoise or isLineOfSightClear(x,y,z,wx,wy,wz,true,true,false,true)) then
+					seen = true
+					witness = w
+					if(getTeamGroup(getTeamName(getPlayerTeam(w))) == "Официалы") then break end
+				end
+			end
+		end
+	end
+	if(seen) then
+		WantedLevel(criminal, count)
+		if(not WantedSearch[criminal]) then
+			WantedSearch[criminal] = {pos={x,y,z}, lastSeen=getTickCount(), searching=false, fade=0}
+		end
+		PoliceCallRemove(x,y,z, info)
+	end
+	return seen
+end
+
+-- Коп видит разыскиваемого: обновление last known position (throttle на клиенте)
+addEvent("PoliceSpot", true)
+addEventHandler("PoliceSpot", root, function(target)
+	if(not isElement(target) or not isElement(client)) then return end
+	if(getElementType(target) ~= "player" or getElementType(client) ~= "player") then return end
+	if(getTeamGroup(getTeamName(getPlayerTeam(client))) ~= "Официалы") then return end
+	local wanted = tonumber(getElementData(target, "WantedLevel")) or 0
+	if(wanted <= 0) then return end
+	local tx,ty,tz = getElementPosition(target)
+	local cx,cy,cz = getElementPosition(client)
+	if(getElementDimension(target) ~= getElementDimension(client)) then return end
+	if(getDistanceBetweenPoints3D(tx,ty,tz,cx,cy,cz) > 100) then return end
+
+	local st = WantedSearch[target]
+	local wasSearching = st and st.searching
+	local bx, by
+	if(st) then bx, by = st.bx, st.by end
+	WantedSearch[target] = {pos={tx,ty,tz}, lastSeen=getTickCount(), searching=false, fade=0, bx=bx, by=by}
+	setElementData(target, "WantedSearching", false)
+
+	-- Обновить маркер копам, если цель сместилась далеко от последней рассылки или вышла из режима поиска
+	if(not bx or getDistanceBetweenPoints3D(tx,ty,tz,bx,by,tz) > 50 or wasSearching) then
+		WantedSearch[target].bx, WantedSearch[target].by = tx, ty
+		local city = getZoneName(tx,ty,tz,true)
+		for _,thePlayers in pairs(getElementsByType "player") do
+			if(getTeamGroup(getTeamName(getPlayerTeam(thePlayers))) == "Официалы") then
+				local px,py,pz = getElementPosition(thePlayers)
+				if(getZoneName(px,py,pz,true) == city) then
+					triggerClientEvent(thePlayers, "PoliceAddMarker", thePlayers, tx, ty, tz-1, "Разыскиваемый замечен")
+				end
+			end
+		end
+	end
+end)
+
+-- Потеря контакта: статус "поиск" и медленное затухание звёзд
+setTimer(function()
+	local now = getTickCount()
+	for player,st in pairs(WantedSearch) do
+		if(not isElement(player)) then
+			WantedSearch[player] = nil
+		else
+			local wanted = tonumber(getElementData(player, "WantedLevel")) or 0
+			if(wanted <= 0) then
+				WantedSearch[player] = nil
+				setElementData(player, "WantedSearching", false)
+			else
+				local hideTime = 45000 + (wanted-1)*15000
+				if(now - st.lastSeen > hideTime) then
+					if(not st.searching) then
+						st.searching = true
+						setElementData(player, "WantedSearching", true)
+					end
+					st.fade = (st.fade or 0) + 1
+					if(st.fade >= 60) then -- затухание ~0.05 звезды в минуту
+						st.fade = 0
+						WantedLevel(player, -0.05)
+					end
+				end
+			end
+		end
+	end
+end, 1000, 0)
 
 
 
@@ -4578,14 +4695,13 @@ function AddRobPresure(thePed, count)
 
 
 	if(RobPresure[thePed]["presure"] == 100) then
-		WantedLevel(thePlayer, 1)
+		-- Ограбление — шум: звёзды и вызов полиции всегда (как в оригинале)
+		WitnessedCrime(thePlayer, 1, "Ограбление", 150, true)
 		AddPlayerMoney(thePlayer, math.random(1,5000), "МАГАЗИН ОГРАБЛЕН!")
 
 		setTimer(function(thePlayer) triggerClientEvent(thePlayer, "PlaySFXClient", thePlayer, "script", 80, RobVoice[math.random(1,#RobVoice)]) end, 1000, 1, thePlayer)
 		StartAnimation(thePed, "SHOP", RobAnimation[math.random(1,#RobAnimation)],-1,false,false,false)
 
-		local x,y,z = GetPlayerLocation(thePlayer)
-		PoliceCallRemove(x,y,z,"Ограбление")
 		StopRob(thePlayer, thePed)
 		return true
 	end
@@ -4702,9 +4818,7 @@ function laltEnteredPickup(thePlayer)
 							if(getElementData(theVehicle, "x") == xmlNodeGetAttribute(node, "vx") and getElementData(theVehicle, "y") == xmlNodeGetAttribute(node, "vy") and getElementData(theVehicle, "z") == xmlNodeGetAttribute(node, "vz")) then
 								xmlDestroyNode(node)
 								if(getElementData(theVehicle, "owner") ~= getPlayerName(thePlayer)) then
-									WantedLevel(thePlayer, 1.5)
-									local x2,y2,z2 = getElementPosition(thePlayer)
-									PoliceCallRemove(x2,y2,z2 "Продажа угнанного автомобиля")
+									WitnessedCrime(thePlayer, 1.5, "Продажа угнанного автомобиля", 60, false)
 								end
 								local vmodelH = getVehicleHandling(theVehicle)
 								AddPlayerMoney(thePlayer, vmodelH["monetary"]/4, "Транспорт продан!")
@@ -12759,7 +12873,7 @@ function player_Wasted(ammo, killer, weapon, bodypart, stealth)
 
 				if(PTeam == "Мирные жители" and KTeam ~= "Полиция") then
 					Respect(killer, "civilian", -1)
-					WantedLevel(killer, 1)
+					WitnessedCrime(killer, 1, "Убийство", 80, false)
 				elseif(PTeam == "Баллас" or PTeam == "Колумбийский картель" or PTeam == "Русская мафия") then
 					Respect(killer, "grove", 1)
 					Respect(killer, "ballas", -1)
@@ -12774,7 +12888,7 @@ function player_Wasted(ammo, killer, weapon, bodypart, stealth)
 					Respect(killer, "ugol", 3)
 					Respect(killer, "police", -3)
 					Respect(killer, "civilian", -3)
-					WantedLevel(killer, 1)
+					WitnessedCrime(killer, 1, "Убийство полицейского", 80, false)
 				elseif(PTeam == "Деревенщины") then
 					Respect(killer, "ugol", -1)
 				elseif(PTeam == "Уголовники" and KTeam == "Уголовники") then
@@ -13675,7 +13789,7 @@ function playerDamage(attacker, weapon, bodypart, loss)
 			local PTeam = getTeamName(getPlayerTeam(source))
 			local KTeam = getTeamName(getPlayerTeam(attacker))
 			if(getTeamGroup(PTeam) == "Официалы" and KTeam ~= "Уголовники") then
-				WantedLevel(attacker, 0.1)
+				WitnessedCrime(attacker, 0.1, "Нападение на официала", 80, false)
 			end
 			if(weapon >= 0 and weapon <= 9) then
 				if(loss > 0) then
@@ -14435,8 +14549,7 @@ function CheckSiren(theVehicle, thePlayer)
 						end
 					end, 15000, 1)
 					local x,y,z = getElementPosition(theVehicle)
-					PoliceCallRemove(x,y,z,"Сработала сигнализация")
-					if(thePlayer) then WantedLevel(thePlayer, 0.2) end
+					WitnessedCrime(thePlayer, 0.2, "Сработала сигнализация", 150, true)
 				end
 			end
 		end

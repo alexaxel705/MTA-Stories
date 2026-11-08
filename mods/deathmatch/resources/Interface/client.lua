@@ -3711,10 +3711,15 @@ function DrawPlayer()
 	if(not getElementData(localPlayer, "AEZAKMI")) then
 		if(tonumber(wanted)) then
 			local WantedPosX, WantedPosY = 20*scalex, 290*scaley
+			-- Розыск в режиме "поиска": звёзды мигают — копы потеряли контакт
+			local searchBlink = 255
+			if(getElementData(localPlayer, "WantedSearching")) then
+				searchBlink = (math.floor(getTickCount()/500)%2 == 0) and 200 or 60
+			end
 			dxDrawBorderedText("★★★★★★", WantedPosX, WantedPosY, 0, 0, tocolor(40,40,40,200), scale*1.13, "pricedown", "left", "top")
 			local tws = dxGetTextWidth("★", scale*1.13, "pricedown", false)
 			for i = 1, math.ceil(tonumber(wanted)) do
-				dxDrawBorderedText("★", WantedPosX+dxGetTextWidth("★★★★★★", scale*1.13, "pricedown", false)-(tws*i), WantedPosY, 0, 0, tocolor(255,165,0, 200),scale*1.13, "pricedown", "left", "top", nil, nil, nil, true, false)
+				dxDrawBorderedText("★", WantedPosX+dxGetTextWidth("★★★★★★", scale*1.13, "pricedown", false)-(tws*i), WantedPosY, 0, 0, tocolor(255,165,0, searchBlink),scale*1.13, "pricedown", "left", "top", nil, nil, nil, true, false)
 			end
 			
 		end
