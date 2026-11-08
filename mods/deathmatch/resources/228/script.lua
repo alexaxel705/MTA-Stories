@@ -13784,6 +13784,8 @@ end
 
 
 function playerDamage(attacker, weapon, bodypart, loss)
+	loss = tonumber(loss) or 0
+	if(loss <= 0) then return end
 	if(attacker) then
 		if(getElementType(attacker) == "player") then
 			local PTeam = getTeamName(getPlayerTeam(source))
