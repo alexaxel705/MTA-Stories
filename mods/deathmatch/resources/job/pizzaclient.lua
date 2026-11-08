@@ -101,6 +101,26 @@ function cleanupPickups()
 	createdPickups = {}
 end
 
+-- страховка: при остановке ресурса чистим всё, что могли создать
+addEventHandler("onClientResourceStop", resourceRoot,
+	function()
+		cleanupPickups()
+	end
+)
+
+-- страховка: смерть во время работы тоже завершает смену и чистит радар
+addEventHandler("onClientPlayerWasted", localPlayer,
+	function()
+		if getElementData ( localPlayer, "pizza_working" ) then
+			cleanupPickups()
+			triggerServerEvent ( "finitoWork_pizza", localPlayer )
+			setElementData ( localPlayer, "pizza_working", false )
+			setElementData ( localPlayer, "pizza_working_hit", 0 )
+			outputChatBox ( "Вы закончили работу", 255, 255, 255, true )
+		end
+	end
+)
+
 addEventHandler("onClientVehicleExit", getRootElement(),
     function(thePlayer, seat)
         if thePlayer == getLocalPlayer() then

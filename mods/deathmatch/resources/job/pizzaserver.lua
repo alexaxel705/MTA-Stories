@@ -28,6 +28,17 @@ function finitoWorkS ()
 end
 addEventHandler ( "finitoWork_pizza", root, finitoWorkS )
 
+-- чистим рабочий байк при выходе игрока с сервера, иначе он остаётся в мире
+addEventHandler ( "onPlayerQuit", root,
+	function ()
+		local veh = getElementData ( source, "working_veh" )
+		if isElement ( veh ) then
+			destroyElement ( veh )
+		end
+		setElementData ( source, "working_veh", false )
+	end
+)
+
 addEvent ( "giveMoneyFromClient_pizza", true )
 
 function giveMoneyFromClientS (amount)
