@@ -2064,6 +2064,7 @@ addEventHandler("RemovePlayerArmas", root, RemovePlayerArmas)
 
 
 function UpdateVehicleHandling(theVehicle, arr)
+	if(not theVehicle or not isElement(theVehicle) or type(arr) ~= "table") then return end
 	setElementData(theVehicle, "handl", toJSON(arr), false)
 	local engine,turbo,transmission,suspension,brakes,tires = arr[1], arr[2], arr[3], arr[4], arr[5], arr[6]
 
@@ -3648,7 +3649,11 @@ local ModificationVehicle = {
 }
 
 function UpgradePreload(thePlayer, name, upgr)
-	local comp = fromJSON(PData[thePlayer]["theVehicleTuningHandl"])
+	if(not thePlayer or not isElement(thePlayer) or not PData[thePlayer]) then return false end
+	local rawHandl = PData[thePlayer]["theVehicleTuningHandl"]
+	if(type(rawHandl) ~= "string") then return false end
+	local comp = fromJSON(rawHandl)
+	if(type(comp) ~= "table") then return false end
 	if(upgr and name) then
 		local oldpart = comp[ModificationVehicle[upgr]]
 		comp[ModificationVehicle[upgr]] = name
