@@ -1,5 +1,6 @@
 ﻿jobpizza = createMarker ( 2103.845,-1809.484,12.554, "cylinder", 1.5, 255, 0, 0, 170 )
-myBlip = createBlipAttachedTo ( jobpizza, 29 )
+-- значок точки найма виден только при подъезде (200 м)
+myBlip = createBlipAttachedTo ( jobpizza, 29, 2, 255, 0, 0, 255, 0, 200 )
 
 give_skin = 155 -- скин, который выдается работнику
 function enter (element)

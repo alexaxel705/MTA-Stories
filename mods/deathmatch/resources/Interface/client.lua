@@ -4348,7 +4348,8 @@ function GPS(x,y,z,info,after)
 	end
 	local GPSM = createMarker(x, y, z, "checkpoint", 5, 255, 50, 50, 170)
 	setElementData(GPSM , "type", "GPS")
-	GPSObject[GPSM] = createBlipAttachedTo(GPSM)
+	-- блип GPS-маркера виден только при подъезде (200 м), маршрут ведёт по GPS-линии
+	GPSObject[GPSM] = createBlipAttachedTo(GPSM, 0, 2, 255, 255, 255, 255, 0, 200)
 	if(x ~= 228 and y ~= 228 and z ~= 228) then
 		local px, py, pz = getElementPosition(localPlayer)
 		triggerServerEvent("GetPathByCoordsNEW", localPlayer, localPlayer, px, py, pz, x,y,z)

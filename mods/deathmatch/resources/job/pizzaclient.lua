@@ -75,7 +75,8 @@ function startWorking ()
 			setElementData ( pick, "pizza_pickup", true )
 			setElementData ( pick, "id", i )
 			if i == 1 then
-				local icon = createBlipAttachedTo ( pick, 41, 2 )
+				-- иконка цели доставки видна только при подъезде (200 м)
+				local icon = createBlipAttachedTo ( pick, 41, 2, 255, 255, 255, 255, 0, 200 )
 				setElementData ( pick, "icon", icon )
 			end
 			table.insert (createdPickups, pick)
@@ -162,7 +163,8 @@ function clientPickupHit(thePlayer, matchingDimension)
 			return true
 		end
 		if createdPickups[hitted+1] then
-			local icon = createBlipAttachedTo ( createdPickups[hitted+1], 41, 2 )
+			-- иконка следующей цели видна только при подъезде (200 м)
+			local icon = createBlipAttachedTo ( createdPickups[hitted+1], 41, 2, 255, 255, 255, 255, 0, 200 )
 			setElementData ( createdPickups[hitted+1], "icon", icon )
 		end
 	end
