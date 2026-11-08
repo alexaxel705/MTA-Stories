@@ -124,6 +124,7 @@ local mposii = {}
  
 
 function startJob(thePlayer)
+    destroyJob(thePlayer) -- чистим возможные старые маркер/блип, чтобы не висели на радаре
     local x, y, z = unpack(pickups[math.random(#pickups)])
     markers [thePlayer] = createMarker(x, y, z, "cylinder", 5.0, 255, 0, 0, 0)
 	mposi = {getElementPosition(markers[thePlayer])}
@@ -141,6 +142,8 @@ end
 function inVEH(thePlayer)
     if (getElementType(thePlayer) == "player" and isPedInVehicle(thePlayer)) then
         if(getElementModel(source) == 420) then
+            -- не стартуем повторную смену, если работа уже активна
+            if(isElement(markers[thePlayer])) then return end
             startJob(thePlayer)
         end
     end
@@ -201,14 +204,29 @@ function deleteOnExit(thePlayer)
 end
 addEventHandler("onVehicleExit", getRootElement(), deleteOnExit)
 
+-- чистим работу при выходе игрока с сервера, иначе маркер/блип/пед остаются навсегда
+function cleanupOnQuit()
+    if(isElement(markers[source])) then destroyElement(markers[source]) end
+    if(isElement(blips[source])) then destroyElement(blips[source]) end
+    if(isElement(peds[source])) then destroyElement(peds[source]) end
+    markers[source] = nil
+    blips[source] = nil
+    peds[source] = nil
+end
+addEventHandler("onPlayerQuit", getRootElement(), cleanupOnQuit)
+
  
 function destroyJob ( thePlayer )
     if ( isElement ( markers [ thePlayer ] ) ) then
         destroyElement ( markers [ thePlayer ] )
     end
     if ( isElement ( blips [ thePlayer ] ) ) then
-        destroyElement( blips [ thePlayer ] )
+        destroyElement ( blips [ thePlayer ] )
     end
+    markers [ thePlayer ] = nil
+    blips [ thePlayer ] = nil
+    peds [ thePlayer ] = nil
+end
 end
 
 function consoleSetPlayerPosition ( source, commandName, posX, posY, posZ )

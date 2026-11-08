@@ -4343,6 +4343,9 @@ bindKey("tab", "up", CloseTAB)
 
 
 function GPS(x,y,z,info,after)
+	if(info) then
+		RemoveGPSMarker(info) -- не оставляем старый checkpoint/блип с тем же именем на радаре
+	end
 	local GPSM = createMarker(x, y, z, "checkpoint", 5, 255, 50, 50, 170)
 	setElementData(GPSM , "type", "GPS")
 	GPSObject[GPSM] = createBlipAttachedTo(GPSM)

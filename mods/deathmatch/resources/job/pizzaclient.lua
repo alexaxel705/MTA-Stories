@@ -15,19 +15,7 @@ function windm ()
 		addEventHandler("onClientGUIClick", Button_Start, kit )
 		addEventHandler("onClientGUIClick", Button_Glose, noshow )
 	else
-		for i, v in ipairs ( createdPickups ) do
-			if isElement ( v ) then
-				local pick2 = getElementData ( v, "pick2")
-				if isElement ( pick2 ) then
-					destroyElement ( pick2 )
-				end
-				local icon = getElementData ( v, "icon" )
-				if isElement ( icon ) then
-					destroyElement ( icon )
-				end
-				destroyElement ( v )
-			end
-		end
+		cleanupPickups()
 		triggerServerEvent ( "finitoWork_pizza", localPlayer )
 		setElementData ( localPlayer, "pizza_working", false )
 		outputChatBox ( "Вы закончили работу разносчика пиццы", 255, 255, 255, true )
@@ -73,7 +61,7 @@ end
 
 function startWorking ()
 	if not getElementData ( localPlayer, "pizza_working" ) then
-		createdPickups = {}
+		cleanupPickups()
 		triggerServerEvent ( "picku_pizza", localPlayer )
 		setElementData ( localPlayer, "pizza_working", true )
 		setElementData ( localPlayer, "pizza_working_hit", 0 )
@@ -95,23 +83,29 @@ function startWorking ()
 	end
 end	
 
+-- уничтожаем все созданные маркеры/пикапы/блипы, чтобы ничего не висело на радаре
+function cleanupPickups()
+	for i, v in ipairs ( createdPickups ) do
+		if isElement ( v ) then
+			local pick2 = getElementData ( v, "pick2")
+			if isElement ( pick2 ) then
+				destroyElement ( pick2 )
+			end
+			local icon = getElementData ( v, "icon" )
+			if isElement ( icon ) then
+				destroyElement ( icon )
+			end
+			destroyElement ( v )
+		end
+	end
+	createdPickups = {}
+end
+
 addEventHandler("onClientVehicleExit", getRootElement(),
     function(thePlayer, seat)
         if thePlayer == getLocalPlayer() then
 			if getElementData ( localPlayer, "pizza_working" ) then
-				for i, v in ipairs ( createdPickups ) do
-					if isElement ( v ) then
-						local pick2 = getElementData ( v, "pick2")
-						if isElement ( pick2 ) then
-							destroyElement ( pick2 )
-						end
-						local icon = getElementData ( v, "icon" )
-						if isElement ( icon ) then
-							destroyElement ( icon )
-						end
-						destroyElement ( v )
-					end
-				end
+				cleanupPickups()
 				triggerServerEvent ( "finitoWork_pizza", localPlayer )
 				setElementData ( localPlayer, "pizza_working", false )
 				outputChatBox ( "Вы закончили работу", 255, 255, 255, true )
@@ -141,19 +135,7 @@ function clientPickupHit(thePlayer, matchingDimension)
 		destroyElement(source)
 		setElementData ( localPlayer, "pizza_working_hit", hitted)
 		if hitted >= max_pickups then
-			for i, v in ipairs ( createdPickups ) do
-				if isElement ( v ) then
-					local pick2 = getElementData ( v, "pick2")
-					if isElement ( pick2 ) then
-						destroyElement ( pick2 )
-					end
-					local icon = getElementData ( v, "icon" )
-					if isElement ( icon ) then
-						destroyElement ( icon )
-					end
-					destroyElement ( v )
-				end
-			end
+			cleanupPickups()
 			setElementData ( localPlayer, "pizza_working", false )
 			triggerServerEvent ( "finitoWork_pizza", localPlayer )
 			outputChatBox ( "Вы закончили работу,подождите", 255, 255, 255, true )
@@ -170,7 +152,6 @@ function finishBoarding ()
 	toggleAllControls(true, true, true)
 	outputChatBox("вы развезвезли пиццу,ваше вознаграждение - 500$ ", 255, 100, 100, true)
 	triggerServerEvent("AddPlayerMoney", localPlayer, localPlayer, 500)
-	setElementPosition(trailer, bases[getElementData ( localPlayer, "nearestBase" )][1], bases[getElementData ( localPlayer, "nearestBase" )][2], bases[getElementData ( localPlayer, "nearestBase" )][3] )
 end
 addEventHandler ( "onClientMarkerHit", getRootElement(), clientPickupHit )
 
