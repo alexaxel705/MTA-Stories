@@ -357,37 +357,39 @@ function CreateJustPed(pedmodel,x,y,z,rz,city,district)
 	end
 	
 	local thePed = createPed(pedmodel, x,y,z, rz)
-	setElementData(thePed, "team", SkinData[pedmodel][2])
-	setPedWalkingStyle(thePed, SkinData[pedmodel][1])
-		
-	local name = SkinData[pedmodel][3]
-	if(SkinData[pedmodel][6]) then
-		name = SkinData[pedmodel][6][math.random(#SkinData[pedmodel][6])]
+	local skin = SkinData[pedmodel]
+	if(not skin) then skin = SkinData[299]; pedmodel = 299 end -- fallback на CJ-подобный мирный скин
+	setElementData(thePed, "team", skin[2])
+	setPedWalkingStyle(thePed, skin[1])
+
+	local name = skin[3]
+	if(skin[6]) then
+		name = skin[6][math.random(#skin[6])]
 	end
 
 	local botinv = {}
-	if(SkinData[pedmodel][4]) then
-		botinv[#botinv+1] = {["txd"] = FoundWName(SkinData[pedmodel][4]), ["name"] = FoundWName(SkinData[pedmodel][4])}
-		giveWeapon(thePed, SkinData[pedmodel][4], 9999, true)
+	if(skin[4]) then
+		botinv[#botinv+1] = {["txd"] = FoundWName(skin[4]), ["name"] = FoundWName(skin[4])}
+		giveWeapon(thePed, skin[4], 9999, true)
 	end
 
 	local randitem = math.random(20)
 
 	if(randitem == 1) then
-		if(SkinData[pedmodel][2] == "Мирные жители") then
+		if(skin[2] == "Мирные жители") then
 			botinv[#botinv+1] = {["txd"] = "Пакет", ["name"] = "Пакет"}
 			name=name.." с пакетом"
 		end
 	elseif(randitem == 2) then
-		if(SkinData[pedmodel][2] == "Мирные жители") then
+		if(skin[2] == "Мирные жители") then
 			botinv[#botinv+1] = {["txd"] = "Чемодан", ["name"] = "Чемодан"}
 			name=name.." с чемоданом"
 		end
 	elseif(randitem == 3) then
-		if(SkinData[pedmodel][3] == "Мужчина") then
+		if(skin[3] == "Мужчина") then
 			name="Пьяный "..utf8.lower(name)
 			setElementData(thePed, "dialog", "Пьяный Мужчина")
-		elseif(SkinData[pedmodel][3] == "Женщина") then
+		elseif(skin[3] == "Женщина") then
 			name="Пьяная "..utf8.lower(name)
 		end
 
