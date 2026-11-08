@@ -186,8 +186,9 @@ function onPlayerChat(message, messageType, messagenovision)
 				end
 				
 				local voice = "gg"
-				if(SkinData[getElementModel(source)][3] == "Женщина") then 
-					voice = "dg" 
+				local skin = SkinData[getElementModel(source)]
+				if(skin and skin[3] == "Женщина") then
+					voice = "dg"
 				end
 				CheckVoice({getPlayerName(source), getPlayerName(CallTo)}, message, voice, true)
 				triggerClientEvent(source, "PlaySound", source, "http://"..getElementData(root, "IP").."/engine/include/MTA/"..voice.."/"..md5(utf8.upper(message))..".wav")
