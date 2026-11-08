@@ -131,8 +131,7 @@ function startJob(thePlayer)
 	mposi = {getElementPosition(markers[thePlayer])}
     local skins = unpack(pedCus[math.random(#pedCus)])
     peds[thePlayer] = createPed(skins, x, y, z)  
-    -- иконка пассажира видна только при подъезде (200 м)
-    blips[thePlayer] = createBlipAttachedTo(markers[thePlayer], 58, 2, 255, 0, 0, 255, 0, 200, thePlayer)
+    blips[thePlayer] = createBlipAttachedTo(markers[thePlayer], 58, 2, 255, 0, 0, 255, 0, 16383.0, thePlayer)
 	
 	triggerClientEvent(thePlayer, "AddGPSMarker", thePlayer, x, y, z, "Пассажир")
 	
@@ -161,8 +160,7 @@ function warpit ( thePlayer )
             local x, y, z = unpack ( dropoffss [ math.random ( #dropoffss ) ] )
             markers [ thePlayer ] = createMarker ( x, y, z - 1, "cylinder", 5.0, 255, 0, 0, 50 )
 			mposii = { getElementPosition( markers [ thePlayer ] ) }
-            -- иконка точки доставки видна только при подъезде (200 м)
-            blips[thePlayer] = createBlipAttachedTo(markers[thePlayer], 41, 2, 255, 0, 0, 255, 0, 200, thePlayer)
+            blips[thePlayer] = createBlipAttachedTo(markers[thePlayer], 41, 2, 255, 0, 0, 255, 0, 16383.0, thePlayer)
 			triggerClientEvent(thePlayer, "AddGPSMarker", thePlayer, x, y, z, "Точка доставки")
 
             addEventHandler("onMarkerHit", markers[thePlayer ], pickmeup)
