@@ -13124,7 +13124,7 @@ function OpenTuning(thePlayer,x,y,z,rz)
 	local theVehicle = getPedOccupiedVehicle(thePlayer)
 	if(theVehicle) then
 		if(getPedOccupiedVehicleSeat(thePlayer) == 0) then
-			if(GetVehicleType(theVehicle) == "Automobile" or GetVehicleType(theVehicle) == "Bike") then
+			if(GetVehicleType(theVehicle) == "Automobile") then
 
 				setPlayerHudComponentVisible(thePlayer, "radar", false)
 				PData[thePlayer]["oldposition"] = {x,y,z,rz}
@@ -13153,7 +13153,11 @@ function OpenTuning(thePlayer,x,y,z,rz)
 				triggerClientEvent(thePlayer, "CameraTuning", thePlayer, getElementData(theVehicle, "handl"), toJSON(parts))
 
 			else
-				HelpMessage(thePlayer, "Тюнинговать можно только автомобили!")
+				if(GetVehicleType(theVehicle) == "Bike" or GetVehicleType(theVehicle) == "Quad") then
+					HelpMessage(thePlayer, "Этот транспорт нельзя тюнинговать!")
+				else
+					HelpMessage(thePlayer, "Тюнинговать можно только автомобили!")
+				end
 			end
 		end
 	end
