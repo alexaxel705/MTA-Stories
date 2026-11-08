@@ -8367,6 +8367,7 @@ function tablelength(T)
 end
 
 function PedDialog(thePlayer, thePed)
+	if(not thePed or not isElement(thePed) or not thePlayer or not isElement(thePlayer)) then return false end
 	if(not isPedDead(thePed) and not isPedDead(thePlayer)) then
 		if(getElementHealth(thePed) > 20) then
 			if(getElementType(thePed) == "ped") then
