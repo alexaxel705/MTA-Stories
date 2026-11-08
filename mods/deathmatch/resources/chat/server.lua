@@ -149,6 +149,7 @@ end
 function CallBackGovorilka(thePlayers, voice, gg)
 	if(thePlayers) then
 		thePlayers = fromJSON(thePlayers)
+		if(type(thePlayers) ~= "table") then return end
 		for _, thePlayer in pairs(thePlayers) do
 			triggerClientEvent(getPlayerFromName(thePlayer), "PlaySound", getPlayerFromName(thePlayer), "http://"..getElementData(root, "IP").."/engine/include/MTA/"..gg.."/"..md5(utf8.upper(voice))..".wav")
 		end
@@ -156,6 +157,10 @@ function CallBackGovorilka(thePlayers, voice, gg)
 end
 
 function onPlayerChat(message, messageType, messagenovision)
+	if(type(message) ~= "string") then
+		cancelEvent()
+		return false
+	end
 	if(getElementData(source, "auth")) then
 		if(string.len(message:gsub("%s+", "")) == 0) then
 			cancelEvent()
