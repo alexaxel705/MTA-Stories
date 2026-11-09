@@ -1,4 +1,4 @@
-﻿local SkinData = exports["228"]:GetSkinData()
+﻿local SkinData = {}
 local help = {}
 local GlobalChat = true -- Для глобального\локального чата
 local MainChat = {}
@@ -14,6 +14,14 @@ local Zones = {
 for _,el in pairs(Zones) do
 	setElementData(el, "chat", true, false)
 end
+
+-- Функция подгрузит данные, если 228 уже запущен, либо дождется его старта
+addEventHandler("onResourceStart", root, function(startedRes)
+    local resName = getResourceName(startedRes)
+    if (startedRes == resource and getResourceFromName("228") and getResourceState(getResourceFromName("228")) == "running") or (resName == "228") then
+        SkinData = exports["228"]:GetSkinData()
+    end
+end)
 
 
 local Phones = {}

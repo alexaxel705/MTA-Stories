@@ -15,19 +15,7 @@ function windm ()
 		addEventHandler("onClientGUIClick", Button_Start, kit )
 		addEventHandler("onClientGUIClick", Button_Glose, noshow )
 	else
-		for i, v in ipairs ( createdPickups ) do
-			if isElement ( v ) then
-				local pick2 = getElementData ( v, "pick2")
-				if isElement ( pick2 ) then
-					destroyElement ( pick2 )
-				end
-				local icon = getElementData ( v, "icon" )
-				if isElement ( icon ) then
-					destroyElement ( icon )
-				end
-				destroyElement ( v )
-			end
-		end
+		cleanupPickups()
 		triggerServerEvent ( "finitoWork_pizza", localPlayer )
 		setElementData ( localPlayer, "pizza_working", false )
 		outputChatBox ( "Вы закончили работу разносчика пиццы", 255, 255, 255, true )
@@ -73,7 +61,7 @@ end
 
 function startWorking ()
 	if not getElementData ( localPlayer, "pizza_working" ) then
-		createdPickups = {}
+		cleanupPickups()
 		triggerServerEvent ( "picku_pizza", localPlayer )
 		setElementData ( localPlayer, "pizza_working", true )
 		setElementData ( localPlayer, "pizza_working_hit", 0 )
@@ -87,7 +75,8 @@ function startWorking ()
 			setElementData ( pick, "pizza_pickup", true )
 			setElementData ( pick, "id", i )
 			if i == 1 then
-				local icon = createBlipAttachedTo ( pick, 41, 2 )
+				-- иконка цели доставки видна только при подъезде (200 м)
+				local icon = createBlipAttachedTo ( pick, 41, 2, 255, 255, 255, 255, 0, 200 )
 				setElementData ( pick, "icon", icon )
 			end
 			table.insert (createdPickups, pick)
@@ -95,23 +84,49 @@ function startWorking ()
 	end
 end	
 
+-- уничтожаем все созданные маркеры/пикапы/блипы, чтобы ничего не висело на радаре
+function cleanupPickups()
+	for i, v in ipairs ( createdPickups ) do
+		if isElement ( v ) then
+			local pick2 = getElementData ( v, "pick2")
+			if isElement ( pick2 ) then
+				destroyElement ( pick2 )
+			end
+			local icon = getElementData ( v, "icon" )
+			if isElement ( icon ) then
+				destroyElement ( icon )
+			end
+			destroyElement ( v )
+		end
+	end
+	createdPickups = {}
+end
+
+-- страховка: при остановке ресурса чистим всё, что могли создать
+addEventHandler("onClientResourceStop", resourceRoot,
+	function()
+		cleanupPickups()
+	end
+)
+
+-- страховка: смерть во время работы тоже завершает смену и чистит радар
+addEventHandler("onClientPlayerWasted", localPlayer,
+	function()
+		if getElementData ( localPlayer, "pizza_working" ) then
+			cleanupPickups()
+			triggerServerEvent ( "finitoWork_pizza", localPlayer )
+			setElementData ( localPlayer, "pizza_working", false )
+			setElementData ( localPlayer, "pizza_working_hit", 0 )
+			outputChatBox ( "Вы закончили работу", 255, 255, 255, true )
+		end
+	end
+)
+
 addEventHandler("onClientVehicleExit", getRootElement(),
     function(thePlayer, seat)
         if thePlayer == getLocalPlayer() then
 			if getElementData ( localPlayer, "pizza_working" ) then
-				for i, v in ipairs ( createdPickups ) do
-					if isElement ( v ) then
-						local pick2 = getElementData ( v, "pick2")
-						if isElement ( pick2 ) then
-							destroyElement ( pick2 )
-						end
-						local icon = getElementData ( v, "icon" )
-						if isElement ( icon ) then
-							destroyElement ( icon )
-						end
-						destroyElement ( v )
-					end
-				end
+				cleanupPickups()
 				triggerServerEvent ( "finitoWork_pizza", localPlayer )
 				setElementData ( localPlayer, "pizza_working", false )
 				outputChatBox ( "Вы закончили работу", 255, 255, 255, true )
@@ -141,26 +156,15 @@ function clientPickupHit(thePlayer, matchingDimension)
 		destroyElement(source)
 		setElementData ( localPlayer, "pizza_working_hit", hitted)
 		if hitted >= max_pickups then
-			for i, v in ipairs ( createdPickups ) do
-				if isElement ( v ) then
-					local pick2 = getElementData ( v, "pick2")
-					if isElement ( pick2 ) then
-						destroyElement ( pick2 )
-					end
-					local icon = getElementData ( v, "icon" )
-					if isElement ( icon ) then
-						destroyElement ( icon )
-					end
-					destroyElement ( v )
-				end
-			end
+			cleanupPickups()
 			setElementData ( localPlayer, "pizza_working", false )
 			triggerServerEvent ( "finitoWork_pizza", localPlayer )
 			outputChatBox ( "Вы закончили работу,подождите", 255, 255, 255, true )
 			return true
 		end
 		if createdPickups[hitted+1] then
-			local icon = createBlipAttachedTo ( createdPickups[hitted+1], 41, 2 )
+			-- иконка следующей цели видна только при подъезде (200 м)
+			local icon = createBlipAttachedTo ( createdPickups[hitted+1], 41, 2, 255, 255, 255, 255, 0, 200 )
 			setElementData ( createdPickups[hitted+1], "icon", icon )
 		end
 	end
@@ -170,7 +174,6 @@ function finishBoarding ()
 	toggleAllControls(true, true, true)
 	outputChatBox("вы развезвезли пиццу,ваше вознаграждение - 500$ ", 255, 100, 100, true)
 	triggerServerEvent("AddPlayerMoney", localPlayer, localPlayer, 500)
-	setElementPosition(trailer, bases[getElementData ( localPlayer, "nearestBase" )][1], bases[getElementData ( localPlayer, "nearestBase" )][2], bases[getElementData ( localPlayer, "nearestBase" )][3] )
 end
 addEventHandler ( "onClientMarkerHit", getRootElement(), clientPickupHit )
 

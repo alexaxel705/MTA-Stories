@@ -3762,3 +3762,167 @@ debuguptime              sfakelag
 [2026-11-06 00:09:15] chat restarted successfully
 [2026-11-06 00:23:06] QUIT: alexaxel705 left the game [Quit] 
 [2026-11-06 00:23:11] ERROR: 228\script.lua:12035: Bad argument @ 'removeElementData' [Expected element at argument 1]
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-09 08:45:41] Compacting accounts database 'internal.db' ...
+[2026-11-09 08:45:56] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-09 08:46:12] Resources: 230 loaded, 0 failed
+[2026-11-09 08:46:12] Compacting database 'registry.db' ...
+[2026-11-09 08:46:12] Starting resources...
+[2026-11-09 08:46:12] Please wait...
+[2026-11-09 08:46:12] Please wait...
+[2026-11-09 08:46:13] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-09 08:46:14] ERROR: chat\server.lua:1: call: failed to call '228:GetSkinData' [string "?"]
+[2026-11-09 08:46:15] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-09 08:46:15] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-09 08:46:15] Server started and is ready to accept connections!
+[2026-11-09 08:46:15] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-09 08:46:15] Type 'help' for a list of commands.
+[2026-11-09 08:46:37] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24149.0)
+[2026-11-09 08:46:38] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-09 08:49:12] QUIT: alexaxel705 left the game [Quit] 
+[2026-11-09 08:49:13] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24149.0)
+[2026-11-09 08:49:13] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-09 08:50:25] Stopping draw_intro
+[2026-11-09 08:50:25] Starting draw_intro
+[2026-11-09 08:50:25] draw_intro restarted successfully
+[2026-11-09 08:52:57] restart: Requested by Console
+[2026-11-09 08:52:57] restart: Resource 'chat' restarting...
+[2026-11-09 08:52:57] Stopping chat
+[2026-11-09 08:52:57] Starting chat
+[2026-11-09 08:52:57] chat restarted successfully
+[2026-11-09 08:56:35] restart: Requested by Console
+[2026-11-09 08:56:35] restart: Resource 'all' could not be found
+[2026-11-09 08:57:13] Server stopped!
+[2026-11-09 08:57:13] Stopping resources...................
+[2026-11-09 08:57:13] Closing SQLite3 database
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-09 08:57:28] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-09 08:57:34] Resources: 230 loaded, 0 failed
+[2026-11-09 08:57:34] Starting resources...
+[2026-11-09 08:57:34] Please wait...
+[2026-11-09 08:57:34] Please wait...
+[2026-11-09 08:57:35] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-09 08:57:35] ERROR: chat\server.lua:1: call: failed to call '228:GetSkinData' [string "?"]
+[2026-11-09 08:57:36] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-09 08:57:36] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-09 08:57:36] Server started and is ready to accept connections!
+[2026-11-09 08:57:36] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-09 08:57:36] Type 'help' for a list of commands.
+[2026-11-09 09:00:11] Server stopped!
+[2026-11-09 09:00:11] Stopping resources...................
+[2026-11-09 09:00:11] Closing SQLite3 database
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-09 09:00:17] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-09 09:00:24] ERROR: Problem with resource: 228; Circular include error: 228 -> chat -> 228 
+[2026-11-09 09:00:24] ERROR: Problem with resource: chat; Circular include error: chat -> 228 -> chat 
+[2026-11-09 09:00:24] Resources: 228 loaded, 2 failed
+[2026-11-09 09:00:24] Starting resources...
+[2026-11-09 09:00:24] Please wait...
+[2026-11-09 09:00:24] Please wait...
+[2026-11-09 09:00:25] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-09 09:00:25] ERROR: chat\server.lua:1: call: failed to call '228:GetSkinData' [string "?"]
+[2026-11-09 09:00:26] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-09 09:00:26] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-09 09:00:26] Server started and is ready to accept connections!
+[2026-11-09 09:00:26] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-09 09:00:26] Type 'help' for a list of commands.
+[2026-11-09 09:03:40] Server stopped!
+[2026-11-09 09:03:40] Stopping resources...................
+[2026-11-09 09:03:40] Closing SQLite3 database
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-09 09:03:47] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-09 09:03:54] Resources: 230 loaded, 0 failed
+[2026-11-09 09:03:54] Starting resources...
+[2026-11-09 09:03:54] Please wait...
+[2026-11-09 09:03:54] Please wait...
+[2026-11-09 09:03:54] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-09 09:03:55] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-09 09:03:55] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-09 09:03:55] Server started and is ready to accept connections!
+[2026-11-09 09:03:55] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-09 09:03:55] Type 'help' for a list of commands.
+[2026-11-09 09:04:06] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24149.0)
+[2026-11-09 09:04:06] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-09 09:07:59] QUIT: alexaxel705 left the game [Quit] 
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-09 09:20:10] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-09 09:20:24] Resources: 230 loaded, 0 failed
+[2026-11-09 09:20:24] Starting resources...
+[2026-11-09 09:20:24] Please wait...
+[2026-11-09 09:20:24] Please wait...
+[2026-11-09 09:20:25] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-09 09:20:26] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-09 09:20:26] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-09 09:20:26] Server started and is ready to accept connections!
+[2026-11-09 09:20:26] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-09 09:20:26] Type 'help' for a list of commands.
+[2026-11-09 09:20:52] * Syntax: upgrade <resource-name> | all
+[2026-11-09 09:20:54] Upgrading all resources...
+[2026-11-09 09:20:54] Please wait...
+[2026-11-09 09:20:54] Please wait...
+[2026-11-09 09:20:54] Please wait...
+[2026-11-09 09:20:55] Please wait...
+[2026-11-09 09:20:55] Upgrade completed. Refreshing all resources...
+[2026-11-09 09:21:03] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24159.0)
+[2026-11-09 09:21:04] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-09 09:22:15] QUIT: alexaxel705 left the game [Quit] 

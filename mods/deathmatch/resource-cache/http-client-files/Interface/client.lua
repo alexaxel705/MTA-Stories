@@ -41,14 +41,21 @@ local RenderTargets = {
 function UpdateTargets()
 	for name, dat in pairs(RenderTargets) do
 		if(dat[1]) then
-			destroyElement(dat[1])			
+			destroyElement(dat[1])
+			dat[1] = false
 		end
 		dat[1] = dxCreateRenderTarget(dat[2]*RenderQuality, dat[3]*RenderQuality, dat[4])
+		if(not dat[1]) then
+			outputDebugString("Interface: failed to create render target '"..name.."', retrying on next restore", 2)
+		end
 		if(dat[5]) then
 			triggerEvent(dat[5], resourceRoot)
 		end
 	end
 end
+
+-- Флаг: рендеры не рисуют кэшированные таргеты, пока те не пересозданы после рестора
+local TargetsValid = true
 
 
 function RenderQualityChecker(theKey, oldValue, newValue)
@@ -577,7 +584,11 @@ addEventHandler("onClientResourceStart", getResourceRootElement(), LoadedRes)
 
 
 addEventHandler("onClientRestore", root, function(didClearRenderTargets)
-	LoadedRes()
+	-- После сворачивания/разворачивания окна render targets теряются —
+	-- пересоздаём и перерисовываем кэш (иначе радар/HUD остаётся чёрным)
+	TargetsValid = false
+	UpdateTargets()
+	TargetsValid = true
 end)
 
 function GenerateTextureCompleted(textures) -- Третий этап загрузки
@@ -1226,6 +1237,7 @@ end
 
 
 function DrawSpeedo(theVehicle)
+	if(not TargetsValid or not RenderTargets["DrawSpeedo"][1]) then return false end
 	dxSetRenderTarget(RenderTargets["DrawSpeedo"][1], true)
 	dxSetBlendMode("modulate_add")
 	
@@ -3258,6 +3270,7 @@ local ToolTipTimers = false
 local RespectMsg = false
 
 function DrawToolTip()
+	if(not TargetsValid or not RenderTargets["ToolTip"][1]) then return false end
 	dxSetRenderTarget(RenderTargets["ToolTip"][1], true)
 	dxSetBlendMode("modulate_add")
 	
@@ -3464,6 +3477,7 @@ addEventHandler("RespectMessage", localPlayer, RespectMessage)
 local ZonesDisplay = {}
 
 function DrawLocation()
+	if(not TargetsValid or not RenderTargets["Location"][1]) then return false end
 	if(ZonesDisplay[1]) then
 		dxSetRenderTarget(RenderTargets["Location"][1], true)
 		dxSetBlendMode("modulate_add")
@@ -3496,6 +3510,7 @@ local TABCurrent = 0
 
 
 function DrawTabPanel()
+	if(not TargetsValid or not RenderTargets["TabPanel"][1]) then return false end
 	dxSetRenderTarget(RenderTargets["TabPanel"][1], true)
 	dxSetBlendMode("modulate_add")
 	
@@ -3613,6 +3628,7 @@ end
 
 
 function DrawPlayer()
+	if(not TargetsValid or not RenderTargets["Player"][1]) then return false end
 	dxSetRenderTarget(RenderTargets["Player"][1], true)
 	dxSetBlendMode("modulate_add")
 
@@ -3711,10 +3727,15 @@ function DrawPlayer()
 	if(not getElementData(localPlayer, "AEZAKMI")) then
 		if(tonumber(wanted)) then
 			local WantedPosX, WantedPosY = 20*scalex, 290*scaley
+			-- Розыск в режиме "поиска": звёзды мигают — копы потеряли контакт
+			local searchBlink = 255
+			if(getElementData(localPlayer, "WantedSearching")) then
+				searchBlink = (math.floor(getTickCount()/500)%2 == 0) and 200 or 60
+			end
 			dxDrawBorderedText("★★★★★★", WantedPosX, WantedPosY, 0, 0, tocolor(40,40,40,200), scale*1.13, "pricedown", "left", "top")
 			local tws = dxGetTextWidth("★", scale*1.13, "pricedown", false)
 			for i = 1, math.ceil(tonumber(wanted)) do
-				dxDrawBorderedText("★", WantedPosX+dxGetTextWidth("★★★★★★", scale*1.13, "pricedown", false)-(tws*i), WantedPosY, 0, 0, tocolor(255,165,0, 200),scale*1.13, "pricedown", "left", "top", nil, nil, nil, true, false)
+				dxDrawBorderedText("★", WantedPosX+dxGetTextWidth("★★★★★★", scale*1.13, "pricedown", false)-(tws*i), WantedPosY, 0, 0, tocolor(255,165,0, searchBlink),scale*1.13, "pricedown", "left", "top", nil, nil, nil, true, false)
 			end
 			
 		end
@@ -3789,6 +3810,7 @@ local GPSObject = {}
 
 
 function DrawArrow()
+	if(not TargetsValid or not RenderTargets["Arrow"][1]) then return false end
 	dxSetRenderTarget(RenderTargets["Arrow"][1], true)
 	dxSetBlendMode("modulate_add")
 	
@@ -4321,6 +4343,9 @@ bindKey("tab", "up", CloseTAB)
 
 
 function GPS(x,y,z,info,after)
+	if(info) then
+		RemoveGPSMarker(info) -- не оставляем старый checkpoint/блип с тем же именем на радаре
+	end
 	local GPSM = createMarker(x, y, z, "checkpoint", 5, 255, 50, 50, 170)
 	setElementData(GPSM , "type", "GPS")
 	GPSObject[GPSM] = createBlipAttachedTo(GPSM)
@@ -4374,6 +4399,7 @@ local MissionCompletedData = {}
 
 
 function DrawMissionCompleted()
+	if(not TargetsValid or not RenderTargets["MissionCompleted"][1]) then return false end
 	dxSetRenderTarget(RenderTargets["MissionCompleted"][1], true)
 	dxSetBlendMode("modulate_add")
 	

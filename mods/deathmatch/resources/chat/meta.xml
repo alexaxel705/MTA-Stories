@@ -1,9 +1,7 @@
 <meta>
 	<info name="chat" version="1.0.0" type="script" author="alexaxel705" description="chat"/>
 	<min_mta_version client="1.5.7" server="1.5.7" />
-
-	<depend>228</depend>
-
+	
 	<script src="client.lua" type="client"/>
 	<script src="server.lua" type="server"/>
 	
