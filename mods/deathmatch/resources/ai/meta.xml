@@ -1,8 +1,8 @@
 <meta>
 	<info name="ai" version="1.0.0" type="script" author="alexaxel705" description="ai"/>
 
-	<depend>vehicle_node</depend>
-	<depend>228</depend>
+	<include resource="vehicle_node"/>
+	<include resource="228"/>
 
 	<script src="server.lua" type="server"/>
 	<script src="client.lua" type="client"/>
