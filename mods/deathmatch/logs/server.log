@@ -3926,3 +3926,97 @@ debuguptime              sfakelag
 [2026-11-09 09:21:03] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24159.0)
 [2026-11-09 09:21:04] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
 [2026-11-09 09:22:15] QUIT: alexaxel705 left the game [Quit] 
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-09 09:27:18] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-09 09:27:25] Resources: 230 loaded, 0 failed
+[2026-11-09 09:27:25] Starting resources...
+[2026-11-09 09:27:25] Please wait...
+[2026-11-09 09:27:25] Please wait...
+[2026-11-09 09:27:26] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-09 09:27:27] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-09 09:27:27] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-09 09:27:27] Server started and is ready to accept connections!
+[2026-11-09 09:27:27] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-09 09:27:27] Type 'help' for a list of commands.
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-09 09:29:10] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-09 09:29:17] Resources: 230 loaded, 0 failed
+[2026-11-09 09:29:17] Starting resources...
+[2026-11-09 09:29:17] Please wait...
+[2026-11-09 09:29:17] Please wait...
+[2026-11-09 09:29:18] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-09 09:29:19] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-09 09:29:19] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-09 09:29:19] Server started and is ready to accept connections!
+[2026-11-09 09:29:19] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-09 09:29:19] Type 'help' for a list of commands.
+[2026-11-09 09:29:21] CONNECT: alexaxel705 connected (IP: 192.168.50.1  Serial: FAF10FEE3BB2675C47305A736F569384  Version: 1.6.0-9.24159.0)
+[2026-11-09 09:29:27] JOIN: alexaxel705 joined the game (IP: 192.168.50.1)
+[2026-11-09 09:30:14] QUIT: alexaxel705 left the game [Quit] 
+[2026-11-09 19:29:10] CONNECT: CalmSteaks52 connected (IP: 176.139.129.235  Serial: A5BA729F85A1BD8C59CA79416D02FFB4  Version: 1.6.0-9.24159.0)
+[2026-11-09 19:29:11] JOIN: CalmSteaks52 joined the game (IP: 176.139.129.235)
+[2026-11-09 19:31:22] KICK: CalmSteaks52 was kicked from the game by Console
+[2026-11-10 10:08:55] WARNING: 228\script.lua:3415: Bad argument @ 'getVehicleOccupants' [Expected vehicle at argument 1]
+[2026-11-10 10:08:55] ERROR: 228\script.lua:3415: bad argument #1 to 'pairs' (table expected, got boolean)
+[2026-11-10 17:23:14] CONNECT: Egor70 connected (IP: 176.65.39.141  Serial: D9C0D5FF9307ABCA06E9349FC4CDABA3  Version: 1.6.0-9.24159.0)
+[2026-11-10 17:23:14] JOIN: Egor70 joined the game (IP: 176.65.39.141)
+[2026-11-10 17:23:46] QUIT: Egor70 left the game [Timed out] 
+[2026-11-10 17:25:02] CONNECT: Egor70 connected (IP: 176.65.39.141  Serial: D9C0D5FF9307ABCA06E9349FC4CDABA3  Version: 1.6.0-9.24159.0)
+[2026-11-10 17:25:06] JOIN: Egor70 joined the game (IP: 176.65.39.141)
+[2026-11-10 17:30:03] KICK: Egor70 was kicked from the game by Console
+[2026-11-10 21:23:36] CONNECT: df connected (IP: 178.206.117.176  Serial: 6F43D046C254E19B0DE0110376668AE3  Version: 1.6.0-9.24157.0)
+[2026-11-10 21:23:37] JOIN: df joined the game (IP: 178.206.117.176)
+[2026-11-10 21:25:50] QUIT: df left the game [Quit] 
+[2026-11-10 21:37:56] CONNECT: Egor70 connected (IP: 176.65.39.141  Serial: D9C0D5FF9307ABCA06E9349FC4CDABA3  Version: 1.6.0-9.24159.0)
+[2026-11-10 21:37:57] JOIN: Egor70 joined the game (IP: 176.65.39.141)
+[2026-11-10 21:38:59] KICK: Egor70 was kicked from the game by Console
+[2026-11-10 21:45:45] WARNING: 228\script.lua:3415: Bad argument @ 'getVehicleOccupants' [Expected vehicle at argument 1]
+[2026-11-10 21:45:45] ERROR: 228\script.lua:3415: bad argument #1 to 'pairs' (table expected, got boolean)
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : Multi Theft Auto: Stories [RPG\RealLife\DM] (Russian/Tomsk)
+= Server IP address: auto
+= Server port      : 22003
+= 
+= Log file         : ..tories-main/mods/deathmatch/logs/server.log
+= Maximum players  : 1024
+= HTTP port        : 22005
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-11-11 10:59:32] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-11-11 10:59:46] Resources: 230 loaded, 0 failed
+[2026-11-11 10:59:46] Starting resources...
+[2026-11-11 10:59:46] Please wait...
+[2026-11-11 10:59:47] Please wait...
+[2026-11-11 10:59:47] Server minclientversion is now 1.6.0-9.24109.0
+[2026-11-11 10:59:48] Querying MTA master server... success! (Auto detected IP:90.188.88.152)
+[2026-11-11 10:59:48] Authorized serial account protection is enabled for the ACL group(s): `Admin`  See http://multitheftauto.com/authserial
+[2026-11-11 10:59:48] Server started and is ready to accept connections!
+[2026-11-11 10:59:48] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-11-11 10:59:48] Type 'help' for a list of commands.
