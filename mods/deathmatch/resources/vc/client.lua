@@ -20802,11 +20802,11 @@ function GenerateMapPreRenderVC()
 				GTAVC[ind][12] = createObject(lodmodel,v[3],v[4],v[5], rx,ry,rz, true)
 				setElementDimension(GTAVC[ind][12], 2)
 				
-				setLowLODElement(GTAVC[ind][12], false)
+				setLowLODElement(GTAVC[ind][12], nil)
 				setLowLODElement(GTAVC[ind][11], GTAVC[ind][12])
 				engineSetModelLODDistance(lodmodel, 300)
 			else
-				setLowLODElement(GTAVC[ind][11], false)
+				setLowLODElement(GTAVC[ind][11], nil)
 			end
 		end
 		ind = ind+1
