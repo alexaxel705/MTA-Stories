@@ -12967,6 +12967,7 @@ function MarkerHit(hitElement, Dimension)
 					if(AddPlayerMoney(thePlayer, -100)) then
 						fixVehicle(theVehicle)
 						MissionCompleted(thePlayer, "$100", Text(thePlayer, "НОВЫЙ ДВИГАТЕЛЬ И ПОКРАСКА"))
+						exports["deformation"]:resetVehicleDeformation(theVehicle)
 						setVehicleColor(theVehicle, math.random(0,127), math.random(0,127), math.random(0,127), math.random(0,127))
 						AddBizMoney("SPRAYSA", 100)
 						WantedLevel(thePlayer, -6)
