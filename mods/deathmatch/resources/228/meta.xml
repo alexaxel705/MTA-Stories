@@ -1,7 +1,7 @@
 <meta>
 	<info author="Dark_ALEX" type="gamemode" name="SAxVCxLC Stories" version="2.8" description="Томский RPRL сервер" />
 	<map src="228.map" dimension="0"/>
-	<min_mta_version client="1.5.7" server="1.5.7" />
+	<min_mta_version client="1.6" server="1.6" />
 	<include resource="chat" />
 	<include resource="deformation" />
   	<script src="mapEditorScriptingExtension_s.lua" type="server"></script>
