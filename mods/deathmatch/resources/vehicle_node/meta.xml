@@ -1,6 +1,6 @@
 <meta>
 	<info author="Dark_ALEX" type="script" name="Vehicle Node" version="1.0.4" description="Vehicle Node" />
-	<min_mta_version client="1.3.0-9.04431" />
+	<min_mta_version client="1.6" server="1.6" />
 	<script src="VehicleNodeSA.lua" type="shared"/>
 	<script src="VehicleNodeVC.lua" type="shared"/>
 	<script src="VehicleNodeLC.lua" type="shared"/>

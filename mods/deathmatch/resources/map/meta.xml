@@ -4,7 +4,7 @@
 	<script src="client.lua" type="client"/>
 	<script src="server.lua" type="server"/>
 	<script src="radar.lua" type="client"/>
-	<min_mta_version client="1.5.7" server="1.5.7" />
+	<min_mta_version client="1.6" server="1.6" />
 
 	<file src="radar.png"/>
 	<file src="texreplace.fx"/>

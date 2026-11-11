@@ -1,6 +1,6 @@
 <meta>
 	<info name="Inventory" version="1.0.0" type="script" author="alexaxel705" description="Inventory"/>
-	<min_mta_version client="1.5.7" server="1.5.7" />
+	<min_mta_version client="1.6" server="1.6" />
 	
 	<script src="server.lua" type="server"/>
 	<script src="VehicleSound.lua" type="client"/>

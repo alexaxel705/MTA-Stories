@@ -1,6 +1,6 @@
 <meta>
 	<info name="Draw_Intro" version="1.0.2" type="script" author="alexaxel705" description="Draw_Intro"/>
-	<min_mta_version client="1.5.7" server="1.5.7" />
+	<min_mta_version client="1.6" server="1.6" />
 	
 	<script src="client.lua" type="client"/>
 	
